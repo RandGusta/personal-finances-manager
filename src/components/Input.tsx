@@ -3,18 +3,16 @@ import { TextField, IconButton, InputAdornment } from "@mui/material";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-type InputFieldBaseProps = TextFieldProps & {
+type BaseInputFieldProps = TextFieldProps & {
   helperText?: string;
 };
 
-export function InputFieldBase(props: InputFieldBaseProps) {
+export function BaseInputField(props: BaseInputFieldProps) {
   const { type, ...rest } = props;
 
   const [showPassword, setShowPassword] = useState(false);
-  const isPassword = type === "password";
-  const inputType = isPassword
-    ? (showPassword ? "text" : "password")
-    : type;
+  const isPassword = type === 'password';
+  const inputType = isPassword && showPassword ? 'text' : type;
 
   return (
     <TextField
