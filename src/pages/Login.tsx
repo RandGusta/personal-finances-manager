@@ -1,14 +1,19 @@
 import {BaseButton} from "../components/Button"
 import {BaseInputField} from "../components/Input"
 import {BaseCheckBox} from "../components/Checkbox"
-import { Typography, Link } from "@mui/material";
+import { Typography, Link, LinearProgress,  Box, Card } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import { Box } from '@mui/material';
+import cardImage from '../assets/images/cover-cards.png'
+// import zxcvbn from 'zxcvbn';
+// import { useState } from "react";
 
 
 
 
 export function Login(){
+    // const [password, setPassword] = useState('');
+    // const passwordStrength = zxcvbn(password)
+
     return(
     <AutenticationLayout
         right = {
@@ -31,14 +36,24 @@ export function Login(){
         label="Password"
         placeholder="@$76exemple"
         type="password"
+        // onChange={(e) => setPassword(e.target.value)}
     />
-    <Box sx={{display:"flex", alignItems:"center", gap: "182px"}}>
+    {/* <LinearProgress
+        variant="determinate"
+        value={(passwordStrength.score != 4 ? passwordStrength.score : passwordStrength.score +1) * 20}
+    />
+    <Typography>
+        Password strength: {passwordStrength.score}/4
+    </Typography> */}
+
+    <Box sx={{display:"flex", alignItems:"center", gap:{xs:8, sm:25, md:25, lg:25}}}>
+        <BaseCheckBox label="remember me"/>
     <Typography>
         <Link href="">
             Forgot Password?
         </Link>
     </Typography>
-    <BaseCheckBox label="remember me"/>
+    
     </Box>
     <BaseButton fullWidth variant="contained" loading={false} onClick={() => console.log("teste")}>    
         Sing in
@@ -46,7 +61,23 @@ export function Login(){
     </>
     }
     left = {
-        <></>
+        <>
+        <Box sx={{width:'100%', maxWidth: "35rem", minHeight:"19rem", maxHeight: '19rem'}}>
+            <Card sx={{borderRadius:"80", boxShadow:'-7px 7px 5px 2px #00000038', overflow:'hidden'}}>
+                <Typography color="primary" variant="h2" sx={{ padding: '40px 23px 10px 23px' }}>
+                    Track your fianaces
+                </Typography>
+                <Box sx={{display:'flex', gap:"px"}}>
+                <Typography color="primary" variant="body2" sx={{padding: '0 0px 0px 23px', minWidth:"20rem"}}>
+                    Manage expenses and savings with clarity.
+                    Share and explore solitions and advices with other users. <br/>
+                    Sometimes a new perspective changes everything.
+                </Typography>
+                <Box component="img" src={cardImage} sx={{minWidth:'23rem', maxHeight:'18rem', transform:'translate(0px, -10px)'}}/>
+               </Box>
+            </Card>
+        </Box>
+        </>
     }
     />
     );
