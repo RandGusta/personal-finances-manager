@@ -7,10 +7,5 @@ export const typography = {
     h2:{
         fontSize: '2rem',
         fontWeight: 600,
-        padding: '23px 23px 10px 23px' 
-    },
-    body2:{
-        padding: '0 23px 23px 23px' ,
-        maxWidth: '20rem'
-    },
+    }
 } 

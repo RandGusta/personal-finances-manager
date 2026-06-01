@@ -3,7 +3,8 @@ import {BaseInputField} from "../components/Input"
 import {BaseCheckBox} from "../components/Checkbox"
 import { Typography, Link, LinearProgress,  Box, Card } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import cardImage from '../assets/images/cover-cards.png'
+import cardImage from '../assets/images/cover-cards.png';
+import logo from '../assets/svg/favicon.svg'
 // import zxcvbn from 'zxcvbn';
 // import { useState } from "react";
 
@@ -15,9 +16,17 @@ export function Login(){
     // const passwordStrength = zxcvbn(password)
 
     return(
+
+    <>
+    <Box
+    component="img"
+    src={logo}
+    sx={{position: "absolute", top: 32, left: 23, width:"3rem"}}
+    />
     <AutenticationLayout
-        right = {
-            <>
+        
+    left = {
+        <>
     <Typography variant="h1" sx={{mb:1}}>
         Sing in
     </Typography>
@@ -30,7 +39,7 @@ export function Login(){
     <BaseInputField
         label="E-mail"
         placeholder="exemple@gmail.com"
-        type="text"
+        type="email"
     />
     <BaseInputField
         label="Password"
@@ -38,6 +47,7 @@ export function Login(){
         type="password"
         // onChange={(e) => setPassword(e.target.value)}
     />
+    
     {/* <LinearProgress
         variant="determinate"
         value={(passwordStrength.score != 4 ? passwordStrength.score : passwordStrength.score +1) * 20}
@@ -46,7 +56,7 @@ export function Login(){
         Password strength: {passwordStrength.score}/4
     </Typography> */}
 
-    <Box sx={{display:"flex", alignItems:"center", gap:{xs:8, sm:25, md:25, lg:25}}}>
+    <Box sx={{display:"flex", justifyContent: "space-between", alignItems: "center"}}>
         <BaseCheckBox label="remember me"/>
     <Typography>
         <Link href="">
@@ -60,12 +70,12 @@ export function Login(){
     </BaseButton>
     </>
     }
-    left = {
+    right = {
         <>
         <Box sx={{width:'100%', maxWidth: "35rem", minHeight:"19rem", maxHeight: '19rem'}}>
             <Card sx={{borderRadius:"80", boxShadow:'-7px 7px 5px 2px #00000038', overflow:'hidden'}}>
                 <Typography color="primary" variant="h2" sx={{ padding: '40px 23px 10px 23px' }}>
-                    Track your fianaces
+                    Track your finances
                 </Typography>
                 <Box sx={{display:'flex', gap:"px"}}>
                 <Typography color="primary" variant="body2" sx={{padding: '0 0px 0px 23px', minWidth:"20rem"}}>
@@ -78,7 +88,9 @@ export function Login(){
             </Card>
         </Box>
         </>
+            
     }
     />
+    </>
     );
 };
