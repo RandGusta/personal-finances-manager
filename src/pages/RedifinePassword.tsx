@@ -6,6 +6,7 @@ import { useState } from "react";
 import { BaseButton } from "../components/Button";
 import { BaseInputField } from "../components/Input";
 import { BaseForm } from "../components/Form";
+import BaseNavBar from "../components/NavBar";
 
 const RedifinePassword = () => {
   const [password, setPassword] = useState("");
