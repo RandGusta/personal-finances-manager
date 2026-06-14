@@ -1,7 +1,14 @@
 import { Box } from '@mui/material';
+import logo from "../assets/svg/favicon.svg";
 
 export function AutenticationLayout({ left, right}: { right: React.ReactNode, left: React.ReactNode }) {
   return (
+    <>
+    <Box
+        component="img"
+        src={logo}
+        sx={{ position: "absolute", top: 32, left: 23, width: "3rem" }}
+      />
     <Box sx={{display:"flex", height:"100vh"}}>
         <Box sx={{display:"flex", flex:"1", justifyContent:"center", alignItems:"center", m:{xs:2}}}>
             <Box sx={{width: "100%", maxWidth: "28rem"}}>
@@ -14,5 +21,6 @@ export function AutenticationLayout({ left, right}: { right: React.ReactNode, le
             </Box>
         </Box>
     </Box>
+    </>
   );
 }
