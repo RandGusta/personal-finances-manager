@@ -9,7 +9,7 @@ interface NavBarProps {
 const BaseNavBar = ({ children }: NavBarProps) => {
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="sticky">
         <Toolbar>
             <Box sx={{display: {lg:"flex", md:"flex", xs: "none"}, gap: 7}}>
               <Box component="img" src={logo} sx={{width: "2rem"}}/>
