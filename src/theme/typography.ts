@@ -29,4 +29,9 @@ export const typography = {
         fontWeight: 800, 
         color: '#1C4632'
     },
+    body2:{
+        fontSize: '1.2rem',
+        fontWeight: 800, 
+        color: '#ffff',
+    },
 } 

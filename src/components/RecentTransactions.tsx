@@ -38,18 +38,29 @@ const RecentTransaction = () => {
   ];
   return (
     <>
-      <Card sx={{ margin: "3rem" }}>
+      <Card
+        sx={{
+          margin: { lg: "3rem", xs: "0rem" },
+          display: { xs: "flex", lg: "block" },
+        }}
+      >
         <CardContent>
           <Typography
             variant="h5"
-            sx={{ backgroundColor: "#1C4632", textAlign: "center" }}
+            sx={{ backgroundColor: "#1C4632", padding:{xs:'1rem', lg:'0.2rem'} , textAlign: "center" }}
           >
-            Last actions
+            Recent Transactions
           </Typography>
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: "2fr 1fr 1fr 1fr",
+              display: {
+                xs: "none",
+                md: "grid",
+              },
+              gridTemplateColumns: {
+                xs: "1fr 1fr",
+                lg: "2fr 1fr 1fr 1fr",
+              },
               gap: 2,
             }}
           >
@@ -70,14 +81,20 @@ const RecentTransaction = () => {
             <Box
               key={transaction.id}
               sx={{
-                display: "grid",
+                display: {
+                  xs: "block",
+                  md: "grid",
+                },
+
                 gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                gap: 2,
+
+                p: 2,
+
+                borderBottom: "1px solid #ddd",
               }}
             >
               <Box>{transaction.description}</Box>
-              {transaction.value}
-              <Box>{transaction.date}</Box>
+              {transaction.value}$<Box>{transaction.date}</Box>
               <Box>{transaction.type}</Box>
             </Box>
           ))}

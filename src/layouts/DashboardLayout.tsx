@@ -18,6 +18,7 @@ export function DashboardLayout({
         sx={{
           display: "flex",
           gap: 3,
+          flexDirection: {xs:"column", lg: "row"}
         }}
       >
         <Box sx={{ flex: 1 }}>
