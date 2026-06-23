@@ -4,6 +4,7 @@ import { BaseCheckBox } from "../components/Checkbox";
 import { Typography, Link, LinearProgress, Box, Card } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
+import { Link as RoutesLink } from "react-router-dom";
 import logo from "../assets/svg/favicon.svg";
 
 export function Login() {
@@ -16,7 +17,7 @@ export function Login() {
               Sing in
             </Typography>
             <Typography>
-              Don't have an account? <Link href="">Create now</Link>
+              Don't have an account? <Link component={RoutesLink} to="/singup">Create now</Link>
             </Typography>
             <BaseInputField
               label="E-mail"
@@ -38,7 +39,7 @@ export function Login() {
             >
               <BaseCheckBox label="remember me" />
               <Typography>
-                <Link href="">Forgot Password?</Link>
+                <Link component={RoutesLink} to="/recover-password">Forgot Password?</Link>
               </Typography>
             </Box>
             <BaseButton
@@ -77,8 +78,7 @@ export function Login() {
                 </Typography>
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
-                    color="primary"
-                    variant="body2"
+                    color="primary" 
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Manage expenses and savings with clarity. Share and explore

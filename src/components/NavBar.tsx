@@ -36,7 +36,7 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             justifyContent: "space-between",
           }}
         >
-          {/* Desktop */}
+          {}
           <Box
             sx={{
               display: {
@@ -86,7 +86,7 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             </Button>
           </Box>
 
-          {/* Mobile */}
+          {}
           <Box
             sx={{
               display: {

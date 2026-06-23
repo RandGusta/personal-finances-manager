@@ -98,7 +98,6 @@ const RedifinePassword = () => {
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
                     color="primary"
-                    variant="body2"
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Forgot your password?

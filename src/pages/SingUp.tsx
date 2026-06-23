@@ -3,6 +3,7 @@ import { Typography, Box, Link, LinearProgress, Card } from "@mui/material";
 import { BaseInputField } from "../components/Input";
 import { BaseCheckBox } from "../components/Checkbox";
 import { BaseButton } from "../components/Button";
+import { Link as RoutesLink } from "react-router-dom";
 import logo from "../assets/svg/favicon.svg";
 import cardImage from "../assets/images/cover-cards.png";
 import zxcvbn from "zxcvbn";
@@ -21,7 +22,7 @@ export function SingUp() {
               Sing up
             </Typography>
             <Typography>
-              Already have an account? <Link href="">Login</Link>
+              Already have an account? <Link component={RoutesLink} to="/login">Login</Link>
             </Typography>
             <BaseInputField
               label="Full name"
@@ -90,7 +91,6 @@ export function SingUp() {
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
                     color="primary"
-                    variant="body2"
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Manage expenses and savings with clarity. Share and explore

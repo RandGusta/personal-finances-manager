@@ -5,6 +5,8 @@ import { BaseButton } from "../components/Button";
 import padlock from "../assets/svg/padlock.svg";
 import cardImage from "../assets/images/cover-cards.png";
 import { BaseForm } from '../components/Form';
+import { Link as RoutesLink } from "react-router-dom";
+
 
 const RecoverPassword = () => {
 
@@ -76,7 +78,7 @@ const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) =>{
                 </BaseButton>
                 </BaseForm>
                  <Typography>
-                <Link href="">Return to Login</Link>
+                <Link component={RoutesLink} to="/login">Return to Login</Link>
               </Typography>
               </Box>
             </Box>
@@ -109,7 +111,6 @@ const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) =>{
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
                     color="primary"
-                    variant="body2"
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Forgot your password?
