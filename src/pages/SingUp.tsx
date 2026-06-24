@@ -36,7 +36,7 @@ export function SingUp() {
             />
 
             <BaseInputField
-              label="password"
+              label="Password"
               placeholder="@$76exemple"
               type="password"
               onChange={(e) => setPassword(e.target.value)}

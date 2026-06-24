@@ -48,16 +48,18 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             }}
           >
             <Box
-              component="img"
-              src={logo}
-              sx={{ width: "2rem" }}
-            />
-
-            <Button
               component={Link}
-              to="/profile"
-              sx={{ color: "#F6FAFD" }}
+              to="/login"
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
             >
+              <Box component="img" src={logo} sx={{ width: "2rem" }} />
+            </Box>
+
+            <Button component={Link} to="/profile" sx={{ color: "#F6FAFD" }}>
               Profile
             </Button>
 
@@ -69,19 +71,11 @@ const BaseNavBar = ({ children }: NavBarProps) => {
               Transactions
             </Button>
 
-            <Button
-              component={Link}
-              to="/categories"
-              sx={{ color: "#F6FAFD" }}
-            >
+            <Button component={Link} to="/categories" sx={{ color: "#F6FAFD" }}>
               Categories
             </Button>
 
-            <Button
-              component={Link}
-              to="/teste"
-              sx={{ color: "#F6FAFD" }}
-            >
+            <Button component={Link} to="/teste" sx={{ color: "#F6FAFD" }}>
               Teste
             </Button>
           </Box>
@@ -98,16 +92,9 @@ const BaseNavBar = ({ children }: NavBarProps) => {
               alignItems: "center",
             }}
           >
-            <Box
-              component="img"
-              src={logo}
-              sx={{ width: "2rem" }}
-            />
+            <Box component="img" src={logo} sx={{ width: "2rem" }} />
 
-            <IconButton
-              color="inherit"
-              onClick={handleOpenMenu}
-            >
+            <IconButton color="inherit" onClick={handleOpenMenu}>
               <MenuIcon />
             </IconButton>
           </Box>
@@ -118,11 +105,7 @@ const BaseNavBar = ({ children }: NavBarProps) => {
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
         >
-          <MenuItem
-            component={Link}
-            to="/profile"
-            onClick={handleCloseMenu}
-          >
+          <MenuItem component={Link} to="/profile" onClick={handleCloseMenu}>
             Profile
           </MenuItem>
 
@@ -134,19 +117,11 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             Transactions
           </MenuItem>
 
-          <MenuItem
-            component={Link}
-            to="/categories"
-            onClick={handleCloseMenu}
-          >
+          <MenuItem component={Link} to="/categories" onClick={handleCloseMenu}>
             Categories
           </MenuItem>
 
-          <MenuItem
-            component={Link}
-            to="/teste"
-            onClick={handleCloseMenu}
-          >
+          <MenuItem component={Link} to="/teste" onClick={handleCloseMenu}>
             Teste
           </MenuItem>
         </Menu>

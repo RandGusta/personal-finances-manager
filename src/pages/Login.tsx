@@ -4,10 +4,11 @@ import { BaseCheckBox } from "../components/Checkbox";
 import { Typography, Link, LinearProgress, Box, Card } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
-import { Link as RoutesLink } from "react-router-dom";
+import { Link as RoutesLink, useNavigate } from "react-router-dom";
 import logo from "../assets/svg/favicon.svg";
 
 export function Login() {
+  const navigate = useNavigate();
   return (
     <>
       <AutenticationLayout
@@ -46,7 +47,7 @@ export function Login() {
               fullWidth
               variant="contained"
               loading={false}
-              onClick={() => console.log("teste")}
+              onClick={() => navigate("/")}
             >
               Sing in
             </BaseButton>
