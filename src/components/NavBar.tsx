@@ -71,12 +71,12 @@ const BaseNavBar = ({ children }: NavBarProps) => {
               Transactions
             </Button>
 
-            <Button component={Link} to="/categories" sx={{ color: "#F6FAFD" }}>
+            <Button component={Link} to="/category" sx={{ color: "#F6FAFD" }}>
               Categories
             </Button>
 
-            <Button component={Link} to="/teste" sx={{ color: "#F6FAFD" }}>
-              Teste
+            <Button component={Link} to="/wallets" sx={{ color: "#F6FAFD" }}>
+              Wallets
             </Button>
           </Box>
 
@@ -121,8 +121,8 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             Categories
           </MenuItem>
 
-          <MenuItem component={Link} to="/teste" onClick={handleCloseMenu}>
-            Teste
+          <MenuItem component={Link} to="/wallet" onClick={handleCloseMenu}>
+            Wallets
           </MenuItem>
         </Menu>
       </AppBar>

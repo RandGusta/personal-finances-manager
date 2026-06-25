@@ -1,0 +1,99 @@
+import {
+  Typography,
+  Box,
+  Button,
+} from "@mui/material";
+
+import { useState } from "react";
+
+import BaseNavBar from "../components/NavBar";
+import CategoryTable from "../components/CategoryTable";
+import CategoryModal from "../components/CategoryModal";
+
+const Categories = () => {
+  const [openModal, setOpenModal] =
+    useState(false);
+
+  const categories = [
+    {
+      id: 1,
+      name: "Food",
+      transactionsCount: 12,
+      type: "EXPENSE" as const,
+    },
+    {
+      id: 2,
+      name: "Health",
+      transactionsCount: 5,
+      type: "EXPENSE" as const,
+    },
+    {
+      id: 3,
+      name: "Salary",
+      transactionsCount: 2,
+      type: "INCOME" as const,
+    },
+    {
+      id: 4,
+      name: "Entertainment",
+      transactionsCount: 8,
+      type: "EXPENSE" as const,
+    },
+  ];
+
+  return (
+    <>
+      <BaseNavBar />
+
+      <Box
+        sx={{
+          p: {
+            xs: 2,
+            md: 4,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            alignItems: "center",
+            flexDirection: {
+              xs: "column",
+              md: "row",
+            },
+            gap: 2,
+          }}
+        >
+          <Typography variant="h4">
+            Categories
+          </Typography>
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() =>
+              setOpenModal(true)
+            }
+          >
+            New Category
+          </Button>
+        </Box>
+
+        <CategoryTable
+          categories={categories}
+        />
+
+        <CategoryModal
+          open={openModal}
+          onClose={() =>
+            setOpenModal(false)
+          }
+        />
+      </Box>
+    </>
+  );
+};
+
+export default Categories;
