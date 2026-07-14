@@ -8,10 +8,13 @@ import { BaseInputField } from "../components/Input";
 import { BaseForm } from "../components/Form";
 import BaseNavBar from "../components/NavBar";
 import { useNavigate } from "react-router-dom";
+import { FindInPage } from "@mui/icons-material";
 
 const RedifinePassword = () => {
 
   const navigate = useNavigate();
+  
+  const [loading, setLoading] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -21,9 +24,23 @@ const RedifinePassword = () => {
   const passwordStrength = zxcvbn(newPassword);
 
 
+
   const handleChangePassword = () => {
     if(newPassword !== confirmPassword){
-      setConfirmPasswordError("Passwords do not match.")
+      setConfirmPasswordError("Passwords do not match.");
+      return;
+    } 
+
+    setConfirmPasswordError("");
+    setLoading(true);
+
+    try{
+      console.log("aqui vai ser chamado o back");
+      navigate("/login");
+    } catch {
+      console.log("aqui vai ser chamado o back");
+    } finally{
+      setLoading(false)
     }
   }
 
@@ -68,8 +85,10 @@ const RedifinePassword = () => {
                     />
             <BaseInputField
                       label="Cofirm password"
+                      error={!!confirmPasswordError}
                       type="password"
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      helperText={confirmPasswordError}
                     />
                     {newPassword.length > 0 &&(
               <>
@@ -91,8 +110,8 @@ const RedifinePassword = () => {
                       type="submit"
                       variant="contained"
                       loading={false}
-                      sx={{ marginTop: 10, marginBottom: 3 }}
-                      onClick={() => navigate('/login')}
+                      sx={{ marginTop: 5, marginBottom: 3 }}
+                      onClick={() => handleChangePassword()}
                     >
                       confirm
                     </BaseButton>

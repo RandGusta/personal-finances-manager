@@ -6,8 +6,41 @@ import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
 import { Link as RoutesLink, useNavigate } from "react-router-dom";
 import logo from "../assets/svg/favicon.svg";
+import { useState } from "react";
 
 export function Login() {
+
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [loading, setLoading] = useState(false);
+  
+
+
+  const handleEmailSubmit = () =>{
+    if(!email.trim()){
+      setEmailError("Email is required");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if(emailRegex.test(email)){
+      setEmailError("Invalid email");
+      return;
+    }
+
+    setEmailError("");
+    setLoading(true);
+    try{
+      console.log("aqui vai ser chamado o back");
+      navigate("/login");
+    } catch {
+      console.log("aqui vai ser chamado o back");
+    } finally{
+      setLoading(false)
+    }
+  }
+
   const navigate = useNavigate();
   return (
     <>
@@ -24,6 +57,7 @@ export function Login() {
               label="E-mail"
               placeholder="exemple@gmail.com"
               type="email"
+              onChange={(e) => setEmail(e.target.value)}
             />
             <BaseInputField
               label="Password"
