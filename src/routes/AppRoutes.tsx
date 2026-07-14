@@ -7,6 +7,7 @@ import {Routes, Route} from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 import Category  from '../pages/Category';
 import Wallets from '../pages/Wallets';
+import Profile from '../pages/Profile';
 
 
 const AppRoutes = () =>{
@@ -20,6 +21,7 @@ const AppRoutes = () =>{
             <Route path="/transactions" element={<Transactions/>}/>
             <Route path="/category" element={<Category/>}/>
             <Route path="/wallets" element={<Wallets/>}/>
+            <Route path="/profile" element={<Profile/>}></Route>
         </Routes>
     </>);
 }

@@ -47,7 +47,7 @@ export function Login() {
               fullWidth
               variant="contained"
               loading={false}
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/home")}
             >
               Sing in
             </BaseButton>

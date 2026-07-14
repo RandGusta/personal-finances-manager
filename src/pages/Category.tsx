@@ -10,7 +10,7 @@ import BaseNavBar from "../components/NavBar";
 import CategoryTable from "../components/CategoryTable";
 import CategoryModal from "../components/CategoryModal";
 
-const Categories = () => {
+const Category = () => {
   const [openModal, setOpenModal] =
     useState(false);
 
@@ -96,4 +96,4 @@ const Categories = () => {
   );
 };
 
-export default Categories;
+export default Category;

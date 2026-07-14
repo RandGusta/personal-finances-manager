@@ -7,10 +7,25 @@ import { BaseButton } from "../components/Button";
 import { BaseInputField } from "../components/Input";
 import { BaseForm } from "../components/Form";
 import BaseNavBar from "../components/NavBar";
+import { useNavigate } from "react-router-dom";
 
 const RedifinePassword = () => {
-  const [password, setPassword] = useState("");
-  const passwordStrength = zxcvbn(password);
+
+  const navigate = useNavigate();
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
+  const passwordStrength = zxcvbn(newPassword);
+
+
+  const handleChangePassword = () => {
+    if(newPassword !== confirmPassword){
+      setConfirmPasswordError("Passwords do not match.")
+    }
+  }
 
   const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
@@ -41,16 +56,34 @@ const RedifinePassword = () => {
                   <BaseForm onSubmit={handleSubmit}>
                    <Box sx={{display:"flex", flexDirection: "column", gap: 3}}>
                     <BaseInputField
-                      label="password"
+                      label="Current Password"
                       placeholder="@$76exemple"
                       type="password"
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
                     />
                     <BaseInputField
-                      label="confirm password"
+                      label="New password"
                       type="password"
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => setNewPassword(e.target.value)}
                     />
+            <BaseInputField
+                      label="Cofirm password"
+                      type="password"
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
+                    {newPassword.length > 0 &&(
+              <>
+            <LinearProgress
+              variant="determinate"
+              value={
+                (passwordStrength.score != 4
+                  ? passwordStrength.score
+                  : passwordStrength.score + 1) * 20
+              }
+            /> 
+            <Typography>
+              Password strength: {passwordStrength.score}/4
+            </Typography></>)}
                     </Box>
 
                     <BaseButton
@@ -59,14 +92,14 @@ const RedifinePassword = () => {
                       variant="contained"
                       loading={false}
                       sx={{ marginTop: 10, marginBottom: 3 }}
-                      onClick={() => console.log("teste")}
+                      onClick={() => navigate('/login')}
                     >
                       confirm
                     </BaseButton>
                   </BaseForm>
                 </Box>
                 <Typography>
-                  <Link href="">Return to Login</Link>
+                  <Link href="/login">Return to Login</Link>
                 </Typography>
               </Box>
           </>

@@ -3,6 +3,7 @@ import {
   Box,
   Typography,
   Stack,
+  Button,
 } from "@mui/material";
 
 import { BaseInputField } from "./Input";
@@ -58,11 +59,10 @@ const NewWalletModal = ({
           />
         </Stack>
 
-        {/* <Stack
+        <Stack
           direction="row"
           spacing={2}
-          justifyContent="flex-end"
-          sx={{ mt: 4 }}
+          sx={{ mt: 4, justifyContent: "flex-end"}}
         >
           <Button
             variant="outlined"
@@ -76,7 +76,7 @@ const NewWalletModal = ({
           >
             Create Wallet
           </Button>
-        </Stack> */}
+        </Stack>
       </Box>
     </Modal>
   );

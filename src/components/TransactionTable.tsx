@@ -33,7 +33,6 @@ borderRadius: 1,
 >
 Transactions </Typography>
 
-```
     <Box
       sx={{
         display: "grid",
