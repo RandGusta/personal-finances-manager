@@ -1,8 +1,8 @@
 import {Box} from "@mui/material";
 
 interface BaseFormProps{
-    children: React.ReactNode;
-    onSubmit: React.SubmitEventHandler<HTMLFormElement>;
+    children?: React.ReactNode;
+    onSubmit?: React.SubmitEventHandler<HTMLFormElement>;
 }
 
 

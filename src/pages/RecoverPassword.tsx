@@ -1,19 +1,42 @@
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import { Box, Typography, Card, Link} from "@mui/material";
+import {Box, Typography, Card, Link, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
 import { BaseInputField } from "../components/Input";
 import { BaseButton } from "../components/Button";
 import padlock from "../assets/svg/padlock.svg";
 import cardImage from "../assets/images/cover-cards.png";
-import { BaseForm } from '../components/Form';
+import { BaseForm } from "../components/Form";
 import { Link as RoutesLink } from "react-router-dom";
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const RecoverPassword = () => {
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const navigate = useNavigate();
 
-const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) =>{
-  event.preventDefault();
-  console.log("enviado");
-}
+  const handleSubmit = () => {
+    const emailOk = handleEmailSubmit();
+    if(!emailOk){
+      return;
+    }
+    setOpenDialog(true);
+  }
+
+  const handleEmailSubmit = () => {
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      setEmailError("Invalid email");
+      return;
+    }
+    setEmailError("");
+    return true;
+  };
 
   return (
     <>
@@ -65,21 +88,22 @@ const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) =>{
                 Enter your registered email to recover your password
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              <BaseForm onSubmit={handleSubmit}>
-                <BaseInputField label="Email" type="email"/>
-                <BaseButton
-                  fullWidth
-                  type="submit"
-                  variant="contained"
-                  loading={false}
-                  onClick={() => console.log("teste")}
-                >
-                  Send
-                </BaseButton>
+                <BaseForm>
+                  <BaseInputField label="Email" type="email" error={!!emailError} helperText={emailError}/>
+                  <BaseButton
+                    fullWidth
+                    type="submit"
+                    variant="contained"
+                    onClick={() => handleSubmit()}
+                  >
+                    Send
+                  </BaseButton>
                 </BaseForm>
-                 <Typography>
-                <Link component={RoutesLink} to="/login">Return to Login</Link>
-              </Typography>
+                <Typography>
+                  <Link component={RoutesLink} to="/login">
+                    Return to Login
+                  </Link>
+                </Typography>
               </Box>
             </Box>
           </>
@@ -136,6 +160,32 @@ const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) =>{
           </>
         }
       />
+      <Dialog
+  open={openDialog}
+  onClose={() => setOpenDialog(false)}
+>
+  <DialogTitle>Email sent</DialogTitle>
+
+  <DialogContent>
+    <Typography>
+      If the email exists, recovery instructions have been sent.
+    </Typography>
+
+    <Typography sx={{ mt: 2 }}>
+      Please check your inbox and follow the instructions to reset your
+      password.
+    </Typography>
+  </DialogContent>
+
+  <DialogActions>
+    <BaseButton
+      variant="contained"
+      onClick={() => navigate("/login")}
+    >
+      Back to Login
+    </BaseButton>
+  </DialogActions>
+</Dialog>
     </>
   );
 };

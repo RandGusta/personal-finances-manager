@@ -9,39 +9,62 @@ import logo from "../assets/svg/favicon.svg";
 import { useState } from "react";
 
 export function Login() {
-
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+
+  const navigate = useNavigate();
+
+
   
 
-
-  const handleEmailSubmit = () =>{
-    if(!email.trim()){
-      setEmailError("Email is required");
-      return;
+  const handlePasswordSubmit = () => {
+    if (!password) {
+      setPasswordError("Password is required");
+      return false;
     }
+    setPasswordError("");
+    return true;
+  };
 
+  const handleEmailSubmit = () => {
+    if (!email.trim()) {
+      setEmailError("Email is required");
+      return false;
+    }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if(emailRegex.test(email)){
+    if (!emailRegex.test(email)) {
       setEmailError("Invalid email");
       return;
     }
-
     setEmailError("");
-    setLoading(true);
-    try{
-      console.log("aqui vai ser chamado o back");
-      navigate("/login");
-    } catch {
-      console.log("aqui vai ser chamado o back");
-    } finally{
-      setLoading(false)
-    }
-  }
+    return true;
+  };
 
-  const navigate = useNavigate();
+  const handleSubmit = () => {
+    const passwordOK =  handlePasswordSubmit();
+    const emailOK =   handleEmailSubmit();
+
+    if(!passwordOK || !emailOK){
+      return;
+    }
+    try{
+      setLoading(true);
+      navigate('/home')
+    } catch (error){
+
+      console.log(error);
+
+    } finally{
+
+      setLoading(false);
+    }
+  };
+
   return (
     <>
       <AutenticationLayout
@@ -51,18 +74,25 @@ export function Login() {
               Sing in
             </Typography>
             <Typography>
-              Don't have an account? <Link component={RoutesLink} to="/singup">Create now</Link>
+              Don't have an account?{" "}
+              <Link component={RoutesLink} to="/singup">
+                Create now
+              </Link>
             </Typography>
             <BaseInputField
               label="E-mail"
               placeholder="exemple@gmail.com"
               type="email"
+              error={!!emailError}
               onChange={(e) => setEmail(e.target.value)}
+              helperText={emailError}
             />
             <BaseInputField
               label="Password"
               type="password"
-              // onChange={(e) => setPassword(e.target.value)}
+              error={!!passwordError}
+              onChange={(e) => setPassword(e.target.value)}
+              helperText={passwordError}
             />
 
             <Box
@@ -74,14 +104,16 @@ export function Login() {
             >
               <BaseCheckBox label="remember me" />
               <Typography>
-                <Link component={RoutesLink} to="/recover-password">Forgot Password?</Link>
+                <Link component={RoutesLink} to="/recover-password">
+                  Forgot Password?
+                </Link>
               </Typography>
             </Box>
             <BaseButton
               fullWidth
               variant="contained"
               loading={false}
-              onClick={() => navigate("/home")}
+              onClick={() => handleSubmit()}
             >
               Sing in
             </BaseButton>
@@ -113,7 +145,7 @@ export function Login() {
                 </Typography>
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
-                    color="primary" 
+                    color="primary"
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Manage expenses and savings with clarity. Share and explore
