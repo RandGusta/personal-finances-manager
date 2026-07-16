@@ -1,5 +1,15 @@
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import {Box, Typography, Card, Link, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  Link,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import { BaseInputField } from "../components/Input";
 import { BaseButton } from "../components/Button";
 import padlock from "../assets/svg/padlock.svg";
@@ -17,11 +27,11 @@ const RecoverPassword = () => {
 
   const handleSubmit = () => {
     const emailOk = handleEmailSubmit();
-    if(!emailOk){
+    if (!emailOk) {
       return;
     }
     setOpenDialog(true);
-  }
+  };
 
   const handleEmailSubmit = () => {
     if (!email.trim()) {
@@ -32,7 +42,7 @@ const RecoverPassword = () => {
 
     if (!emailRegex.test(email)) {
       setEmailError("Invalid email");
-      return;
+      return false;
     }
     setEmailError("");
     return true;
@@ -88,17 +98,25 @@ const RecoverPassword = () => {
                 Enter your registered email to recover your password
               </Typography>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <BaseForm>
-                  <BaseInputField label="Email" type="email" error={!!emailError} helperText={emailError}/>
-                  <BaseButton
-                    fullWidth
-                    type="submit"
-                    variant="contained"
-                    onClick={() => handleSubmit()}
-                  >
+                <Box
+                  component="form"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                >
+                  <BaseInputField
+                    label="Email"
+                    type="email"
+                    error={!!emailError}
+                    helperText={emailError}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+
+                  <BaseButton fullWidth type="submit" variant="contained">
                     Send
                   </BaseButton>
-                </BaseForm>
+                </Box>
                 <Typography>
                   <Link component={RoutesLink} to="/login">
                     Return to Login
@@ -160,32 +178,26 @@ const RecoverPassword = () => {
           </>
         }
       />
-      <Dialog
-  open={openDialog}
-  onClose={() => setOpenDialog(false)}
->
-  <DialogTitle>Email sent</DialogTitle>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Email sent</DialogTitle>
 
-  <DialogContent>
-    <Typography>
-      If the email exists, recovery instructions have been sent.
-    </Typography>
+        <DialogContent>
+          <Typography>
+            If the email exists, recovery instructions have been sent.
+          </Typography>
 
-    <Typography sx={{ mt: 2 }}>
-      Please check your inbox and follow the instructions to reset your
-      password.
-    </Typography>
-  </DialogContent>
+          <Typography sx={{ mt: 2 }}>
+            Please check your inbox and follow the instructions to reset your
+            password.
+          </Typography>
+        </DialogContent>
 
-  <DialogActions>
-    <BaseButton
-      variant="contained"
-      onClick={() => navigate("/login")}
-    >
-      Back to Login
-    </BaseButton>
-  </DialogActions>
-</Dialog>
+        <DialogActions>
+          <BaseButton variant="contained" onClick={() => navigate("/login")}>
+            Back to Login
+          </BaseButton>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

@@ -17,7 +17,9 @@ const RedifinePassword = () => {
   const [loading, setLoading] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
 
@@ -26,12 +28,31 @@ const RedifinePassword = () => {
 
 
   const handleChangePassword = () => {
+    if(!currentPassword){
+      setCurrentPasswordError("Field is required")
+      return;
+    }
+
+    if(!newPassword){
+      setNewPasswordError("Field is required");
+      return;
+
+    }
+
+    if(!confirmPassword){
+      setConfirmPasswordError("Field is required");
+      return;
+    }
+
     if(newPassword !== confirmPassword){
       setConfirmPasswordError("Passwords do not match.");
       return;
     } 
 
     setConfirmPasswordError("");
+    setNewPasswordError("");
+    setCurrentPasswordError("");
+
     setLoading(true);
 
     try{
@@ -75,13 +96,17 @@ const RedifinePassword = () => {
                     <BaseInputField
                       label="Current Password"
                       placeholder="@$76exemple"
+                      error={!!currentPasswordError}
                       type="password"
                       onChange={(e) => setCurrentPassword(e.target.value)}
+                      helperText={currentPasswordError}
                     />
                     <BaseInputField
                       label="New password"
                       type="password"
+                      error={!!newPasswordError}
                       onChange={(e) => setNewPassword(e.target.value)}
+                      helperText={newPasswordError}
                     />
             <BaseInputField
                       label="Cofirm password"
