@@ -34,5 +34,8 @@ public class Wallet {
     @OneToMany
     private List<UserWallet> members;
 
+    @OneToMany
+    private List<Transaction> transactions;
+
     
 }

@@ -1,5 +1,5 @@
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import { Typography, Box, Link, LinearProgress, Card } from "@mui/material";
+import { Typography, Box, Link, LinearProgress, Card, Alert } from "@mui/material";
 import { BaseInputField } from "../components/Input";
 import { BaseCheckBox } from "../components/Checkbox";
 import { BaseButton } from "../components/Button";
@@ -9,12 +9,16 @@ import cardImage from "../assets/images/cover-cards.png";
 import zxcvbn from "zxcvbn";
 import { BaseForm } from '../components/Form';
 import { useState } from "react";
+import type { SingUpRequest } from "../dto/SingUpRequest";
+import {singUp} from "../services/UserService"
 
-export function SingUp() {
+export function SignUp() {
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
   const passwordStrength = zxcvbn(password);
+
+  const [generalError, setGeneralError] = useState("");
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -25,6 +29,7 @@ export function SingUp() {
   const [loading, setLoading] = useState(false);
 
   const [passwordError, setPasswordError] = useState("");
+
 
 
   const handlePasswordSubmit = () => {
@@ -66,7 +71,7 @@ export function SingUp() {
     setNameError("")
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const passwordOK =  handlePasswordSubmit();
     const emailOK =   handleEmailSubmit();
     const nameOK =   handleNameSubmit();
@@ -74,15 +79,25 @@ export function SingUp() {
     if(!passwordOK || !emailOK || nameOK){
       return;
     }
+
+    const userName = name;
+    const data: SingUpRequest ={
+      email,
+      password,
+      userName
+    }
+
     try{
       setLoading(true);
-      navigate('/home')
+      await singUp(data);
+      navigate('/home');
     } catch (error){
-
-      console.log(error);
-
+      if(error instanceof Error){
+        setGeneralError(error.message);
+      } else {
+        setGeneralError("Error trying to register")
+      }
     } finally{
-
       setLoading(false);
     }
   };
@@ -94,11 +109,16 @@ export function SingUp() {
         left={
           <>
             <Typography variant="h1" sx={{ mb: 1 }}>
-              Sing up
+              Sign up
             </Typography>
             <Typography>
               Already have an account? <Link component={RoutesLink} to="/login">Login</Link>
             </Typography>
+            {generalError && 
+            <Alert severity="error" sx={{visibility: generalError ? "visible" : "hidden"}}>
+            {generalError}
+            </Alert>
+            }
             <BaseInputField
               label="Full name"
               placeholder="Name LastName"
@@ -143,7 +163,7 @@ export function SingUp() {
               loading={false}
               onClick={() => handleSubmit()}
             >
-              Sing up
+              Sign up
             </BaseButton>
           </>
         }

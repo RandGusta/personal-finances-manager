@@ -1,17 +1,20 @@
 import { BaseButton } from "../components/Button";
 import { BaseInputField } from "../components/Input";
 import { BaseCheckBox } from "../components/Checkbox";
-import { Typography, Link, LinearProgress, Box, Card } from "@mui/material";
+import { Typography, Link, LinearProgress, Box, Card, Alert } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
 import { Link as RoutesLink, useNavigate } from "react-router-dom";
 import logo from "../assets/svg/favicon.svg";
 import { useState } from "react";
+import { login } from "../services/UserService";
+import type { LoginRequest } from "../dto/LoginRequest";
 
 export function Login() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [generalError, setGeneralError] = useState("");
 
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -45,19 +48,28 @@ export function Login() {
     return true;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const passwordOK =  handlePasswordSubmit();
     const emailOK =   handleEmailSubmit();
 
     if(!passwordOK || !emailOK){
       return;
     }
+
+    const data: LoginRequest = {
+      email,
+      password
+    } 
     try{
       setLoading(true);
-      navigate('/home')
+      await login(data);
+      navigate('/home');
     } catch (error){
-
-      console.log(error);
+      if(error instanceof Error){
+        setGeneralError(error.message)
+      } else {
+        setGeneralError("Email or password is incorrect");
+      }
 
     } finally{
 
@@ -71,14 +83,20 @@ export function Login() {
         left={
           <>
             <Typography variant="h1" sx={{ mb: 1 }}>
-              Sing in
+              Sign in
             </Typography>
             <Typography>
               Don't have an account?{" "}
-              <Link component={RoutesLink} to="/singup">
+              <Link component={RoutesLink} to="/signup">
                 Create now
               </Link>
             </Typography>
+            {
+              generalError && 
+              <Alert severity="error" sx={{visibility: generalError ? "visible" : "hidden"}}>
+                {generalError}
+              </Alert>
+            }
             <BaseInputField
               label="E-mail"
               placeholder="exemple@gmail.com"

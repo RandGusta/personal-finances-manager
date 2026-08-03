@@ -1,5 +1,6 @@
 package com.gustavo.finance.finance_control.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,9 +14,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.gustavo.finance.finance_control.security.JwtAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.persistence.Access;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     PasswordEncoder passwordEncoder(){
@@ -29,9 +38,12 @@ public class SecurityConfig {
             auth.requestMatchers(
                 "/login", //tela de login
                 "/recover-password", // tela de recuperar senha
-                "/singup" // tela criar conta
+                "/signup", // tela criar conta
+                "/error"
             ).permitAll()
-            .anyRequest().authenticated()).formLogin(form -> form.disable())
+            .anyRequest().authenticated())
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
     }

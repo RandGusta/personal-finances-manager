@@ -11,6 +11,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -29,16 +30,14 @@ public class Transaction {
     @ManyToOne
     private Wallet wallet;
 
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
     @NotNull(message = "Category is required")
     @ManyToOne
     private Category category;
-
-    @NotNull(message = "Category is required")
-    @ManyToOne
-    private User creator;
-
-    @Enumerated(EnumType.STRING)
-    private TransactionType type;
 
     @NotBlank(message = "Value is required")
     @Positive(message = "Value must be positive")

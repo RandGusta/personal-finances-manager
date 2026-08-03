@@ -1,5 +1,5 @@
 import {Login} from '../pages/Login';
-import { SingUp } from '../pages/SingUp';
+import { SignUp } from '../pages/SingUp';
 import RecoverPassword from '../pages/RecoverPassword';
 import RedifinePassword from '../pages/RedifinePassword';
 import Transactions from '../pages/Transactions';
@@ -17,7 +17,7 @@ const AppRoutes = () =>{
             <Route path="/login" element={<Login/>}/>
             <Route path="/recover-password" element={<RecoverPassword/>}/>
             <Route path="/redifine-password" element={<RedifinePassword/>}/>
-            <Route path="/singup" element={<SingUp/>}/>
+            <Route path="/signup" element={<SignUp/>}/>
             <Route path="/transactions" element={<Transactions/>}/>
             <Route path="/category" element={<Category/>}/>
             <Route path="/wallets" element={<Wallets/>}/>
