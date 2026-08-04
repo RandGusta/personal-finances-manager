@@ -1,67 +1,58 @@
 package com.gustavo.finance.finance_control.controller;
-import org.springframework.security.core.Authentication;
 
-import java.util.Currency;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.gustavo.finance.finance_control.dto.CurrentUserResponse;
-import com.gustavo.finance.finance_control.dto.LoginRequest;
-import com.gustavo.finance.finance_control.dto.LoginResponse;
-import com.gustavo.finance.finance_control.dto.SingUpRequest;
+import com.gustavo.finance.finance_control.dto.ChangePasswordRequest;
+import com.gustavo.finance.finance_control.dto.MessageResponse;
+import com.gustavo.finance.finance_control.dto.UpdateUserRequest;
+import com.gustavo.finance.finance_control.dto.UserProfileResponse;
 import com.gustavo.finance.finance_control.entity.User;
-import com.gustavo.finance.finance_control.security.JwtService;
 import com.gustavo.finance.finance_control.service.UserService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin
+@RequestMapping("/api/v1/users")
 public class UserController {
 
-    @Autowired
-    AuthenticationManager authenticationManager;
+    private final UserService userService;
 
-    @Autowired
-    UserService userService;
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
-    @Autowired
-    JwtService jwtService;
-    
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest){
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> getProfile(Authentication authentication) {
+        return ResponseEntity.ok(userService.getProfile(authenticatedUser(authentication)));
+    }
 
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword())
+    @PutMapping("/me")
+    public ResponseEntity<UserProfileResponse> updateProfile(
+        Authentication authentication,
+        @Valid @RequestBody UpdateUserRequest request
+    ) {
+        return ResponseEntity.ok(
+            userService.updateProfile(authenticatedUser(authentication), request)
         );
-        User user = (User) authentication.getPrincipal();
-        String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(new LoginResponse(token));
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<Void> singUp(@Valid @RequestBody SingUpRequest singUpRequest){
-        userService.insertUser(singUpRequest);
-        // retornar status 201 -> created
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PatchMapping("/me/password")
+    public ResponseEntity<MessageResponse> changePassword(
+        Authentication authentication,
+        @Valid @RequestBody ChangePasswordRequest request
+    ) {
+        userService.changePassword(authenticatedUser(authentication), request);
+        return ResponseEntity.ok(new MessageResponse("Senha alterada com sucesso."));
     }
 
-    @GetMapping("/home")
-    public ResponseEntity<CurrentUserResponse> getCurrentUser(Authentication authentication){
-        System.out.println("authentication: " + authentication);
-        return ResponseEntity.ok(userService.getCurrentUser(authentication));
+    private User authenticatedUser(Authentication authentication) {
+        return (User) authentication.getPrincipal();
     }
-
-
 }
