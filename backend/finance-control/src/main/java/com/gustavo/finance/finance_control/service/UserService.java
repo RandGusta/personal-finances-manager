@@ -103,9 +103,9 @@ public class UserService implements UserDetailsService {
 
         for (Transaction transaction : transactions) {
             if (transaction.getCategory().getType() == TransactionType.INCOME) {
-                income = income.add(transaction.getValue());
+                income = income.add(transaction.getAmount());
             } else if (transaction.getCategory().getType() == TransactionType.EXPENSE) {
-                expense = expense.add(transaction.getValue());
+                expense = expense.add(transaction.getAmount());
             } else {
                 throw new InvalidTransactionTypeException();
             }
