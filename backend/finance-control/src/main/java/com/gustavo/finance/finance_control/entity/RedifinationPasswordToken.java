@@ -1,14 +1,13 @@
 package com.gustavo.finance.finance_control.entity;
 import java.time.LocalDateTime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import jakarta.annotation.Generated;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 
 @Entity
@@ -18,11 +17,15 @@ public class RedifinationPasswordToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Column(nullable = false, unique = true)
     private String token;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
+    @Column(nullable = false)
     private LocalDateTime expireDate;
 
+    @Column(nullable = false)
+    private boolean used;
 }

@@ -45,6 +45,15 @@ public class GlobalExceptionHandler {
             .body(new com.gustavo.finance.finance_control.dto.ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidPasswordResetTokenException.class)
+    public ResponseEntity<?> handleInvalidPasswordResetTokenException(
+        InvalidPasswordResetTokenException ex
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new com.gustavo.finance.finance_control.dto.ErrorResponse(ex.getMessage()));
+    }
+
     public ResponseEntity<?> handleInvalidTransactionTypeException(InvalidTransactionTypeException ex){
         return ResponseEntity
         .status(HttpStatus.NOT_FOUND)
