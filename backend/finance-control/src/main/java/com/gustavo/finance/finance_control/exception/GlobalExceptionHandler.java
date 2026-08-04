@@ -21,6 +21,13 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<?> handleConflictException(ConflictException ex) {
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
+            .body(new com.gustavo.finance.finance_control.dto.ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleWrongCredentialsException(BadCredentialsException ex){
         return ResponseEntity

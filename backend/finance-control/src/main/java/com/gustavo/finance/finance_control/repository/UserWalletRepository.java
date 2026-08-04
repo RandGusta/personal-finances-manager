@@ -15,6 +15,12 @@ public interface UserWalletRepository extends JpaRepository<UserWallet, Long> {
 
     Optional<UserWallet> findByWalletIdAndUser(Long walletId, User user);
 
+    Optional<UserWallet> findByWalletIdAndUserId(Long walletId, Long userId);
+
+    List<UserWallet> findAllByWalletOrderByAssociationDateAsc(Wallet wallet);
+
+    boolean existsByWalletIdAndUser(Long walletId, User user);
+
     long countByWallet(Wallet wallet);
 
     void deleteAllByWallet(Wallet wallet);
