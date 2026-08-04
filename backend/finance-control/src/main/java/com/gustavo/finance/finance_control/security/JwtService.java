@@ -15,46 +15,37 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.validation.Valid;
 
 @Service
 public class JwtService {
-    
+
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    private SecretKey getSecretKey(){
-        byte[] ketBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(ketBytes);
-    }
+    @Value("${jwt.expiration:86400000}")
+    private long jwtExpiration;
 
-    public String generateToken(User user){
-        return Jwts.builder().subject(user.getEmail()) // baseado no email
-        .issuedAt(new Date()) // data de criação
-        .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60) // 1 hora
-        ).signWith(getSecretKey()) // assinado a partir da secret 
-        .compact(); // compactado em uma string somente
+    public String generateToken(User user) {
+        return Jwts.builder()
+            .subject(user.getId().toString())
+            .claim("email", user.getEmail())
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+            .signWith(getSecretKey())
+            .compact();
     }
 
     public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim(token, claims -> claims.get("email", String.class));
     }
 
-
-    //retornar todas as informações do token (subject, date, etc...)
-    private Claims extractAllClaims(String token) {
-     return Jwts.parser()
-            .verifyWith(getSecretKey())
-            .build()
-            .parseSignedClaims(token)
-            .getPayload();
-}
-
-    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-    final Claims claims = extractAllClaims(token);
-    return claimsResolver.apply(claims); // aplicando a função para filtrar o especifico
+    public Long extractUserId(String token) {
+        return Long.valueOf(extractClaim(token, Claims::getSubject));
     }
 
+    public long getExpirationSeconds() {
+        return jwtExpiration / 1000;
+    }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String tokenEmail = extractEmail(token);
@@ -65,11 +56,28 @@ public class JwtService {
         return tokenEmail.equals(authenticatedEmail) && !isTokenExpired(token);
     }
 
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser()
+            .verifyWith(getSecretKey())
+            .build()
+            .parseSignedClaims(token)
+            .getPayload();
+    }
+
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        return claimsResolver.apply(extractAllClaims(token));
+    }
+
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
     private Date extractExpiration(String token) {
-    return extractClaim(token, Claims::getExpiration);
-}
+        return extractClaim(token, Claims::getExpiration);
+    }
 }

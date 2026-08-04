@@ -1,6 +1,7 @@
 package com.gustavo.finance.finance_control.security;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ class JwtServiceTest {
             "jwtSecret",
             "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
         );
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 86_400_000L);
     }
 
     @Test
@@ -29,6 +31,9 @@ class JwtServiceTest {
         String token = jwtService.generateToken(user);
 
         assertTrue(jwtService.isTokenValid(token, user));
+        assertEquals(1L, jwtService.extractUserId(token));
+        assertEquals("gustavo@example.com", jwtService.extractEmail(token));
+        assertEquals(86_400L, jwtService.getExpirationSeconds());
     }
 
     @Test
@@ -42,6 +47,7 @@ class JwtServiceTest {
 
     private User user(String name, String email) {
         User user = new User();
+        user.setId(name.equals("Gustavo") ? 1L : 2L);
         user.setUsername(name);
         user.setEmail(email);
         return user;

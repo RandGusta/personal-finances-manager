@@ -30,9 +30,11 @@ public class SecurityConfig {
         // HttpSecurity podem lançar exceções durante a construção da configuração, por isso o exception 
         http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> 
             auth.requestMatchers(
-                "/login", //tela de login
-                "/recover-password", // tela de recuperar senha
-                "/signup", // tela criar conta
+                "/auth/register",
+                "/auth/login",
+                "/auth/forgot-password",
+                "/auth/reset-password",
+                "/actuator/health",
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())

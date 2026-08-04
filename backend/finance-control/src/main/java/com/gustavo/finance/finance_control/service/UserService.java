@@ -16,7 +16,7 @@ import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ChangePasswordRequest;
 import com.gustavo.finance.finance_control.dto.CurrentUserResponse;
-import com.gustavo.finance.finance_control.dto.SingUpRequest;
+import com.gustavo.finance.finance_control.dto.RegisterRequest;
 import com.gustavo.finance.finance_control.dto.UpdateUserRequest;
 import com.gustavo.finance.finance_control.dto.UserProfileResponse;
 import com.gustavo.finance.finance_control.entity.Transaction;
@@ -50,12 +50,12 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User insertUser(SingUpRequest request) {
+    public User register(RegisterRequest request) {
         verifyExistingEmail(request.getEmail());
 
         User user = new User();
         user.setEmail(request.getEmail());
-        user.setUsername(request.getUserName());
+        user.setUsername(request.getName().trim());
         user.setUserType(UserType.USER);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreatedDate(LocalDateTime.now());

@@ -34,6 +34,7 @@ public class User implements UserDetails {
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email")
+    @Column(nullable = false, unique = true)
     private String email;
 
     @NotBlank(message = "Password is required")

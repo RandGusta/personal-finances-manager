@@ -1,52 +1,36 @@
 package com.gustavo.finance.finance_control.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavo.finance.finance_control.dto.LoginRequest;
 import com.gustavo.finance.finance_control.dto.LoginResponse;
-import com.gustavo.finance.finance_control.dto.SingUpRequest;
-import com.gustavo.finance.finance_control.entity.User;
-import com.gustavo.finance.finance_control.security.JwtService;
-import com.gustavo.finance.finance_control.service.UserService;
+import com.gustavo.finance.finance_control.dto.RegisterRequest;
+import com.gustavo.finance.finance_control.dto.RegisterResponse;
+import com.gustavo.finance.finance_control.service.AuthenticationService;
 
 import jakarta.validation.Valid;
 
 @RestController
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserService userService;
-    private final JwtService jwtService;
+    private final AuthenticationService authenticationService;
 
-    public AuthController(
-        AuthenticationManager authenticationManager,
-        UserService userService,
-        JwtService jwtService
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.userService = userService;
-        this.jwtService = jwtService;
+    public AuthController(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
-        User user = (User) authentication.getPrincipal();
-        return ResponseEntity.ok(new LoginResponse(jwtService.generateToken(user)));
+        return ResponseEntity.ok(authenticationService.login(request));
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@Valid @RequestBody SingUpRequest request) {
-        userService.insertUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    @PostMapping("/register")
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest request) {
+        return ResponseEntity.status(201).body(authenticationService.register(request));
     }
 }
