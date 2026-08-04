@@ -36,9 +36,6 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private EmailSenderService emailSenderService;
-
     private UserService userService;
     private User user;
 
@@ -47,8 +44,7 @@ class UserServiceTest {
         userService = new UserService(
             userRepository,
             transactionRepository,
-            passwordEncoder,
-            emailSenderService
+            passwordEncoder
         );
 
         user = new User();
