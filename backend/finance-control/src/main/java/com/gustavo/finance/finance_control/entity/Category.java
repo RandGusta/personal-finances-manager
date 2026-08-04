@@ -7,7 +7,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
@@ -19,15 +20,16 @@ public class Category {
     private Long id;
 
     @NotNull(message = "User is required")
+    @ManyToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
-    @NotBlank(message = "Name is required")
     private String name;
 
+    @NotNull(message = "Type is required")
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    @NotBlank(message = "Color is required")
     private String color;
 
 }
