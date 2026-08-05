@@ -1,6 +1,7 @@
 package com.gustavo.finance.finance_control.repository;
 
 import java.util.List;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,6 +20,24 @@ public interface TransactionRepository extends
     boolean existsByCategory(Category category);
 
     Optional<Transaction> findByIdAndWalletId(Long id, Long walletId);
+
+    List<Transaction> findAllByWalletIdOrderByDateAsc(Long walletId);
+
+    List<Transaction> findAllByWalletIdAndDateBetweenOrderByDateAsc(
+        Long walletId,
+        LocalDate startDate,
+        LocalDate endDate
+    );
+
+    List<Transaction> findAllByWalletIdAndDateGreaterThanEqualOrderByDateAsc(
+        Long walletId,
+        LocalDate startDate
+    );
+
+    List<Transaction> findAllByWalletIdAndDateLessThanEqualOrderByDateAsc(
+        Long walletId,
+        LocalDate endDate
+    );
 
     void deleteAllByWallet(Wallet wallet);
 }

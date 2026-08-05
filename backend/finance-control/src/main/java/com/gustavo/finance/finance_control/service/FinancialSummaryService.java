@@ -3,13 +3,11 @@ package com.gustavo.finance.finance_control.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,79 +49,121 @@ public class FinancialSummaryService {
         validateMembership(user, walletId);
         validateDateRange(startDate, endDate);
 
-        Specification<Transaction> filters = Specification
-            .where(hasWallet(walletId))
-            .and(dateOnOrAfter(startDate))
-            .and(dateOnOrBefore(endDate));
-        List<Transaction> transactions = transactionRepository.findAll(
-            filters,
-            Sort.by(Sort.Direction.ASC, "date")
-        );
-
+        List<Transaction> transactions = findTransactions(walletId, startDate, endDate);
         return summarize(transactions);
+    }
+
+    private List<Transaction> findTransactions(
+        Long walletId,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        if (startDate != null && endDate != null) {
+            return transactionRepository.findAllByWalletIdAndDateBetweenOrderByDateAsc(
+                walletId,
+                startDate,
+                endDate
+            );
+        }
+
+        if (startDate != null) {
+            return transactionRepository
+                .findAllByWalletIdAndDateGreaterThanEqualOrderByDateAsc(walletId, startDate);
+        }
+
+        if (endDate != null) {
+            return transactionRepository
+                .findAllByWalletIdAndDateLessThanEqualOrderByDateAsc(walletId, endDate);
+        }
+
+        return transactionRepository.findAllByWalletIdOrderByDateAsc(walletId);
     }
 
     private FinancialSummaryResponse summarize(List<Transaction> transactions) {
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
-        Map<CategoryKey, BigDecimal> byCategory = new HashMap<>();
-        Map<YearMonth, MonthlyTotals> byMonth = new TreeMap<>();
+
+        Map<Long, CategorySummaryResponse> categories = new LinkedHashMap<>();
+        Map<String, MonthlySummaryResponse> months = new LinkedHashMap<>();
 
         for (Transaction transaction : transactions) {
             BigDecimal amount = transaction.getAmount();
+
             if (transaction.getType() == TransactionType.INCOME) {
                 totalIncome = totalIncome.add(amount);
             } else {
                 totalExpense = totalExpense.add(amount);
             }
 
-            CategoryKey categoryKey = categoryKey(transaction.getCategory());
-            byCategory.merge(categoryKey, amount, BigDecimal::add);
-
-            YearMonth month = YearMonth.from(transaction.getDate());
-            byMonth.computeIfAbsent(month, ignored -> new MonthlyTotals())
-                .add(transaction.getType(), amount);
+            addCategoryTotal(categories, transaction);
+            addMonthlyTotal(months, transaction);
         }
+
+        List<CategorySummaryResponse> categoryList = new ArrayList<>(categories.values());
+        List<MonthlySummaryResponse> monthList = new ArrayList<>(months.values());
+        BigDecimal balance = totalIncome.subtract(totalExpense);
 
         return new FinancialSummaryResponse(
             totalIncome,
             totalExpense,
-            totalIncome.subtract(totalExpense),
+            balance,
             transactions.size(),
-            categoryResponses(byCategory),
-            monthlyResponses(byMonth)
+            categoryList,
+            monthList
         );
     }
 
-    private List<CategorySummaryResponse> categoryResponses(
-        Map<CategoryKey, BigDecimal> totals
+    private void addCategoryTotal(
+        Map<Long, CategorySummaryResponse> categories,
+        Transaction transaction
     ) {
-        return totals.entrySet().stream()
-            .sorted(Map.Entry.comparingByKey())
-            .map(entry -> new CategorySummaryResponse(
-                entry.getKey().id(),
-                entry.getKey().name(),
-                entry.getValue()
-            ))
-            .toList();
+        Category category = transaction.getCategory();
+        Long categoryId = null;
+        String categoryName = UNCATEGORIZED;
+
+        if (category != null) {
+            categoryId = category.getId();
+            categoryName = category.getName();
+        }
+
+        CategorySummaryResponse summary = categories.get(categoryId);
+
+        if (summary == null) {
+            summary = new CategorySummaryResponse(
+                categoryId,
+                categoryName,
+                transaction.getAmount()
+            );
+            categories.put(categoryId, summary);
+        } else {
+            BigDecimal newTotal = summary.getTotal().add(transaction.getAmount());
+            summary.setTotal(newTotal);
+        }
     }
 
-    private List<MonthlySummaryResponse> monthlyResponses(
-        Map<YearMonth, MonthlyTotals> totals
+    private void addMonthlyTotal(
+        Map<String, MonthlySummaryResponse> months,
+        Transaction transaction
     ) {
-        return totals.entrySet().stream()
-            .map(entry -> new MonthlySummaryResponse(
-                entry.getKey().toString(),
-                entry.getValue().income,
-                entry.getValue().expense
-            ))
-            .toList();
-    }
+        String month = YearMonth.from(transaction.getDate()).toString();
+        MonthlySummaryResponse summary = months.get(month);
 
-    private CategoryKey categoryKey(Category category) {
-        return category == null
-            ? new CategoryKey(null, UNCATEGORIZED)
-            : new CategoryKey(category.getId(), category.getName());
+        if (summary == null) {
+            summary = new MonthlySummaryResponse(
+                month,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO
+            );
+            months.put(month, summary);
+        }
+
+        if (transaction.getType() == TransactionType.INCOME) {
+            BigDecimal newIncome = summary.getIncome().add(transaction.getAmount());
+            summary.setIncome(newIncome);
+        } else {
+            BigDecimal newExpense = summary.getExpense().add(transaction.getAmount());
+            summary.setExpense(newExpense);
+        }
     }
 
     private void validateMembership(User user, Long walletId) {
@@ -135,54 +175,6 @@ public class FinancialSummaryService {
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new BusinessException("Start date cannot be after end date");
-        }
-    }
-
-    private Specification<Transaction> hasWallet(Long walletId) {
-        return (root, query, criteriaBuilder) ->
-            criteriaBuilder.equal(root.get("wallet").get("id"), walletId);
-    }
-
-    private Specification<Transaction> dateOnOrAfter(LocalDate startDate) {
-        return startDate == null
-            ? Specification.unrestricted()
-            : (root, query, criteriaBuilder) ->
-            criteriaBuilder.greaterThanOrEqualTo(root.get("date"), startDate);
-    }
-
-    private Specification<Transaction> dateOnOrBefore(LocalDate endDate) {
-        return endDate == null
-            ? Specification.unrestricted()
-            : (root, query, criteriaBuilder) ->
-            criteriaBuilder.lessThanOrEqualTo(root.get("date"), endDate);
-    }
-
-    private record CategoryKey(Long id, String name) implements Comparable<CategoryKey> {
-
-        @Override
-        public int compareTo(CategoryKey other) {
-            int nameComparison = name.compareToIgnoreCase(other.name);
-            if (nameComparison != 0) {
-                return nameComparison;
-            }
-            if (id == null) {
-                return other.id == null ? 0 : -1;
-            }
-            return other.id == null ? 1 : id.compareTo(other.id);
-        }
-    }
-
-    private static class MonthlyTotals {
-
-        private BigDecimal income = BigDecimal.ZERO;
-        private BigDecimal expense = BigDecimal.ZERO;
-
-        private void add(TransactionType type, BigDecimal amount) {
-            if (type == TransactionType.INCOME) {
-                income = income.add(amount);
-            } else {
-                expense = expense.add(amount);
-            }
         }
     }
 }

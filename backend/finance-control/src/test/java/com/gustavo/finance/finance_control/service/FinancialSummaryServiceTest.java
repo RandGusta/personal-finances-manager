@@ -2,9 +2,8 @@ package com.gustavo.finance.finance_control.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -18,9 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-
 import com.gustavo.finance.finance_control.dto.CategorySummaryResponse;
 import com.gustavo.finance.finance_control.dto.FinancialSummaryResponse;
 import com.gustavo.finance.finance_control.entity.Category;
@@ -75,10 +71,7 @@ class FinancialSummaryServiceTest {
             () -> financialSummaryService.get(user, 10L, null, null)
         );
 
-        verify(transactionRepository, never()).findAll(
-            any(Specification.class),
-            any(Sort.class)
-        );
+        verifyNoInteractions(transactionRepository);
     }
 
     @Test
@@ -99,7 +92,7 @@ class FinancialSummaryServiceTest {
     @Test
     void shouldReturnZeroSummaryWhenWalletHasNoTransactions() {
         mockMembership();
-        when(transactionRepository.findAll(any(Specification.class), any(Sort.class)))
+        when(transactionRepository.findAllByWalletIdOrderByDateAsc(10L))
             .thenReturn(List.of());
 
         FinancialSummaryResponse response = financialSummaryService.get(
@@ -128,7 +121,11 @@ class FinancialSummaryServiceTest {
             transaction(TransactionType.EXPENSE, "50.00", LocalDate.of(2026, 2, 3), null)
         );
         mockMembership();
-        when(transactionRepository.findAll(any(Specification.class), any(Sort.class)))
+        when(transactionRepository.findAllByWalletIdAndDateBetweenOrderByDateAsc(
+            10L,
+            LocalDate.of(2026, 1, 1),
+            LocalDate.of(2026, 2, 28)
+        ))
             .thenReturn(transactions);
 
         FinancialSummaryResponse response = financialSummaryService.get(
@@ -151,6 +148,34 @@ class FinancialSummaryServiceTest {
         assertEquals("2026-02", response.getByMonth().get(1).getMonth());
         assertEquals(BigDecimal.ZERO, response.getByMonth().get(1).getIncome());
         assertEquals(new BigDecimal("150.00"), response.getByMonth().get(1).getExpense());
+    }
+
+    @Test
+    void shouldFilterTransactionsOnlyFromStartDate() {
+        LocalDate startDate = LocalDate.of(2026, 1, 1);
+        mockMembership();
+        when(transactionRepository
+            .findAllByWalletIdAndDateGreaterThanEqualOrderByDateAsc(10L, startDate))
+            .thenReturn(List.of());
+
+        financialSummaryService.get(user, 10L, startDate, null);
+
+        verify(transactionRepository)
+            .findAllByWalletIdAndDateGreaterThanEqualOrderByDateAsc(10L, startDate);
+    }
+
+    @Test
+    void shouldFilterTransactionsOnlyUntilEndDate() {
+        LocalDate endDate = LocalDate.of(2026, 1, 31);
+        mockMembership();
+        when(transactionRepository
+            .findAllByWalletIdAndDateLessThanEqualOrderByDateAsc(10L, endDate))
+            .thenReturn(List.of());
+
+        financialSummaryService.get(user, 10L, null, endDate);
+
+        verify(transactionRepository)
+            .findAllByWalletIdAndDateLessThanEqualOrderByDateAsc(10L, endDate);
     }
 
     private BigDecimal categoryTotal(FinancialSummaryResponse response, String categoryName) {
