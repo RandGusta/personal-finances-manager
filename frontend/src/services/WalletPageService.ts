@@ -1,5 +1,6 @@
 import type { TransactionPageResponse } from "../dto/TransactionResponse";
 import type { WalletMemberResponse } from "../dto/WalletMemberResponse";
+import type { WalletRequest } from "../dto/WalletRequest";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
@@ -58,6 +59,30 @@ export async function getWallets(): Promise<WalletResponse[]> {
     token,
     "Error while loading the wallets",
   );
+}
+
+export async function createWallet(
+  request: WalletRequest,
+): Promise<WalletResponse> {
+  const token = requireToken();
+  const response = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while creating the wallet",
+    );
+    throw new Error(message);
+  }
+
+  return (await response.json()) as WalletResponse;
 }
 
 export async function getWalletMembers(

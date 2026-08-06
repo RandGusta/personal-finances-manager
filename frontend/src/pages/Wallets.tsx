@@ -109,6 +109,10 @@ const Wallets = () => {
       <NewWalletModal
         open={openNewWallet}
         onClose={() => setOpenNewWallet(false)}
+        onCreated={(wallet) => {
+          setWallets((currentWallets) => [...currentWallets, wallet]);
+          setError("");
+        }}
       />
     </>
   );
