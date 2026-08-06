@@ -17,7 +17,11 @@ import { getCategories } from "../services/CategoryTableService";
 
 type CategoryFilter = CategoryType | "ALL";
 
-const CategoryTable = () => {
+interface CategoryTableProps {
+  refreshKey: number;
+}
+
+const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [filter, setFilter] = useState<CategoryFilter>("ALL");
   const [loading, setLoading] = useState(true);
@@ -57,7 +61,7 @@ const CategoryTable = () => {
     return () => {
       componentIsMounted = false;
     };
-  }, [filter]);
+  }, [filter, refreshKey]);
 
   return (
     <Card sx={{ mt: 3 }}>
