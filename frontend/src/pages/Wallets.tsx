@@ -1,59 +1,65 @@
-import { Box, Typography, Button } from "@mui/material";
-
-import { useState } from "react";
-
+import { Alert, Box, Button, Skeleton, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import BaseNavBar from "../components/NavBar";
+import NewWalletModal from "../components/NewWalletModal";
 import WalletCard from "../components/WalletCard";
 import WalletMembersModal from "../components/WalletMembersModal";
-import NewWalletModal from "../components/NewWalletModal";
-
+import type { WalletResponse } from "../dto/UserSummaryResponse";
+import { getWallets } from "../services/WalletPageService";
 
 const Wallets = () => {
-  const [openModal, setOpenModal] = useState(false);
+  const [wallets, setWallets] = useState<WalletResponse[]>([]);
+  const [selectedWallet, setSelectedWallet] = useState<WalletResponse | null>(null);
   const [openNewWallet, setOpenNewWallet] = useState(false);
-  const wallets = [
-    {
-      id: 1,
-      name: "Personal Wallet",
-      owner: "Gustavo",
-      members: 1,
-    },
-    {
-      id: 2,
-      name: "House Expenses",
-      owner: "Gustavo",
-      members: 3,
-    },
-    {
-      id: 3,
-      name: "Trip 2026",
-      owner: "Gustavo",
-      members: 2,
-    },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let componentIsMounted = true;
+
+    const loadWallets = async () => {
+      try {
+        const response = await getWallets();
+
+        if (componentIsMounted) {
+          setWallets(response);
+          setError("");
+        }
+      } catch (requestError) {
+        if (componentIsMounted) {
+          const message =
+            requestError instanceof Error
+              ? requestError.message
+              : "Error occurred while loading wallets";
+          setWallets([]);
+          setError(message);
+        }
+      } finally {
+        if (componentIsMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadWallets();
+
+    return () => {
+      componentIsMounted = false;
+    };
+  }, []);
 
   return (
     <>
       <BaseNavBar />
 
-      <Box
-        sx={{
-          p: {
-            xs: 2,
-            md: 4,
-          },
-        }}
-      >
+      <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             mb: 4,
-            flexDirection: {
-              xs: "column",
-              md: "row",
-            },
+            flexDirection: { xs: "column", md: "row" },
             gap: 2,
           }}
         >
@@ -63,6 +69,14 @@ const Wallets = () => {
             New Wallet
           </Button>
         </Box>
+
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+
+        {loading && <Skeleton variant="rounded" height={180} />}
+
+        {!loading && !error && wallets.length === 0 && (
+          <Alert severity="info">You do not have any wallets yet.</Alert>
+        )}
 
         <Box
           sx={{
@@ -75,25 +89,27 @@ const Wallets = () => {
             gap: 3,
           }}
         >
-          {wallets.map((wallet) => (
-            <WalletCard
-              key={wallet.id}
-              wallet={wallet}
-              onOpen={() => setOpenModal(true)}
-            />
-          ))}
+          {!loading &&
+            wallets.map((wallet) => (
+              <WalletCard
+                key={wallet.id}
+                wallet={wallet}
+                onOpen={() => setSelectedWallet(wallet)}
+              />
+            ))}
         </Box>
 
         <WalletMembersModal
-          open={openModal}
-          onClose={() => setOpenModal(false)}
+          open={selectedWallet !== null}
+          wallet={selectedWallet}
+          onClose={() => setSelectedWallet(null)}
         />
       </Box>
 
       <NewWalletModal
-  open={openNewWallet}
-  onClose={() => setOpenNewWallet(false)}
-/>
+        open={openNewWallet}
+        onClose={() => setOpenNewWallet(false)}
+      />
     </>
   );
 };
