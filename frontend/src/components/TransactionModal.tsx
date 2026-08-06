@@ -1,44 +1,151 @@
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  MenuItem,
-} from "@mui/material";
-
-import { useState } from "react";
+import { Alert, Box, Button, MenuItem, Modal, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
+import type { TransactionRequest } from "../dto/TransactionRequest";
+import type { TransactionType } from "../dto/TransactionResponse";
+import { getCategories } from "../services/CategoryTableService";
+import { createTransaction } from "../services/TransactionModalService";
+import { BaseButton } from "./Button";
 import { BaseInputField } from "./Input";
 
 interface TransactionModalProps {
   open: boolean;
+  walletId: number | null;
   onClose: () => void;
+  onCreated: () => void;
+}
+
+function getCurrentDate() {
+  const today = new Date();
+  const timezoneOffset = today.getTimezoneOffset() * 60_000;
+  return new Date(today.getTime() - timezoneOffset).toISOString().slice(0, 10);
 }
 
 const TransactionModal = ({
   open,
+  walletId,
   onClose,
+  onCreated,
 }: TransactionModalProps) => {
   const [description, setDescription] = useState("");
-  const [value, setValue] = useState("");
-  const [category, setCategory] = useState("");
-  const [type, setType] = useState("");
+  const [amount, setAmount] = useState("");
+  const [categoryId, setCategoryId] = useState<number | "">("");
+  const [type, setType] = useState<TransactionType | "">("");
+  const [date, setDate] = useState(getCurrentDate());
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSave = () => {
-    console.log({
-      description,
-      value,
-      category,
-      type,
-    });
+  useEffect(() => {
+    if (!open || type === "") {
+      return;
+    }
 
+    let componentIsMounted = true;
+
+    const loadCategories = async () => {
+      try {
+        setCategoriesLoading(true);
+        const response = await getCategories(type as CategoryType);
+
+        if (componentIsMounted) {
+          setCategories(response);
+          setError("");
+        }
+      } catch (requestError) {
+        if (componentIsMounted) {
+          const message =
+            requestError instanceof Error
+              ? requestError.message
+              : "Error occurred while loading categories";
+          setCategories([]);
+          setError(message);
+        }
+      } finally {
+        if (componentIsMounted) {
+          setCategoriesLoading(false);
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      componentIsMounted = false;
+    };
+  }, [open, type]);
+
+  const resetForm = () => {
+    setDescription("");
+    setAmount("");
+    setCategoryId("");
+    setType("");
+    setDate(getCurrentDate());
+    setCategories([]);
+    setError("");
+  };
+
+  const handleClose = () => {
+    if (saving) {
+      return;
+    }
+
+    resetForm();
     onClose();
   };
 
+  const handleSave = async () => {
+    const parsedAmount = Number(amount);
+
+    if (walletId === null) {
+      setError("Select a wallet before creating a transaction");
+      return;
+    }
+
+    if (type === "") {
+      setError("Transaction type is required");
+      return;
+    }
+
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 0.01) {
+      setError("Value must be at least 0.01");
+      return;
+    }
+
+    if (!date) {
+      setError("Date is required");
+      return;
+    }
+
+    const request: TransactionRequest = {
+      type,
+      amount: parsedAmount,
+      description: description.trim() || undefined,
+      date,
+      categoryId: categoryId === "" ? null : categoryId,
+    };
+
+    try {
+      setSaving(true);
+      setError("");
+      await createTransaction(walletId, request);
+      resetForm();
+      onClose();
+      onCreated();
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Error occurred while creating the transaction";
+      setError(message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-    >
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
           position: "absolute",
@@ -46,110 +153,85 @@ const TransactionModal = ({
           left: "50%",
           transform: "translate(-50%, -50%)",
           bgcolor: "background.paper",
-          width: {
-            xs: "90%",
-            sm: "30rem",
-          },
+          width: { xs: "90%", sm: "30rem" },
+          maxHeight: "90vh",
+          overflowY: "auto",
           p: 4,
           borderRadius: 2,
           boxShadow: 24,
         }}
       >
-        <Typography
-          variant="h4"
-          sx={{
-            mb: 2,
-            textAlign: "center",
-          }}
-        >
+        <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>
           New Transaction
         </Typography>
 
-        <BaseInputField
-          label="Description"
-          value={description}
-          onChange={(e) =>
-            setDescription(e.target.value)
-          }
-        />
-
-        <BaseInputField
-          label="Value"
-          type="number"
-          value={value}
-          onChange={(e) =>
-            setValue(e.target.value)
-          }
-        />
-
-        <BaseInputField
-          select
-          label="Category"
-          value={category}
-          onChange={(e) =>
-            setCategory(e.target.value)
-          }
-        >
-          <MenuItem value="Food">
-            Food
-          </MenuItem>
-
-          <MenuItem value="Health">
-            Health
-          </MenuItem>
-
-          <MenuItem value="Transport">
-            Transport
-          </MenuItem>
-
-          <MenuItem value="Entertainment">
-            Entertainment
-          </MenuItem>
-
-          <MenuItem value="Salary">
-            Salary
-          </MenuItem>
-        </BaseInputField>
+        {error && <Alert severity="error">{error}</Alert>}
 
         <BaseInputField
           select
           label="Type"
           value={type}
-          onChange={(e) =>
-            setType(e.target.value)
-          }
+          onChange={(event) => {
+            setType(event.target.value as TransactionType);
+            setCategoryId("");
+          }}
+          required
         >
-          <MenuItem value="INCOME">
-            Income
-          </MenuItem>
-
-          <MenuItem value="EXPENSE">
-            Expense
-          </MenuItem>
+          <MenuItem value="INCOME">Income</MenuItem>
+          <MenuItem value="EXPENSE">Expense</MenuItem>
         </BaseInputField>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 2,
-            mt: 3,
+        <BaseInputField
+          label="Value"
+          type="number"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          slotProps={{ htmlInput: { min: 0.01, step: 0.01 } }}
+          required
+        />
+
+        <BaseInputField
+          label="Date"
+          type="date"
+          value={date}
+          onChange={(event) => setDate(event.target.value)}
+          slotProps={{ htmlInput: { max: getCurrentDate() } }}
+          required
+        />
+
+        <BaseInputField
+          label="Description"
+          value={description}
+          onChange={(event) => setDescription(event.target.value)}
+          slotProps={{ htmlInput: { maxLength: 255 } }}
+        />
+
+        <BaseInputField
+          select
+          label="Category"
+          value={categoryId}
+          onChange={(event) => {
+            const value = event.target.value;
+            setCategoryId(value === "" ? "" : Number(value));
           }}
+          disabled={type === "" || categoriesLoading}
         >
-          <Button
-            variant="outlined"
-            onClick={onClose}
-          >
+          <MenuItem value="">No category</MenuItem>
+          {categories.map((category) => (
+            <MenuItem key={category.id} value={category.id}>
+              {category.name}
+            </MenuItem>
+          ))}
+        </BaseInputField>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
+          <Button variant="outlined" onClick={handleClose} disabled={saving}>
             Cancel
           </Button>
 
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSave}
-          >
+          <BaseButton variant="contained" onClick={handleSave} loading={saving}>
             Save
-          </Button>
+          </BaseButton>
         </Box>
       </Box>
     </Modal>

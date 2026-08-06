@@ -31,7 +31,15 @@ function formatDate(date: string) {
   return dateFormatter.format(new Date(`${date}T00:00:00`));
 }
 
-const TransactionTable = () => {
+interface TransactionTableProps {
+  refreshKey: number;
+  onWalletChange: (walletId: number | null) => void;
+}
+
+const TransactionTable = ({
+  refreshKey,
+  onWalletChange,
+}: TransactionTableProps) => {
   const [wallets, setWallets] = useState<WalletResponse[]>([]);
   const [selectedWalletId, setSelectedWalletId] = useState<number | "">("");
   const [transactionPage, setTransactionPage] =
@@ -51,7 +59,10 @@ const TransactionTable = () => {
 
         if (componentIsMounted) {
           setWallets(response);
-          setSelectedWalletId(response[0]?.id ?? "");
+          const firstWalletId: number | "" =
+            response.length > 0 ? response[0].id : "";
+          setSelectedWalletId(firstWalletId);
+          onWalletChange(firstWalletId === "" ? null : firstWalletId);
           setError("");
         }
       } catch (requestError) {
@@ -60,6 +71,7 @@ const TransactionTable = () => {
             requestError instanceof Error
               ? requestError.message
               : "Error occurred while loading the wallets";
+          onWalletChange(null);
           setError(message);
         }
       } finally {
@@ -74,7 +86,7 @@ const TransactionTable = () => {
     return () => {
       componentIsMounted = false;
     };
-  }, []);
+  }, [onWalletChange]);
 
   useEffect(() => {
     if (selectedWalletId === "") {
@@ -117,10 +129,11 @@ const TransactionTable = () => {
     return () => {
       componentIsMounted = false;
     };
-  }, [page, rowsPerPage, selectedWalletId]);
+  }, [page, refreshKey, rowsPerPage, selectedWalletId]);
 
   const handleWalletChange = (walletId: number) => {
     setSelectedWalletId(walletId);
+    onWalletChange(walletId);
     setPage(0);
   };
 
