@@ -1,5 +1,4 @@
 import {Box} from "@mui/material";
-import UserSummary from "../components/UserSummary";
 
 interface ProfileLayoutProps {
     summary: React.ReactNode;
@@ -28,4 +27,4 @@ const ProfileLayout = ({summary, wallets, members}: ProfileLayoutProps)=>{
 }
 
 
-export default ProfileLayout; 
+export default ProfileLayout;

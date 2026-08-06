@@ -9,8 +9,11 @@ import {
 export interface Wallet {
   id: number;
   name: string;
-  owner: string;
-  members: number;
+  description?: string | null;
+  role?: string;
+  memberCount?: number;
+  owner?: string;
+  members?: number;
 }
 
 interface WalletCardProps {
@@ -22,6 +25,11 @@ const WalletCard = ({
   wallet,
   onOpen,
 }: WalletCardProps) => {
+  const members = wallet.memberCount ?? wallet.members ?? 0;
+  const formattedRole = wallet.role
+    ? wallet.role.charAt(0) + wallet.role.slice(1).toLowerCase()
+    : null;
+
   return (
     <Card>
       <CardContent>
@@ -29,12 +37,16 @@ const WalletCard = ({
           {wallet.name}
         </Typography>
 
+        {wallet.description && (
+          <Typography color="text.secondary">{wallet.description}</Typography>
+        )}
+
         <Typography>
-          Owner: {wallet.owner}
+          {formattedRole ? `Role: ${formattedRole}` : `Owner: ${wallet.owner}`}
         </Typography>
 
         <Typography>
-          Members: {wallet.members}
+          Members: {members}
         </Typography>
 
         <Box sx={{ mt: 2 }}>
