@@ -20,43 +20,26 @@ async function getErrorMessage(response: Response, fallbackMessage: string) {
   }
 }
 
-async function authenticatedGet<T>(
-  path: string,
-  token: string,
-  fallbackMessage: string,
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const message = await getErrorMessage(response, fallbackMessage);
-    throw new Error(message);
-  }
-
-  return (await response.json()) as T;
-}
-
-function requireToken() {
+export async function getTransactionWallets(): Promise<WalletResponse[]> {
   const token = getStoredToken();
 
   if (!token) {
     throw new Error("You need to sign in to view transactions");
   }
 
-  return token;
-}
+  const response = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export async function getTransactionWallets(): Promise<WalletResponse[]> {
-  const token = requireToken();
+  if (!response.ok) {
+    const message = await getErrorMessage(response, "Error while loading the wallets");
+    throw new Error(message);
+  }
 
-  return authenticatedGet<WalletResponse[]>(
-    "/api/v1/wallets",
-    token,
-    "Error while loading the wallets",
-  );
+  const wallets = (await response.json()) as WalletResponse[];
+  return wallets;
 }
 
 export async function getTransactionsPage(
@@ -64,16 +47,35 @@ export async function getTransactionsPage(
   page: number,
   size: number,
 ): Promise<TransactionPageResponse> {
-  const token = requireToken();
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You need to sign in to view transactions");
+  }
+
   const query = new URLSearchParams({
     page: page.toString(),
     size: size.toString(),
     sort: "date,desc",
   });
 
-  return authenticatedGet<TransactionPageResponse>(
-    `/api/v1/wallets/${walletId}/transactions?${query.toString()}`,
-    token,
-    "Error while loading the transactions",
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallets/${walletId}/transactions?${query.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while loading the transactions",
+    );
+    throw new Error(message);
+  }
+
+  const transactions = (await response.json()) as TransactionPageResponse;
+  return transactions;
 }

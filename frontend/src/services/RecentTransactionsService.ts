@@ -1,4 +1,7 @@
-import type { TransactionPageResponse, TransactionResponse } from "../dto/TransactionResponse";
+import type {
+  TransactionPageResponse,
+  TransactionResponse,
+} from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
@@ -20,25 +23,6 @@ async function getErrorMessage(response: Response, fallbackMessage: string) {
   }
 }
 
-async function authenticatedGet<T>(
-  path: string,
-  token: string,
-  fallbackMessage: string,
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const message = await getErrorMessage(response, fallbackMessage);
-    throw new Error(message);
-  }
-
-  return (await response.json()) as T;
-}
-
 export async function getRecentTransactions(
   limit = 5,
 ): Promise<TransactionResponse[]> {
@@ -48,25 +32,42 @@ export async function getRecentTransactions(
     throw new Error("You need to sign in to view recent transactions");
   }
 
-  const wallets = await authenticatedGet<WalletResponse[]>(
-    "/api/v1/wallets",
-    token,
-    "Error while loading the wallets",
-  );
+  const walletsResponse = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-  const transactionPages = await Promise.all(
-    wallets.map((wallet) =>
-      authenticatedGet<TransactionPageResponse>(
-        `/api/v1/wallets/${wallet.id}/transactions?page=0&size=${limit}&sort=date,desc`,
-        token,
-        `Error while loading transactions from ${wallet.name}`,
-      ),
-    ),
-  );
+  if (!walletsResponse.ok) {
+    const message = await getErrorMessage(
+      walletsResponse,
+      "Error while loading the wallets",
+    );
+    throw new Error(message);
+  }
 
+  const wallets = (await walletsResponse.json()) as WalletResponse[];
   const transactions: TransactionResponse[] = [];
 
-  for (const page of transactionPages) {
+  for (const wallet of wallets) {
+    const transactionsResponse = await fetch(
+      `${API_BASE_URL}/api/v1/wallets/${wallet.id}/transactions?page=0&size=${limit}&sort=date,desc`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!transactionsResponse.ok) {
+      const message = await getErrorMessage(
+        transactionsResponse,
+        `Error while loading transactions from ${wallet.name}`,
+      );
+      throw new Error(message);
+    }
+
+    const page = (await transactionsResponse.json()) as TransactionPageResponse;
     transactions.push(...page.content);
   }
 

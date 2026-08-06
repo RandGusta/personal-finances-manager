@@ -26,25 +26,6 @@ async function getErrorMessage(response: Response, fallbackMessage: string) {
   }
 }
 
-async function authenticatedGet<T>(
-  path: string,
-  token: string,
-  fallbackMessage: string,
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const message = await getErrorMessage(response, fallbackMessage);
-    throw new Error(message);
-  }
-
-  return (await response.json()) as T;
-}
-
 export async function getProfilePage(): Promise<ProfilePageResponse> {
   const token = getStoredToken();
 
@@ -52,37 +33,61 @@ export async function getProfilePage(): Promise<ProfilePageResponse> {
     throw new Error("You need to sign in to view your profile");
   }
 
-  const [profile, wallets] = await Promise.all([
-    authenticatedGet<UserProfileResponse>(
-      "/api/v1/users/me",
-      token,
+  const profileResponse = await fetch(`${API_BASE_URL}/api/v1/users/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!profileResponse.ok) {
+    const message = await getErrorMessage(
+      profileResponse,
       "Error while loading the user profile",
-    ),
-    authenticatedGet<WalletResponse[]>(
-      "/api/v1/wallets",
-      token,
+    );
+    throw new Error(message);
+  }
+
+  const profile = (await profileResponse.json()) as UserProfileResponse;
+
+  const walletsResponse = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!walletsResponse.ok) {
+    const message = await getErrorMessage(
+      walletsResponse,
       "Error while loading the wallets",
-    ),
-  ]);
+    );
+    throw new Error(message);
+  }
 
-  const financialSummaries = await Promise.all(
-    wallets.map((wallet) =>
-      authenticatedGet<ProfileFinancialSummaryResponse>(
-        `/api/v1/wallets/${wallet.id}/summary`,
-        token,
-        `Error while loading the summary for ${wallet.name}`,
-      ),
-    ),
-  );
-
+  const wallets = (await walletsResponse.json()) as WalletResponse[];
   let transactionCount = 0;
   let memberCount = 0;
 
-  for (const summary of financialSummaries) {
-    transactionCount += summary.transactionCount;
-  }
-
   for (const wallet of wallets) {
+    const summaryResponse = await fetch(
+      `${API_BASE_URL}/api/v1/wallets/${wallet.id}/summary`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    );
+
+    if (!summaryResponse.ok) {
+      const message = await getErrorMessage(
+        summaryResponse,
+        `Error while loading the summary for ${wallet.name}`,
+      );
+      throw new Error(message);
+    }
+
+    const summary =
+      (await summaryResponse.json()) as ProfileFinancialSummaryResponse;
+    transactionCount += summary.transactionCount;
     memberCount += wallet.memberCount;
   }
 

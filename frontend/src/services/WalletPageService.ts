@@ -22,49 +22,37 @@ async function getErrorMessage(response: Response, fallbackMessage: string) {
   }
 }
 
-async function authenticatedGet<T>(
-  path: string,
-  token: string,
-  fallbackMessage: string,
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    const message = await getErrorMessage(response, fallbackMessage);
-    throw new Error(message);
-  }
-
-  return (await response.json()) as T;
-}
-
-function requireToken() {
+export async function getWallets(): Promise<WalletResponse[]> {
   const token = getStoredToken();
 
   if (!token) {
     throw new Error("You need to sign in to view wallets");
   }
 
-  return token;
-}
+  const response = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export async function getWallets(): Promise<WalletResponse[]> {
-  const token = requireToken();
+  if (!response.ok) {
+    const message = await getErrorMessage(response, "Error while loading the wallets");
+    throw new Error(message);
+  }
 
-  return authenticatedGet<WalletResponse[]>(
-    "/api/v1/wallets",
-    token,
-    "Error while loading the wallets",
-  );
+  const wallets = (await response.json()) as WalletResponse[];
+  return wallets;
 }
 
 export async function createWallet(
   request: WalletRequest,
 ): Promise<WalletResponse> {
-  const token = requireToken();
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You need to sign in to create a wallet");
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
     method: "POST",
     headers: {
@@ -75,36 +63,70 @@ export async function createWallet(
   });
 
   if (!response.ok) {
-    const message = await getErrorMessage(
-      response,
-      "Error while creating the wallet",
-    );
+    const message = await getErrorMessage(response, "Error while creating the wallet");
     throw new Error(message);
   }
 
-  return (await response.json()) as WalletResponse;
+  const createdWallet = (await response.json()) as WalletResponse;
+  return createdWallet;
 }
 
 export async function getWalletMembers(
   walletId: number,
 ): Promise<WalletMemberResponse[]> {
-  const token = requireToken();
+  const token = getStoredToken();
 
-  return authenticatedGet<WalletMemberResponse[]>(
-    `/api/v1/wallets/${walletId}/members`,
-    token,
-    "Error while loading the wallet members",
+  if (!token) {
+    throw new Error("You need to sign in to view wallet members");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallets/${walletId}/members`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while loading the wallet members",
+    );
+    throw new Error(message);
+  }
+
+  const members = (await response.json()) as WalletMemberResponse[];
+  return members;
 }
 
 export async function getWalletRecentTransactions(
   walletId: number,
 ): Promise<TransactionPageResponse> {
-  const token = requireToken();
+  const token = getStoredToken();
 
-  return authenticatedGet<TransactionPageResponse>(
-    `/api/v1/wallets/${walletId}/transactions?page=0&size=5&sort=date,desc`,
-    token,
-    "Error while loading the wallet transactions",
+  if (!token) {
+    throw new Error("You need to sign in to view wallet transactions");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallets/${walletId}/transactions?page=0&size=5&sort=date,desc`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
   );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while loading the wallet transactions",
+    );
+    throw new Error(message);
+  }
+
+  const transactions = (await response.json()) as TransactionPageResponse;
+  return transactions;
 }
