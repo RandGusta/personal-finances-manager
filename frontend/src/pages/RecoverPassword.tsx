@@ -1,201 +1,179 @@
-import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import {
+  Alert,
   Box,
-  Typography,
   Card,
-  Link,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
-  Button,
+  DialogContent,
+  DialogTitle,
+  Link,
+  Typography,
 } from "@mui/material";
-import { BaseInputField } from "../components/Input";
-import { BaseButton } from "../components/Button";
-import padlock from "../assets/svg/padlock.svg";
+import { useState, type FormEvent } from "react";
+import { Link as RoutesLink, useNavigate } from "react-router-dom";
 import cardImage from "../assets/images/cover-cards.png";
-import { BaseForm } from "../components/Form";
-import { Link as RoutesLink } from "react-router-dom";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import padlock from "../assets/svg/padlock.svg";
+import { BaseButton } from "../components/Button";
+import { BaseInputField } from "../components/Input";
+import { AutenticationLayout } from "../layouts/AutenticationLayout";
+import { requestPasswordRecovery } from "../services/PasswordRecoveryService";
 
 const RecoverPassword = () => {
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    const emailOk = handleEmailSubmit();
-    if (!emailOk) {
-      return;
-    }
-    setOpenDialog(true);
-  };
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [generalError, setGeneralError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
+  const [debugToken, setDebugToken] = useState("");
 
-  const handleEmailSubmit = () => {
-    if (!email.trim()) {
+  const validateEmail = () => {
+    const normalizedEmail = email.trim();
+
+    if (!normalizedEmail) {
       setEmailError("Email is required");
       return false;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(normalizedEmail)) {
       setEmailError("Invalid email");
       return false;
     }
+
     setEmailError("");
     return true;
   };
 
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!validateEmail()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setGeneralError("");
+
+      const response = await requestPasswordRecovery(email.trim());
+      setResponseMessage(response.message);
+      setDebugToken(response.debugToken ?? "");
+      setOpenDialog(true);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error occurred while requesting password recovery";
+      setGeneralError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <>
-      <Box
-        sx={{
-          position: "absolute",
-          width: "209px",
-          height: "201px",
-          top: { xs: "15rem", lg: "10rem", md: "24rem", sm: "20rem" },
-          left: { xs: "6rem", lg: "18rem", md: "29rem" },
-          borderRadius: "50%",
-          bgcolor: "#1C4632",
-          opacity: 0.1,
-          filter: "blur(4px)",
-        }}
-      />
       <AutenticationLayout
         left={
-          <>
-            <Box>
-              <Typography
-                variant="h2"
-                sx={{
-                  textAlign: "center",
-                  color: "#1C4632",
-                  position: "absolute",
-                  top: { xs: "6rem", lg: "3rem", md: "24rem", sm: "20rem" },
-                  left: { xs: "5rem", lg: "16rem", md: "29rem" },
-                }}
-              >
-                Forgot password
-              </Typography>
-            </Box>
+          <Box sx={{ width: "100%", maxWidth: "32rem" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+              Forgot password
+            </Typography>
+
             <Box
               component="img"
               src={padlock}
-              sx={{
-                position: "absolute",
-                minHeight: "7rem",
-                top: { xs: "17rem", lg: "12rem", md: "24rem", sm: "20rem" },
-                left: { xs: "9rem", lg: "21rem", md: "29rem" },
-              }}
+              alt="Padlock"
+              sx={{ display: "block", height: "7rem", margin: "2rem auto" }}
             />
-            <Box sx={{ marginTop: "20rem" }}>
-              <Typography
-                variant="h3"
-                sx={{ textAlign: "center", color: "#1C4632" }}
-              >
-                Enter your registered email to recover your password
-              </Typography>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                <Box
-                  component="form"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleSubmit();
-                  }}
-                >
-                  <BaseInputField
-                    label="Email"
-                    type="email"
-                    error={!!emailError}
-                    helperText={emailError}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
 
-                  <BaseButton fullWidth type="submit" variant="contained">
-                    Send
-                  </BaseButton>
-                </Box>
-                <Typography>
-                  <Link component={RoutesLink} to="/login">
-                    Return to Login
-                  </Link>
-                </Typography>
-              </Box>
+            <Typography variant="h3" sx={{ textAlign: "center", color: "#1C4632" }}>
+              Enter your registered email to recover your password
+            </Typography>
+
+            {generalError && <Alert severity="error" sx={{ mt: 2 }}>{generalError}</Alert>}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <BaseInputField
+                label="Email"
+                type="email"
+                value={email}
+                error={!!emailError}
+                helperText={emailError}
+                onChange={(event) => setEmail(event.target.value)}
+              />
+
+              <BaseButton fullWidth type="submit" variant="contained" loading={loading}>
+                Send
+              </BaseButton>
             </Box>
-          </>
+
+            <Typography sx={{ mt: 2 }}>
+              <Link component={RoutesLink} to="/login">
+                Return to Login
+              </Link>
+            </Typography>
+          </Box>
         }
         right={
-          <>
-            <Box
+          <Box sx={{ width: "100%", maxWidth: "35rem" }}>
+            <Card
               sx={{
-                width: "100%",
-                maxWidth: "35rem",
-                minHeight: "19rem",
-                maxHeight: "19rem",
+                borderRadius: "80px",
+                boxShadow: "-7px 7px 5px 2px #00000038",
+                overflow: "hidden",
               }}
             >
-              <Card
-                sx={{
-                  borderRadius: "80",
-                  boxShadow: "-7px 7px 5px 2px #00000038",
-                  overflow: "hidden",
-                }}
-              >
-                <Typography
-                  color="primary"
-                  variant="h2"
-                  sx={{ padding: "40px 23px 10px 23px" }}
-                >
-                  Account Security
+              <Typography color="primary" variant="h2" sx={{ p: "40px 23px 10px" }}>
+                Account Security
+              </Typography>
+              <Box sx={{ display: "flex" }}>
+                <Typography color="primary" sx={{ pl: "23px", minWidth: "20rem" }}>
+                  Enter your registered e-mail address and use the recovery link
+                  to create a new password securely.
                 </Typography>
-                <Box sx={{ display: "flex", gap: "px" }}>
-                  <Typography
-                    color="primary"
-                    sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
-                  >
-                    Forgot your password?
-                    <br />
-                    Don't worry. Account recovery is a quick and secure process
-                    designed to help you regain access safely. <br />
-                    Enter your registered e-mail address and follow the
-                    instructions provided to create <br /> a new password and
-                    continue managing your finances with confidence.
-                  </Typography>
-                  <Box
-                    component="img"
-                    src={cardImage}
-                    sx={{
-                      minWidth: "23rem",
-                      maxHeight: "18rem",
-                      transform: "translate(0px, -10px)",
-                    }}
-                  />
-                </Box>
-              </Card>
-            </Box>
-          </>
+                <Box
+                  component="img"
+                  src={cardImage}
+                  alt="Finance cards"
+                  sx={{ minWidth: "23rem", maxHeight: "18rem", transform: "translateY(-10px)" }}
+                />
+              </Box>
+            </Card>
+          </Box>
         }
       />
+
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Email sent</DialogTitle>
-
+        <DialogTitle>Recovery requested</DialogTitle>
         <DialogContent>
-          <Typography>
-            If the email exists, recovery instructions have been sent.
-          </Typography>
+          <Typography>{responseMessage}</Typography>
 
-          <Typography sx={{ mt: 2 }}>
-            Please check your inbox and follow the instructions to reset your
-            password.
-          </Typography>
+          {debugToken && (
+            <Alert severity="info" sx={{ mt: 2 }}>
+              E-mail delivery is not configured yet. Use the development link below:
+              {" "}
+              <Link component={RoutesLink} to={`/reset-password/${debugToken}`}>
+                Reset password
+              </Link>
+            </Alert>
+          )}
         </DialogContent>
-
         <DialogActions>
-          <BaseButton variant="contained" onClick={() => navigate("/login")}>
+          <BaseButton onClick={() => navigate("/login")} variant="outlined">
             Back to Login
           </BaseButton>
+          {debugToken && (
+            <BaseButton
+              onClick={() => navigate(`/reset-password/${debugToken}`)}
+              variant="contained"
+            >
+              Continue
+            </BaseButton>
+          )}
         </DialogActions>
       </Dialog>
     </>

@@ -1,0 +1,221 @@
+import {
+  Alert,
+  Box,
+  Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  LinearProgress,
+  Link,
+  Typography,
+} from "@mui/material";
+import { useState, type FormEvent } from "react";
+import { Link as RoutesLink, useNavigate, useParams } from "react-router-dom";
+import zxcvbn from "zxcvbn";
+import cardImage from "../assets/images/cover-cards.png";
+import padlock from "../assets/svg/padlock.svg";
+import { BaseButton } from "../components/Button";
+import { BaseInputField } from "../components/Input";
+import { AutenticationLayout } from "../layouts/AutenticationLayout";
+import { resetPassword } from "../services/PasswordRecoveryService";
+
+const ResetPassword = () => {
+  const { token } = useParams<{ token: string }>();
+  const navigate = useNavigate();
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [generalError, setGeneralError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [responseMessage, setResponseMessage] = useState("");
+
+  const passwordStrength = zxcvbn(newPassword);
+
+  const validateForm = () => {
+    let formIsValid = true;
+
+    setNewPasswordError("");
+    setConfirmPasswordError("");
+
+    if (!newPassword) {
+      setNewPasswordError("New password is required");
+      formIsValid = false;
+    } else if (newPassword.length < 8) {
+      setNewPasswordError("The password must have at least 8 characters");
+      formIsValid = false;
+    } else if (newPassword.length > 100) {
+      setNewPasswordError("The password must have at most 100 characters");
+      formIsValid = false;
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError("Password confirmation is required");
+      formIsValid = false;
+    } else if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      formIsValid = false;
+    }
+
+    return formIsValid;
+  };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!token) {
+      setGeneralError("The recovery link is invalid");
+      return;
+    }
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setGeneralError("");
+
+      const response = await resetPassword(token, newPassword);
+      setResponseMessage(response.message);
+      setOpenDialog(true);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error occurred while resetting the password";
+      setGeneralError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const progressValue =
+    newPassword.length > 0 ? (passwordStrength.score + 1) * 20 : 0;
+
+  return (
+    <>
+      <AutenticationLayout
+        left={
+          <Box sx={{ width: "100%", maxWidth: "32rem" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+              Reset password
+            </Typography>
+
+            <Box
+              component="img"
+              src={padlock}
+              alt="Padlock"
+              sx={{ display: "block", height: "7rem", margin: "2rem auto" }}
+            />
+
+            <Typography variant="h3" sx={{ textAlign: "center", color: "#1C4632" }}>
+              Create a new password for your account
+            </Typography>
+
+            {!token && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                The recovery link is invalid. Request a new link.
+              </Alert>
+            )}
+
+            {generalError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {generalError}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <BaseInputField
+                label="New password"
+                type="password"
+                value={newPassword}
+                error={!!newPasswordError}
+                helperText={newPasswordError}
+                onChange={(event) => setNewPassword(event.target.value)}
+              />
+
+              <BaseInputField
+                label="Confirm password"
+                type="password"
+                value={confirmPassword}
+                error={!!confirmPasswordError}
+                helperText={confirmPasswordError}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+
+              {newPassword.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <LinearProgress variant="determinate" value={progressValue} />
+                  <Typography sx={{ mt: 1 }}>
+                    Password strength: {passwordStrength.score}/4
+                  </Typography>
+                </Box>
+              )}
+
+              <BaseButton
+                fullWidth
+                type="submit"
+                variant="contained"
+                loading={loading}
+                disabled={!token}
+              >
+                Confirm
+              </BaseButton>
+            </Box>
+
+            <Typography sx={{ mt: 2 }}>
+              <Link component={RoutesLink} to="/recover-password">
+                Request another recovery link
+              </Link>
+            </Typography>
+          </Box>
+        }
+        right={
+          <Box sx={{ width: "100%", maxWidth: "35rem" }}>
+            <Card
+              sx={{
+                borderRadius: "80px",
+                boxShadow: "-7px 7px 5px 2px #00000038",
+                overflow: "hidden",
+              }}
+            >
+              <Typography color="primary" variant="h2" sx={{ p: "40px 23px 10px" }}>
+                Account Security
+              </Typography>
+              <Box sx={{ display: "flex" }}>
+                <Typography color="primary" sx={{ pl: "23px", minWidth: "20rem" }}>
+                  Choose a new password with at least eight characters. After
+                  confirmation, the recovery link cannot be used again.
+                </Typography>
+                <Box
+                  component="img"
+                  src={cardImage}
+                  alt="Finance cards"
+                  sx={{ minWidth: "23rem", maxHeight: "18rem", transform: "translateY(-10px)" }}
+                />
+              </Box>
+            </Card>
+          </Box>
+        }
+      />
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Password reset</DialogTitle>
+        <DialogContent>
+          <Typography>{responseMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <BaseButton onClick={() => navigate("/login")} variant="contained">
+            Go to Login
+          </BaseButton>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+
+export default ResetPassword;

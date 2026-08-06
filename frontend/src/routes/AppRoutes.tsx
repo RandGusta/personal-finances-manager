@@ -2,6 +2,7 @@ import {Login} from '../pages/Login';
 import { SignUp } from '../pages/SingUp';
 import RecoverPassword from '../pages/RecoverPassword';
 import RedifinePassword from '../pages/RedifinePassword';
+import ResetPassword from '../pages/ResetPassword';
 import Transactions from '../pages/Transactions';
 import {Routes, Route} from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
@@ -16,6 +17,7 @@ const AppRoutes = () =>{
             <Route path="/home" element={<Dashboard/>}/>
             <Route path="/login" element={<Login/>}/>
             <Route path="/recover-password" element={<RecoverPassword/>}/>
+            <Route path="/reset-password/:token" element={<ResetPassword/>}/>
             <Route path="/redifine-password" element={<RedifinePassword/>}/>
             <Route path="/signup" element={<SignUp/>}/>
             <Route path="/transactions" element={<Transactions/>}/>
