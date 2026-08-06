@@ -1,25 +1,64 @@
 import {
+  Alert,
+  Box,
   Card,
   CardContent,
-  Typography,
-  Box,
   Chip,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  Skeleton,
+  Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
+import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
+import { getCategories } from "../services/CategoryTableService";
 
-export interface Category {
-  id: number;
-  name: string;
-  transactionsCount: number;
-  type: "INCOME" | "EXPENSE";
-}
+type CategoryFilter = CategoryType | "ALL";
 
-interface CategoryTableProps {
-  categories: Category[];
-}
+const CategoryTable = () => {
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [filter, setFilter] = useState<CategoryFilter>("ALL");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-const CategoryTable = ({
-  categories,
-}: CategoryTableProps) => {
+  useEffect(() => {
+    let componentIsMounted = true;
+
+    const loadCategories = async () => {
+      try {
+        setLoading(true);
+        const type = filter === "ALL" ? undefined : filter;
+        const response = await getCategories(type);
+
+        if (componentIsMounted) {
+          setCategories(response);
+          setError("");
+        }
+      } catch (requestError) {
+        if (componentIsMounted) {
+          const message =
+            requestError instanceof Error
+              ? requestError.message
+              : "Error occurred while loading categories";
+          setCategories([]);
+          setError(message);
+        }
+      } finally {
+        if (componentIsMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCategories();
+
+    return () => {
+      componentIsMounted = false;
+    };
+  }, [filter]);
+
   return (
     <Card sx={{ mt: 3 }}>
       <CardContent>
@@ -35,63 +74,88 @@ const CategoryTable = ({
           Categories
         </Typography>
 
+        <FormControl fullWidth sx={{ mt: 3 }}>
+          <InputLabel id="category-type-filter-label">Type</InputLabel>
+          <Select
+            labelId="category-type-filter-label"
+            value={filter}
+            label="Type"
+            onChange={(event) => setFilter(event.target.value as CategoryFilter)}
+          >
+            <MenuItem value="ALL">All</MenuItem>
+            <MenuItem value="INCOME">Income</MenuItem>
+            <MenuItem value="EXPENSE">Expense</MenuItem>
+          </Select>
+        </FormControl>
+
+        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              md: "2fr 1fr 1fr",
-            },
+            display: { xs: "none", md: "grid" },
+            gridTemplateColumns: "2fr 1fr 1fr",
             gap: 2,
             mt: 3,
           }}
         >
-          <Typography variant="h6">
-            Name
-          </Typography>
-
-          <Typography variant="h6">
-            Transactions
-          </Typography>
-
-          <Typography variant="h6">
-            Type
-          </Typography>
+          <Typography variant="h6">Name</Typography>
+          <Typography variant="h6">Color</Typography>
+          <Typography variant="h6">Type</Typography>
         </Box>
 
-        {categories.map((category) => (
-          <Box
-            key={category.id}
-            sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                md: "2fr 1fr 1fr",
-              },
-              gap: 2,
-              mt: 2,
-              p: 2,
-              borderBottom: "1px solid #ddd",
-            }}
-          >
-            <Typography>
-              {category.name}
-            </Typography>
-
-            <Typography>
-              {category.transactionsCount}
-            </Typography>
-
-            <Chip
-              label={category.type}
-              color={
-                category.type === "INCOME"
-                  ? "success"
-                  : "error"
-              }
-            />
+        {loading && (
+          <Box sx={{ mt: 2 }}>
+            <Skeleton height={56} />
+            <Skeleton height={56} />
+            <Skeleton height={56} />
           </Box>
-        ))}
+        )}
+
+        {!loading && !error && categories.length === 0 && (
+          <Alert severity="info" sx={{ mt: 2 }}>
+            There are no categories for this filter.
+          </Alert>
+        )}
+
+        {!loading &&
+          categories.map((category) => (
+            <Box
+              key={category.id}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "2fr 1fr 1fr",
+                },
+                gap: 2,
+                mt: 2,
+                p: 2,
+                borderBottom: "1px solid #ddd",
+              }}
+            >
+              <Typography>{category.name}</Typography>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  aria-label={category.color ? `Color ${category.color}` : "No color"}
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: "50%",
+                    bgcolor: category.color ?? "transparent",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                />
+                <Typography>{category.color ?? "No color"}</Typography>
+              </Box>
+
+              <Chip
+                label={category.type === "INCOME" ? "Income" : "Expense"}
+                color={category.type === "INCOME" ? "success" : "error"}
+              />
+            </Box>
+          ))}
       </CardContent>
     </Card>
   );

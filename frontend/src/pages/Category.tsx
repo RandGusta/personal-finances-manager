@@ -14,33 +14,6 @@ const Category = () => {
   const [openModal, setOpenModal] =
     useState(false);
 
-  const categories = [
-    {
-      id: 1,
-      name: "Food",
-      transactionsCount: 12,
-      type: "EXPENSE" as const,
-    },
-    {
-      id: 2,
-      name: "Health",
-      transactionsCount: 5,
-      type: "EXPENSE" as const,
-    },
-    {
-      id: 3,
-      name: "Salary",
-      transactionsCount: 2,
-      type: "INCOME" as const,
-    },
-    {
-      id: 4,
-      name: "Entertainment",
-      transactionsCount: 8,
-      type: "EXPENSE" as const,
-    },
-  ];
-
   return (
     <>
       <BaseNavBar />
@@ -81,9 +54,7 @@ const Category = () => {
           </Button>
         </Box>
 
-        <CategoryTable
-          categories={categories}
-        />
+        <CategoryTable />
 
         <CategoryModal
           open={openModal}
