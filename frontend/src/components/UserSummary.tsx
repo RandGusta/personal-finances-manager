@@ -1,38 +1,57 @@
-import { Card, CardContent, Typography, Box, Alert } from "@mui/material";
+import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import profile from "../assets/svg/profile.svg";
-import { use, useState } from "react";
-import { getCurrentUserInform } from "../services/UserService";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { getUserSummary } from "../services/UserSummaryService";
+import type { UserSummaryResponse } from "../dto/UserSummaryResponse";
+
+const currencyFormatter = new Intl.NumberFormat("pt-BR", {
+  style: "currency",
+  currency: "BRL",
+});
 
 const UserSummary = () => {
-  const [balance, setBalance] = useState(0);
-  const [revenue, setRevenue] = useState(0);
-  const [expenses, setExpenses] = useState(0);
-  const [userName, setUserName] = useState("");
+  const [summary, setSummary] = useState<UserSummaryResponse | null>(null);
   const [userError, setUserError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() =>{
-    handleUserInformation();
-  },[]);
+  useEffect(() => {
+    let componentIsMounted = true;
 
-  const handleUserInformation = async () => {
-    try{
-      await getCurrentUserInform();
-    } catch (error){
-      if(error instanceof Error){
-        setUserError(error.message);
+    const loadUserSummary = async () => {
+      try {
+        const response = await getUserSummary();
+
+        if (componentIsMounted) {
+          setSummary(response);
+          setUserError("");
+        }
+      } catch (error) {
+        if (componentIsMounted) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : "Error occurred while loading";
+          setUserError(message);
+        }
+      } finally {
+        if (componentIsMounted) {
+          setLoading(false);
+        }
       }
-      else {
-        setUserError("Error occurred while loading");
-      }
-    }
-  }
+    };
 
+    loadUserSummary();
 
+    return () => {
+      componentIsMounted = false;
+    };
+  }, []);
+
+  const formatCurrency = (value: number | undefined) =>
+    currencyFormatter.format(value ?? 0);
 
   return (
-    <>
-      <Card sx={{ margin: {lg:"3rem", xs:"0rem"},   width: {
+    <Card sx={{ margin: {lg:"3rem", xs:"0rem"},   width: {
           xs: "100%",
           md: "18rem",
         }, minHeight:{xs:"block", lg:"25.6rem"}, display: 'flex', flexDirection:"column"}}>
@@ -43,20 +62,34 @@ const UserSummary = () => {
         ></CardContent>
         <Box>
           <CardContent>
-            <Typography variant="body2" sx={{textAlign:'center', backgroundColor:"#1C4632"}}>{userError ? <Alert severity="error">{userError}</Alert>: <p>{userName}</p>}</Typography>
+            {userError ? (
+              <Alert severity="error">{userError}</Alert>
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{ textAlign: "center", backgroundColor: "#1C4632" }}
+              >
+                {loading ? <Skeleton /> : summary?.userName}
+              </Typography>
+            )}
           </CardContent>
           <CardContent>
-            <Typography variant="h3">Balance: {balance && <p>{balance}</p>}</Typography>
+            <Typography variant="h3">
+              Balance: {loading ? <Skeleton /> : formatCurrency(summary?.balance)}
+            </Typography>
           </CardContent>
           <CardContent>
-            <Typography variant="h3">Revenue: {revenue && <p>{revenue}</p>}</Typography>
+            <Typography variant="h3">
+              Revenue: {loading ? <Skeleton /> : formatCurrency(summary?.revenue)}
+            </Typography>
           </CardContent>
           <CardContent>
-            <Typography variant="h3">Expenses: {expenses && <p>{expenses}</p>} </Typography>
+            <Typography variant="h3">
+              Expenses: {loading ? <Skeleton /> : formatCurrency(summary?.expenses)}
+            </Typography>
           </CardContent>
         </Box>
       </Card>
-    </>
   );
 };
 
