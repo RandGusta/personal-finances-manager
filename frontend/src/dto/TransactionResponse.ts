@@ -16,4 +16,12 @@ export interface TransactionResponse {
 
 export interface TransactionPageResponse {
   content: TransactionResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+  numberOfElements: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
