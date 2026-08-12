@@ -118,12 +118,17 @@ const TransactionModal = ({
       return;
     }
 
+    if (categoryId === "") {
+      setError("Category is required");
+      return;
+    }
+
     const request: TransactionRequest = {
       type,
       amount: parsedAmount,
       description: description.trim() || undefined,
       date,
-      categoryId: categoryId === "" ? null : categoryId,
+      categoryId,
     };
 
     try {
@@ -216,7 +221,9 @@ const TransactionModal = ({
           }}
           disabled={type === "" || categoriesLoading}
         >
-          <MenuItem value="">No category</MenuItem>
+          <MenuItem value="" disabled>
+            Select a category
+          </MenuItem>
           {categories.map((category) => (
             <MenuItem key={category.id} value={category.id}>
               {category.name}

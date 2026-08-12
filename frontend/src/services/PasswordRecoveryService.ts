@@ -5,20 +5,10 @@ import type {
   ResetPasswordRequest,
 } from "../dto/PasswordRecovery";
 
+import { getErrorMessage, getStoredToken } from "./api";
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
 
-async function getErrorMessage(response: Response, fallbackMessage: string) {
-  try {
-    const error = (await response.json()) as {
-      message?: string;
-      detail?: string;
-    };
-
-    return error.message ?? error.detail ?? fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-}
 
 export async function requestPasswordRecovery(
   email: string,

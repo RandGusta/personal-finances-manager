@@ -12,11 +12,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Link } from "react-router-dom";
 import logo from "../assets/svg/navbarIcon.svg";
 
-interface NavBarProps {
-  children?: React.ReactNode;
-}
-
-const BaseNavBar = ({ children }: NavBarProps) => {
+const BaseNavBar = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -36,7 +32,6 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             justifyContent: "space-between",
           }}
         >
-          {}
           <Box
             sx={{
               display: {
@@ -59,6 +54,10 @@ const BaseNavBar = ({ children }: NavBarProps) => {
               <Box component="img" src={logo} sx={{ width: "2rem" }} />
             </Box>
 
+            <Button component={Link} to="/home" sx={{ color: "#F6FAFD" }}>
+              Home
+            </Button>
+
             <Button component={Link} to="/profile" sx={{ color: "#F6FAFD" }}>
               Profile
             </Button>
@@ -80,7 +79,6 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             </Button>
           </Box>
 
-          {}
           <Box
             sx={{
               display: {
@@ -105,6 +103,10 @@ const BaseNavBar = ({ children }: NavBarProps) => {
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
         >
+          <MenuItem component={Link} to="/home" onClick={handleCloseMenu}>
+            Home
+          </MenuItem>
+
           <MenuItem component={Link} to="/profile" onClick={handleCloseMenu}>
             Profile
           </MenuItem>
@@ -117,11 +119,11 @@ const BaseNavBar = ({ children }: NavBarProps) => {
             Transactions
           </MenuItem>
 
-          <MenuItem component={Link} to="/categories" onClick={handleCloseMenu}>
+          <MenuItem component={Link} to="/category" onClick={handleCloseMenu}>
             Categories
           </MenuItem>
 
-          <MenuItem component={Link} to="/wallet" onClick={handleCloseMenu}>
+          <MenuItem component={Link} to="/wallets" onClick={handleCloseMenu}>
             Wallets
           </MenuItem>
         </Menu>

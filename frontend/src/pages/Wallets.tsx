@@ -109,9 +109,9 @@ const Wallets = () => {
       <NewWalletModal
         open={openNewWallet}
         onClose={() => setOpenNewWallet(false)}
-        onCreated={(wallet) => {
+        onCreated={(wallet, invitationWarning) => {
           setWallets((currentWallets) => [...currentWallets, wallet]);
-          setError("");
+          setError(invitationWarning ?? "");
         }}
       />
     </>

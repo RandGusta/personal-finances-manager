@@ -30,6 +30,7 @@ import com.gustavo.finance.finance_control.enums.UserRelationWallet;
 import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
 import com.gustavo.finance.finance_control.repository.TransactionRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
+import com.gustavo.finance.finance_control.repository.WalletInvitationRepository;
 import com.gustavo.finance.finance_control.repository.WalletRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +45,9 @@ class WalletServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
 
+    @Mock
+    private WalletInvitationRepository walletInvitationRepository;
+
     private WalletService walletService;
     private User user;
 
@@ -52,7 +56,8 @@ class WalletServiceTest {
         walletService = new WalletService(
             walletRepository,
             userWalletRepository,
-            transactionRepository
+            transactionRepository,
+            walletInvitationRepository
         );
 
         user = new User();
@@ -149,6 +154,7 @@ class WalletServiceTest {
         walletService.delete(user, 60L);
 
         verify(transactionRepository).deleteAllByWallet(wallet);
+        verify(walletInvitationRepository).deleteAllByWallet(wallet);
         verify(userWalletRepository).deleteAllByWallet(wallet);
         verify(walletRepository).delete(wallet);
     }

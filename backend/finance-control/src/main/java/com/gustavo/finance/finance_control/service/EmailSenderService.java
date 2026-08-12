@@ -29,7 +29,7 @@ public class EmailSenderService {
         message.setText(text);
         javaMailSender.send(message);
     }
-
+    
     @Async
     public void sendEmailTemplate(String recipient, String subject, 
         String template, Context context){

@@ -9,6 +9,7 @@ import Dashboard from '../pages/Dashboard';
 import Category  from '../pages/Category';
 import Wallets from '../pages/Wallets';
 import Profile from '../pages/Profile';
+import WalletInvitation from '../pages/WalletInvitation';
 
 
 const AppRoutes = () =>{
@@ -23,6 +24,7 @@ const AppRoutes = () =>{
             <Route path="/transactions" element={<Transactions/>}/>
             <Route path="/category" element={<Category/>}/>
             <Route path="/wallets" element={<Wallets/>}/>
+            <Route path="/wallet-invitations/:token" element={<WalletInvitation/>}/>
             <Route path="/profile" element={<Profile/>}></Route>
         </Routes>
     </>);

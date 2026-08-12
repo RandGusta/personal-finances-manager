@@ -13,14 +13,12 @@ public class CategoryResponse {
     private Long id;
     private String name;
     private TransactionType type;
-    private String color;
 
     public static CategoryResponse from(Category category) {
         return new CategoryResponse(
             category.getId(),
             category.getName(),
-            category.getType(),
-            category.getColor()
+            category.getType()
         );
     }
 }

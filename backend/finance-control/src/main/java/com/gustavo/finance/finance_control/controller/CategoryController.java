@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import com.gustavo.finance.finance_control.service.CategoryService;
 import jakarta.validation.Valid;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
 
@@ -34,17 +36,13 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CategoryResponse>> list(
-        Authentication authentication,
-        @RequestParam(required = false) TransactionType type
-    ) {
+    public ResponseEntity<List<CategoryResponse>> list(Authentication authentication, @RequestParam(required = false) TransactionType type) {
         return ResponseEntity.ok(categoryService.list(authenticatedUser(authentication), type));
     }
 
     @PostMapping
     public ResponseEntity<CategoryResponse> create(
-        Authentication authentication,
-        @Valid @RequestBody CategoryRequest request
+        Authentication authentication, @Valid @RequestBody CategoryRequest request
     ) {
         CategoryResponse response = categoryService.create(authenticatedUser(authentication), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);

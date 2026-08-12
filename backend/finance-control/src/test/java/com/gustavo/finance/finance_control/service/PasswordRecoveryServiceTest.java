@@ -3,10 +3,10 @@ package com.gustavo.finance.finance_control.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ForgotPasswordResponse;
 import com.gustavo.finance.finance_control.dto.ResetPasswordRequest;
@@ -42,6 +43,9 @@ class PasswordRecoveryServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailSenderService emailSenderService;
+
     private PasswordRecoveryService passwordRecoveryService;
     private User user;
 
@@ -50,11 +54,14 @@ class PasswordRecoveryServiceTest {
         passwordRecoveryService = new PasswordRecoveryService(
             userRepository,
             tokenRepository,
-            passwordEncoder
+            passwordEncoder,
+            emailSenderService,
+            "http://localhost:5173"
         );
 
         user = new User();
         user.setId(1L);
+        user.setUsername("Gustavo");
         user.setEmail("gustavo@example.com");
         user.setPassword("old-encoded-password");
     }
@@ -67,12 +74,17 @@ class PasswordRecoveryServiceTest {
             passwordRecoveryService.forgotPassword("unknown@example.com");
 
         assertNotNull(response.getMessage());
-        assertNull(response.getDebugToken());
         verify(tokenRepository, never()).save(any(RedifinationPasswordToken.class));
+        verify(emailSenderService, never()).sendEmailTemplate(
+            any(String.class),
+            any(String.class),
+            any(String.class),
+            any(Context.class)
+        );
     }
 
     @Test
-    void shouldCreateOneHourTokenForExistingUser() {
+    void shouldCreateOneHourTokenAndSendRecoveryEmail() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(tokenRepository.save(any(RedifinationPasswordToken.class)))
             .thenAnswer(invocation -> invocation.getArgument(0));
@@ -88,7 +100,20 @@ class PasswordRecoveryServiceTest {
         assertEquals(user, token.getUser());
         assertFalse(token.isUsed());
         assertTrue(token.getExpireDate().isAfter(beforeCreation.plusMinutes(59)));
-        assertEquals(token.getToken(), response.getDebugToken());
+        assertNotNull(response.getMessage());
+
+        ArgumentCaptor<Context> contextCaptor = ArgumentCaptor.forClass(Context.class);
+        verify(emailSenderService).sendEmailTemplate(
+            eq(user.getEmail()),
+            eq("Password recovery"),
+            eq("passwordRecovery"),
+            contextCaptor.capture()
+        );
+
+        Context context = contextCaptor.getValue();
+        String expectedLink = "http://localhost:5173/reset-password/" + token.getToken();
+        assertEquals(expectedLink, context.getVariable("resetLink"));
+        assertEquals(token.getToken(), context.getVariable("token"));
     }
 
     @Test

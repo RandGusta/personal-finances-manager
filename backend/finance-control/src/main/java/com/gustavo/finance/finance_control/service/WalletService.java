@@ -15,6 +15,7 @@ import com.gustavo.finance.finance_control.entity.Wallet;
 import com.gustavo.finance.finance_control.enums.UserRelationWallet;
 import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
 import com.gustavo.finance.finance_control.repository.TransactionRepository;
+import com.gustavo.finance.finance_control.repository.WalletInvitationRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
 import com.gustavo.finance.finance_control.repository.WalletRepository;
 
@@ -24,15 +25,18 @@ public class WalletService {
     private final WalletRepository walletRepository;
     private final UserWalletRepository userWalletRepository;
     private final TransactionRepository transactionRepository;
+    private final WalletInvitationRepository walletInvitationRepository;
 
     public WalletService(
         WalletRepository walletRepository,
         UserWalletRepository userWalletRepository,
-        TransactionRepository transactionRepository
+        TransactionRepository transactionRepository,
+        WalletInvitationRepository walletInvitationRepository
     ) {
         this.walletRepository = walletRepository;
         this.userWalletRepository = userWalletRepository;
         this.transactionRepository = transactionRepository;
+        this.walletInvitationRepository = walletInvitationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -91,6 +95,7 @@ public class WalletService {
         Wallet wallet = membership.getWallet();
 
         transactionRepository.deleteAllByWallet(wallet);
+        walletInvitationRepository.deleteAllByWallet(wallet);
         userWalletRepository.deleteAllByWallet(wallet);
         walletRepository.delete(wallet);
     }

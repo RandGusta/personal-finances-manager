@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet invitation</title>
+</head>
+<body>
+    <h1>Wallet invitation</h1>
+    <p>
+        <span th:text="${inviterName}">A user</span> invited you to join the wallet
+        <strong th:text="${walletName}">Wallet</strong> as
+        <strong th:text="${role}">VIEWER</strong>.
+    </p>
+    <p>
+        <a th:href="${invitationLink}">Open the invitation</a>
+    </p>
+    <p>
+        Sign in with the invited e-mail address and accept the invitation.
+        This link expires in <span th:text="${expirationDays}">7</span> days.
+    </p>
+    <p>Invitation token:</p>
+    <p><strong th:text="${token}">invitation-token</strong></p>
+    <p>If you were not expecting this invitation, you can ignore this e-mail.</p>
+</body>
+</html>

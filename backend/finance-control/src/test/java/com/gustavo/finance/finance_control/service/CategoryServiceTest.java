@@ -1,7 +1,6 @@
 package com.gustavo.finance.finance_control.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -65,7 +64,7 @@ class CategoryServiceTest {
 
     @Test
     void shouldCreateCategoryForAuthenticatedUser() {
-        CategoryRequest request = request("  Food  ", TransactionType.EXPENSE, "#FF5733");
+        CategoryRequest request = request("  Food  ", TransactionType.EXPENSE);
         when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
             Category savedCategory = invocation.getArgument(0);
             savedCategory.setId(20L);
@@ -85,14 +84,13 @@ class CategoryServiceTest {
     @Test
     void shouldUpdateOnlyCategoryOwnedByAuthenticatedUser() {
         Category category = category(30L, user, "Food", TransactionType.EXPENSE);
-        CategoryRequest request = request("Groceries", TransactionType.EXPENSE, null);
+        CategoryRequest request = request("Groceries", TransactionType.EXPENSE);
         when(categoryRepository.findByIdAndUser(30L, user)).thenReturn(Optional.of(category));
         when(categoryRepository.save(category)).thenReturn(category);
 
         CategoryResponse result = categoryService.update(user, 30L, request);
 
         assertEquals("Groceries", result.getName());
-        assertNull(result.getColor());
     }
 
     @Test
@@ -104,7 +102,7 @@ class CategoryServiceTest {
             () -> categoryService.update(
                 user,
                 40L,
-                request("Updated", TransactionType.INCOME, null)
+                request("Updated", TransactionType.INCOME)
             )
         );
     }
@@ -140,11 +138,10 @@ class CategoryServiceTest {
         return category;
     }
 
-    private CategoryRequest request(String name, TransactionType type, String color) {
+    private CategoryRequest request(String name, TransactionType type) {
         CategoryRequest request = new CategoryRequest();
         request.setName(name);
         request.setType(type);
-        request.setColor(color);
         return request;
     }
 }

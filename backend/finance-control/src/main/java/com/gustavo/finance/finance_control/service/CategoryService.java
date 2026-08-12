@@ -29,6 +29,7 @@ public class CategoryService {
         this.transactionRepository = transactionRepository;
     }
 
+    //filtrar por categoria se for expenses ou income
     @Transactional(readOnly = true)
     public List<CategoryResponse> list(User user, TransactionType type) {
         List<Category> categories = type == null
@@ -36,7 +37,7 @@ public class CategoryService {
             : categoryRepository.findAllByUserAndTypeOrderByNameAsc(user, type);
 
         return categories.stream()
-            .map(CategoryResponse::from)
+            .map(CategoryResponse::from)// cada objeto é transformado em response 
             .toList();
     }
 
@@ -78,13 +79,5 @@ public class CategoryService {
     private void copyRequest(Category category, CategoryRequest request) {
         category.setName(request.getName().trim());
         category.setType(request.getType());
-        category.setColor(normalizeOptionalText(request.getColor()));
-    }
-
-    private String normalizeOptionalText(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
-        }
-        return value.trim();
     }
 }

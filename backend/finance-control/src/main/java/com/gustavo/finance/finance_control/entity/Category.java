@@ -30,6 +30,4 @@ public class Category {
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
-    private String color;
-
 }

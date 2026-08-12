@@ -2,6 +2,7 @@ package com.gustavo.finance.finance_control.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,7 @@ import com.gustavo.finance.finance_control.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RequestMapping("/api/v1/users")
 public class UserController {
 
@@ -49,7 +51,7 @@ public class UserController {
         @Valid @RequestBody ChangePasswordRequest request
     ) {
         userService.changePassword(authenticatedUser(authentication), request);
-        return ResponseEntity.ok(new MessageResponse("Senha alterada com sucesso."));
+        return ResponseEntity.ok(new MessageResponse("Password changed successfully."));
     }
 
     private User authenticatedUser(Authentication authentication) {

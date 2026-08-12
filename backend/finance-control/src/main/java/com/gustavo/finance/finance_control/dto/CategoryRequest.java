@@ -4,7 +4,6 @@ import com.gustavo.finance.finance_control.enums.TransactionType;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -17,10 +16,4 @@ public class CategoryRequest {
 
     @NotNull(message = "Type is required")
     private TransactionType type;
-
-    @Pattern(
-        regexp = "^$|^#[0-9A-Fa-f]{6}$",
-        message = "Color must be a valid hexadecimal value, such as #FF5733"
-    )
-    private String color;
 }

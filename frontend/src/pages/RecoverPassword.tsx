@@ -27,7 +27,6 @@ const RecoverPassword = () => {
   const [loading, setLoading] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [responseMessage, setResponseMessage] = useState("");
-  const [debugToken, setDebugToken] = useState("");
 
   const validateEmail = () => {
     const normalizedEmail = email.trim();
@@ -61,7 +60,6 @@ const RecoverPassword = () => {
 
       const response = await requestPasswordRecovery(email.trim());
       setResponseMessage(response.message);
-      setDebugToken(response.debugToken ?? "");
       setOpenDialog(true);
     } catch (error) {
       const message =
@@ -151,29 +149,11 @@ const RecoverPassword = () => {
         <DialogTitle>Recovery requested</DialogTitle>
         <DialogContent>
           <Typography>{responseMessage}</Typography>
-
-          {debugToken && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              E-mail delivery is not configured yet. Use the development link below:
-              {" "}
-              <Link component={RoutesLink} to={`/reset-password/${debugToken}`}>
-                Reset password
-              </Link>
-            </Alert>
-          )}
         </DialogContent>
         <DialogActions>
-          <BaseButton onClick={() => navigate("/login")} variant="outlined">
+          <BaseButton onClick={() => navigate("/login")} variant="contained">
             Back to Login
           </BaseButton>
-          {debugToken && (
-            <BaseButton
-              onClick={() => navigate(`/reset-password/${debugToken}`)}
-              variant="contained"
-            >
-              Continue
-            </BaseButton>
-          )}
         </DialogActions>
       </Dialog>
     </>

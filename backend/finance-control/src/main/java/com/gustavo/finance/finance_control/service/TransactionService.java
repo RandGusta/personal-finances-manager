@@ -115,7 +115,7 @@ public class TransactionService {
 
     private Category findCategory(User user, Long categoryId, Category currentCategory) {
         if (categoryId == null) {
-            return null;
+            throw new BusinessException("Category is required");
         }
         if (currentCategory != null && categoryId.equals(currentCategory.getId())) {
             return currentCategory;

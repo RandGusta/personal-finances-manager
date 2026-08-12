@@ -1,11 +1,10 @@
 import { BaseButton } from "../components/Button";
 import { BaseInputField } from "../components/Input";
 import { BaseCheckBox } from "../components/Checkbox";
-import { Typography, Link, LinearProgress, Box, Card, Alert } from "@mui/material";
+import { Typography, Link, Box, Card, Alert } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
 import { Link as RoutesLink, useNavigate } from "react-router-dom";
-import logo from "../assets/svg/favicon.svg";
 import { useState } from "react";
 import { login } from "../services/UserService";
 import type { LoginRequest } from "../dto/LoginRequest";
@@ -15,6 +14,7 @@ export function Login() {
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -42,37 +42,44 @@ export function Login() {
 
     if (!emailRegex.test(email)) {
       setEmailError("Invalid email");
-      return;
+      return false;
     }
     setEmailError("");
     return true;
   };
 
   const handleSubmit = async () => {
-    const passwordOK =  handlePasswordSubmit();
-    const emailOK =   handleEmailSubmit();
+    const passwordOK = handlePasswordSubmit();
+    const emailOK = handleEmailSubmit();
 
-    if(!passwordOK || !emailOK){
+    if (!passwordOK || !emailOK) {
       return;
     }
 
     const data: LoginRequest = {
-      email,
+      email: email.trim(),
       password
-    } 
-    try{
+    };
+
+    try {
+      setGeneralError("");
       setLoading(true);
-      await login(data);
-      navigate('/home');
-    } catch (error){
-      if(error instanceof Error){
-        setGeneralError(error.message)
+      await login(data, rememberMe);
+      const redirectPath = sessionStorage.getItem("redirectAfterLogin");
+
+      if (redirectPath && redirectPath.startsWith("/")) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        navigate(redirectPath, { replace: true });
+      } else {
+        navigate("/home", { replace: true });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        setGeneralError(error.message);
       } else {
         setGeneralError("Email or password is incorrect");
       }
-
-    } finally{
-
+    } finally {
       setLoading(false);
     }
   };
@@ -120,7 +127,11 @@ export function Login() {
                 alignItems: "center",
               }}
             >
-              <BaseCheckBox label="remember me" />
+              <BaseCheckBox
+                label="Remember me"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+              />
               <Typography>
                 <Link component={RoutesLink} to="/recover-password">
                   Forgot Password?
@@ -130,10 +141,10 @@ export function Login() {
             <BaseButton
               fullWidth
               variant="contained"
-              loading={false}
+              loading={loading}
               onClick={() => handleSubmit()}
             >
-              Sing in
+              Sign in
             </BaseButton>
           </>
         }

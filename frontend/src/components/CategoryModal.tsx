@@ -12,9 +12,6 @@ interface CategoryModalProps {
   onCreated: () => void;
 }
 
-const DEFAULT_COLOR = "#1C4632";
-const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
-
 const CategoryModal = ({
   open,
   onClose,
@@ -22,14 +19,12 @@ const CategoryModal = ({
 }: CategoryModalProps) => {
   const [name, setName] = useState("");
   const [type, setType] = useState<CategoryType | "">("");
-  const [color, setColor] = useState(DEFAULT_COLOR);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const resetForm = () => {
     setName("");
     setType("");
-    setColor(DEFAULT_COLOR);
     setError("");
   };
 
@@ -60,15 +55,9 @@ const CategoryModal = ({
       return;
     }
 
-    if (!HEX_COLOR_PATTERN.test(color)) {
-      setError("Color must be a valid hexadecimal value, such as #FF5733");
-      return;
-    }
-
     const request: CategoryRequest = {
       name: normalizedName,
       type,
-      color,
     };
 
     try {
@@ -128,14 +117,6 @@ const CategoryModal = ({
           <MenuItem value="INCOME">Income</MenuItem>
           <MenuItem value="EXPENSE">Expense</MenuItem>
         </BaseInputField>
-
-        <BaseInputField
-          label="Color"
-          type="color"
-          value={color}
-          onChange={(event) => setColor(event.target.value)}
-          required
-        />
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
           <Button variant="outlined" onClick={handleClose} disabled={saving}>

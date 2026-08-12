@@ -4,11 +4,31 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.gustavo.finance.finance_control.dto.ErrorResponse;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidationException(
+        MethodArgumentNotValidException ex
+    ) {
+        String message = "Request validation failed";
+        FieldError fieldError = ex.getBindingResult().getFieldError();
+
+        if (fieldError != null && fieldError.getDefaultMessage() != null) {
+            message = fieldError.getDefaultMessage();
+        }
+
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse(message));
+    }
     
     @ExceptionHandler(ExistingEmailException.class)
     public ResponseEntity<?> handleExistingEmailException(ExistingEmailException ex){

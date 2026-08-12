@@ -1,205 +1,212 @@
-import { AutenticationLayout } from "../layouts/AutenticationLayout";
-import { Box, Typography, Card, Link, LinearProgress } from "@mui/material";
-import cardImage from "../assets/images/cover-cards.png";
+import {
+  Alert,
+  Box,
+  Card,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  LinearProgress,
+  Link,
+  Typography,
+} from "@mui/material";
+import { useState, type FormEvent } from "react";
+import { Link as RoutesLink, useNavigate } from "react-router-dom";
 import zxcvbn from "zxcvbn";
-import { useState } from "react";
+import cardImage from "../assets/images/cover-cards.png";
 import { BaseButton } from "../components/Button";
 import { BaseInputField } from "../components/Input";
-import { BaseForm } from "../components/Form";
-import BaseNavBar from "../components/NavBar";
-import { useNavigate } from "react-router-dom";
-import { FindInPage } from "@mui/icons-material";
+import { AutenticationLayout } from "../layouts/AutenticationLayout";
+import { changePassword } from "../services/UserService";
 
 const RedifinePassword = () => {
-
   const navigate = useNavigate();
-  
-  const [loading, setLoading] = useState(false);
-
   const [currentPassword, setCurrentPassword] = useState("");
-  const [currentPasswordError, setCurrentPasswordError] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPasswordError, setCurrentPasswordError] = useState("");
+  const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const [generalError, setGeneralError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
 
   const passwordStrength = zxcvbn(newPassword);
 
+  const validateForm = () => {
+    let formIsValid = true;
 
-
-  const handleChangePassword = () => {
-    if(!currentPassword){
-      setCurrentPasswordError("Field is required")
-      return;
-    }
-
-    if(!newPassword){
-      setNewPasswordError("Field is required");
-      return;
-
-    }
-
-    if(!confirmPassword){
-      setConfirmPasswordError("Field is required");
-      return;
-    }
-
-    if(newPassword !== confirmPassword){
-      setConfirmPasswordError("Passwords do not match.");
-      return;
-    } 
-
-    setConfirmPasswordError("");
-    setNewPasswordError("");
     setCurrentPasswordError("");
+    setNewPasswordError("");
+    setConfirmPasswordError("");
 
-    setLoading(true);
-
-    try{
-      console.log("aqui vai ser chamado o back");
-      navigate("/login");
-    } catch {
-      console.log("aqui vai ser chamado o back");
-    } finally{
-      setLoading(false)
+    if (!currentPassword) {
+      setCurrentPasswordError("Current password is required");
+      formIsValid = false;
     }
-  }
 
-  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (event) => {
-    event.preventDefault();
-    console.log("enviado");
+    if (!newPassword) {
+      setNewPasswordError("New password is required");
+      formIsValid = false;
+    } else if (newPassword.length < 8) {
+      setNewPasswordError("The password must have at least 8 characters");
+      formIsValid = false;
+    } else if (newPassword.length > 100) {
+      setNewPasswordError("The password must have at most 100 characters");
+      formIsValid = false;
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError("Password confirmation is required");
+      formIsValid = false;
+    } else if (newPassword !== confirmPassword) {
+      setConfirmPasswordError("Passwords do not match");
+      formIsValid = false;
+    }
+
+    return formIsValid;
   };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setGeneralError("");
+
+      const response = await changePassword({
+        currentPassword,
+        newPassword,
+      });
+
+      setSuccessMessage(response.message);
+      setOpenDialog(true);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error occurred while changing the password";
+      setGeneralError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const progressValue =
+    newPassword.length > 0 ? (passwordStrength.score + 1) * 20 : 0;
+
   return (
     <>
       <AutenticationLayout
         left={
-          <>
-            <Box>
-              <Typography
-                variant="h2"
-                sx={{
-                  textAlign: "center",
-                  color: "#1C4632",
-                  position: "absolute",
-                  top: { xs: "6rem", lg: "5rem", md: "24rem", sm: "20rem" },
-                  left: { xs: "5rem", lg: "16rem", md: "29rem" },
-                }}
-              >
-                Redifine password
-              </Typography>
-            </Box>
-            <Box sx={{ marginTop: "10rem" }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-               
-                  <BaseForm onSubmit={handleSubmit}>
-                   <Box sx={{display:"flex", flexDirection: "column", gap: 3}}>
-                    <BaseInputField
-                      label="Current Password"
-                      placeholder="@$76exemple"
-                      error={!!currentPasswordError}
-                      type="password"
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      helperText={currentPasswordError}
-                    />
-                    <BaseInputField
-                      label="New password"
-                      type="password"
-                      error={!!newPasswordError}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      helperText={newPasswordError}
-                    />
-            <BaseInputField
-                      label="Cofirm password"
-                      error={!!confirmPasswordError}
-                      type="password"
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      helperText={confirmPasswordError}
-                    />
-                    {newPassword.length > 0 &&(
-              <>
-            <LinearProgress
-              variant="determinate"
-              value={
-                (passwordStrength.score != 4
-                  ? passwordStrength.score
-                  : passwordStrength.score + 1) * 20
-              }
-            /> 
-            <Typography>
-              Password strength: {passwordStrength.score}/4
-            </Typography></>)}
-                    </Box>
+          <Box sx={{ width: "100%", maxWidth: "32rem" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+              Change password
+            </Typography>
 
-                    <BaseButton
-                      fullWidth
-                      type="submit"
-                      variant="contained"
-                      loading={false}
-                      sx={{ marginTop: 5, marginBottom: 3 }}
-                      onClick={() => handleChangePassword()}
-                    >
-                      confirm
-                    </BaseButton>
-                  </BaseForm>
+            {generalError && (
+              <Alert severity="error" sx={{ mt: 2 }}>
+                {generalError}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+              <BaseInputField
+                label="Current password"
+                type="password"
+                value={currentPassword}
+                error={!!currentPasswordError}
+                helperText={currentPasswordError}
+                onChange={(event) => setCurrentPassword(event.target.value)}
+              />
+
+              <BaseInputField
+                label="New password"
+                type="password"
+                value={newPassword}
+                error={!!newPasswordError}
+                helperText={newPasswordError}
+                onChange={(event) => setNewPassword(event.target.value)}
+              />
+
+              <BaseInputField
+                label="Confirm password"
+                type="password"
+                value={confirmPassword}
+                error={!!confirmPasswordError}
+                helperText={confirmPasswordError}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+              />
+
+              {newPassword.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <LinearProgress variant="determinate" value={progressValue} />
+                  <Typography sx={{ mt: 1 }}>
+                    Password strength: {passwordStrength.score}/4
+                  </Typography>
                 </Box>
-                <Typography>
-                  <Link href="/login">Return to Login</Link>
-                </Typography>
-              </Box>
-          </>
+              )}
+
+              <BaseButton fullWidth type="submit" variant="contained" loading={loading}>
+                Change password
+              </BaseButton>
+            </Box>
+
+            <Typography sx={{ mt: 2 }}>
+              <Link component={RoutesLink} to="/profile">
+                Return to profile
+              </Link>
+            </Typography>
+          </Box>
         }
         right={
-          <>
-            <Box
+          <Box sx={{ width: "100%", maxWidth: "35rem" }}>
+            <Card
               sx={{
-                width: "100%",
-                maxWidth: "35rem",
-                minHeight: "19rem",
-                maxHeight: "19rem",
+                borderRadius: "80px",
+                boxShadow: "-7px 7px 5px 2px #00000038",
+                overflow: "hidden",
               }}
             >
-              <Card
-                sx={{
-                  borderRadius: "80",
-                  boxShadow: "-7px 7px 5px 2px #00000038",
-                  overflow: "hidden",
-                }}
-              >
-                <Typography
-                  color="primary"
-                  variant="h2"
-                  sx={{ padding: "40px 23px 10px 23px" }}
-                >
-                  Account Security
+              <Typography color="primary" variant="h2" sx={{ p: "40px 23px 10px" }}>
+                Account security
+              </Typography>
+              <Box sx={{ display: "flex" }}>
+                <Typography color="primary" sx={{ pl: "23px", minWidth: "20rem" }}>
+                  Confirm your current password, then choose a new password with
+                  at least eight characters.
                 </Typography>
-                <Box sx={{ display: "flex", gap: "px" }}>
-                  <Typography
-                    color="primary"
-                    sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
-                  >
-                    Forgot your password?
-                    <br />
-                    Don't worry. Account recovery is a quick and secure process
-                    designed to help you regain access safely. <br />
-                    Enter your registered e-mail address and follow the
-                    instructions provided to create <br /> a new password and
-                    continue managing your finances with confidence.
-                  </Typography>
-                  <Box
-                    component="img"
-                    src={cardImage}
-                    sx={{
-                      minWidth: "23rem",
-                      maxHeight: "18rem",
-                      transform: "translate(0px, -10px)",
-                    }}
-                  />
-                </Box>
-              </Card>
-            </Box>
-          </>
+                <Box
+                  component="img"
+                  src={cardImage}
+                  alt="Finance cards"
+                  sx={{ minWidth: "23rem", maxHeight: "18rem", transform: "translateY(-10px)" }}
+                />
+              </Box>
+            </Card>
+          </Box>
         }
       />
+
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Password changed</DialogTitle>
+        <DialogContent>
+          <Typography>{successMessage}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <BaseButton onClick={() => navigate("/profile")} variant="contained">
+            Return to profile
+          </BaseButton>
+        </DialogActions>
+      </Dialog>
     </>
   );
 };

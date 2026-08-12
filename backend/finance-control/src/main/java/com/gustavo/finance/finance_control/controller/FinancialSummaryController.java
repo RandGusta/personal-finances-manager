@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.FinancialSummaryService;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 @RequestMapping("/api/v1/wallets/{walletId}/summary")
 public class FinancialSummaryController {
 

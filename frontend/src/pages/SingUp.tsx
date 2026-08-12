@@ -1,16 +1,13 @@
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import { Typography, Box, Link, LinearProgress, Card, Alert } from "@mui/material";
 import { BaseInputField } from "../components/Input";
-import { BaseCheckBox } from "../components/Checkbox";
 import { BaseButton } from "../components/Button";
 import { Link as RoutesLink, useNavigate } from "react-router-dom";
-import logo from "../assets/svg/favicon.svg";
 import cardImage from "../assets/images/cover-cards.png";
 import zxcvbn from "zxcvbn";
-import { BaseForm } from '../components/Form';
 import { useState } from "react";
 import type { SingUpRequest } from "../dto/SingUpRequest";
-import {singUp} from "../services/UserService"
+import { signUp } from "../services/UserService";
 
 export function SignUp() {
   const navigate = useNavigate();
@@ -37,6 +34,12 @@ export function SignUp() {
       setPasswordError("Password is required");
       return false;
     }
+
+    if (password.length < 8 || password.length > 15) {
+      setPasswordError("Password must have between 8 and 15 characters");
+      return false;
+    }
+
     setPasswordError("");
     return true;
   };
@@ -50,54 +53,56 @@ export function SignUp() {
 
     if (!emailRegex.test(email)) {
       setEmailError("Invalid email");
-      return;
+      return false;
     }
     setEmailError("");
     return true;
   };
 
-  const handleNameSubmit = () =>{
-    if(!name){
+  const handleNameSubmit = () => {
+    const normalizedName = name.trim();
+
+    if (!normalizedName) {
       setNameError("Name is required");
       return false;
     }
 
-    let nameVector = name.split(" ");
-    if(nameVector.length < 2){
-      setNameError("Full Name required");
+    if (normalizedName.length < 2 || normalizedName.length > 100) {
+      setNameError("Name must have between 2 and 100 characters");
       return false;
     }
 
-    setNameError("")
-  }
+    setNameError("");
+    return true;
+  };
 
   const handleSubmit = async () => {
-    const passwordOK =  handlePasswordSubmit();
-    const emailOK =   handleEmailSubmit();
-    const nameOK =   handleNameSubmit();
+    const passwordOK = handlePasswordSubmit();
+    const emailOK = handleEmailSubmit();
+    const nameOK = handleNameSubmit();
 
-    if(!passwordOK || !emailOK || nameOK){
+    if (!passwordOK || !emailOK || !nameOK) {
       return;
     }
 
-    const userName = name;
-    const data: SingUpRequest ={
-      email,
+    const data: SingUpRequest = {
+      name: name.trim(),
+      email: email.trim(),
       password,
-      userName
-    }
+    };
 
-    try{
+    try {
+      setGeneralError("");
       setLoading(true);
-      await singUp(data);
-      navigate('/home');
-    } catch (error){
-      if(error instanceof Error){
+      await signUp(data);
+      navigate("/login", { replace: true });
+    } catch (error) {
+      if (error instanceof Error) {
         setGeneralError(error.message);
       } else {
-        setGeneralError("Error trying to register")
+        setGeneralError("Error trying to register");
       }
-    } finally{
+    } finally {
       setLoading(false);
     }
   };
@@ -123,7 +128,7 @@ export function SignUp() {
               label="Full name"
               placeholder="Name LastName"
               error={!!nameError}
-              type="email"
+              type="text"
               onChange={(e) => setName(e.target.value)}
               helperText={nameError}
             />
@@ -160,7 +165,7 @@ export function SignUp() {
             <BaseButton
               fullWidth
               variant="contained"
-              loading={false}
+              loading={loading}
               onClick={() => handleSubmit()}
             >
               Sign up

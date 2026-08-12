@@ -1,11 +1,14 @@
 package com.gustavo.finance.finance_control.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ForgotPasswordResponse;
 import com.gustavo.finance.finance_control.dto.ResetPasswordRequest;
@@ -19,27 +22,37 @@ import com.gustavo.finance.finance_control.repository.UserRepository;
 public class PasswordRecoveryService {
 
     private static final String NEUTRAL_MESSAGE =
-        "Se este e-mail estiver cadastrado, você receberá as instruções em breve.";
+        "If this e-mail is registered, you will receive the instructions shortly.";
 
     private final UserRepository userRepository;
     private final RedifinationPasswordTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailSenderService emailSenderService;
+    private final String frontendUrl;
 
     public PasswordRecoveryService(
         UserRepository userRepository,
         RedifinationPasswordTokenRepository tokenRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        EmailSenderService emailSenderService,
+        @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl
     ) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailSenderService = emailSenderService;
+        this.frontendUrl = frontendUrl;
     }
 
     @Transactional
     public ForgotPasswordResponse forgotPassword(String email) {
-        return userRepository.findByEmail(email)
-            .map(this::createResetToken)
-            .orElseGet(() -> new ForgotPasswordResponse(NEUTRAL_MESSAGE, null));
+        Optional<User> user = userRepository.findByEmail(email);
+
+        if (user.isEmpty()) {
+            return new ForgotPasswordResponse(NEUTRAL_MESSAGE);
+        }
+
+        return createResetToken(user.get());
     }
 
     @Transactional
@@ -68,6 +81,30 @@ public class PasswordRecoveryService {
         resetToken.setUsed(false);
 
         RedifinationPasswordToken savedToken = tokenRepository.save(resetToken);
-        return new ForgotPasswordResponse(NEUTRAL_MESSAGE, savedToken.getToken());
+
+        String resetLink = buildResetLink(savedToken.getToken());
+        Context context = new Context();
+        context.setVariable("name", user.getUsername());
+        context.setVariable("resetLink", resetLink);
+        context.setVariable("token", savedToken.getToken());
+
+        emailSenderService.sendEmailTemplate(
+            user.getEmail(),
+            "Password recovery",
+            "passwordRecovery",
+            context
+        );
+
+        return new ForgotPasswordResponse(NEUTRAL_MESSAGE);
+    }
+
+    private String buildResetLink(String token) {
+        String baseUrl = frontendUrl;
+
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+        }
+
+        return baseUrl + "/reset-password/" + token;
     }
 }

@@ -1,7 +1,6 @@
 package com.gustavo.finance.finance_control.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +18,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -136,23 +134,16 @@ class TransactionServiceTest {
     }
 
     @Test
-    void shouldCreateTransactionForEditorWithoutCategory() {
+    void shouldRejectTransactionWithoutCategory() {
         mockMembership(UserRelationWallet.EDITOR);
-        when(transactionRepository.save(any(Transaction.class)))
-            .thenAnswer(invocation -> {
-                Transaction transaction = invocation.getArgument(0);
-                transaction.setId(101L);
-                return transaction;
-            });
 
-        TransactionResponse response = transactionService.create(user, 10L, request(null));
+        BusinessException exception = assertThrows(
+            BusinessException.class,
+            () -> transactionService.create(user, 10L, request(null))
+        );
 
-        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
-        verify(transactionRepository).save(captor.capture());
-        assertSame(wallet, captor.getValue().getWallet());
-        assertSame(user, captor.getValue().getCreatedBy());
-        assertNull(captor.getValue().getCategory());
-        assertEquals(new BigDecimal("150.00"), response.getAmount());
+        assertEquals("Category is required", exception.getMessage());
+        verify(transactionRepository, never()).save(any(Transaction.class));
     }
 
     @Test

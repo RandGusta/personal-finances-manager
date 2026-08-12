@@ -97,13 +97,12 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
         <Box
           sx={{
             display: { xs: "none", md: "grid" },
-            gridTemplateColumns: "2fr 1fr 1fr",
+            gridTemplateColumns: "2fr 1fr",
             gap: 2,
             mt: 3,
           }}
         >
           <Typography variant="h6">Name</Typography>
-          <Typography variant="h6">Color</Typography>
           <Typography variant="h6">Type</Typography>
         </Box>
 
@@ -129,7 +128,7 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
                 display: "grid",
                 gridTemplateColumns: {
                   xs: "1fr",
-                  md: "2fr 1fr 1fr",
+                  md: "2fr 1fr",
                 },
                 gap: 2,
                 mt: 2,
@@ -138,21 +137,6 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
               }}
             >
               <Typography>{category.name}</Typography>
-
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Box
-                  aria-label={category.color ? `Color ${category.color}` : "No color"}
-                  sx={{
-                    width: 24,
-                    height: 24,
-                    borderRadius: "50%",
-                    bgcolor: category.color ?? "transparent",
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                />
-                <Typography>{category.color ?? "No color"}</Typography>
-              </Box>
 
               <Chip
                 label={category.type === "INCOME" ? "Income" : "Expense"}

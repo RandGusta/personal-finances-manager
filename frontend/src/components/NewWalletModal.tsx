@@ -1,15 +1,27 @@
-import { Alert, Box, Button, Modal, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  MenuItem,
+  Modal,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import type { WalletRequest } from "../dto/WalletRequest";
+import type { WalletInvitationRole } from "../dto/WalletInvitation";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
-import { createWallet } from "../services/WalletPageService";
+import {
+  createWallet,
+  sendWalletInvitation,
+} from "../services/WalletPageService";
 import { BaseButton } from "./Button";
 import { BaseInputField } from "./Input";
 
 interface NewWalletModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated: (wallet: WalletResponse) => void;
+  onCreated: (wallet: WalletResponse, invitationWarning?: string) => void;
 }
 
 const modalStyle = {
@@ -24,6 +36,8 @@ const modalStyle = {
   bgcolor: "background.paper",
   borderRadius: 3,
   boxShadow: 24,
+  maxHeight: "90vh",
+  overflowY: "auto",
   p: 4,
 };
 
@@ -34,12 +48,16 @@ const NewWalletModal = ({
 }: NewWalletModalProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<WalletInvitationRole>("VIEWER");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const resetForm = () => {
     setName("");
     setDescription("");
+    setInviteEmail("");
+    setInviteRole("VIEWER");
     setError("");
   };
 
@@ -55,6 +73,7 @@ const NewWalletModal = ({
   const handleCreate = async () => {
     const normalizedName = name.trim();
     const normalizedDescription = description.trim();
+    const normalizedInviteEmail = inviteEmail.trim();
 
     if (!normalizedName) {
       setError("Wallet name is required");
@@ -71,6 +90,15 @@ const NewWalletModal = ({
       return;
     }
 
+    if (normalizedInviteEmail) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(normalizedInviteEmail)) {
+        setError("Invalid invitation e-mail");
+        return;
+      }
+    }
+
     const request: WalletRequest = {
       name: normalizedName,
       description: normalizedDescription || undefined,
@@ -80,9 +108,27 @@ const NewWalletModal = ({
       setSaving(true);
       setError("");
       const createdWallet = await createWallet(request);
+
+      let invitationWarning: string | undefined;
+
+      if (normalizedInviteEmail) {
+        try {
+          await sendWalletInvitation(createdWallet.id, {
+            email: normalizedInviteEmail,
+            role: inviteRole,
+          });
+        } catch (invitationError) {
+          const invitationMessage =
+            invitationError instanceof Error
+              ? invitationError.message
+              : "The invitation could not be sent";
+          invitationWarning = `Wallet created, but invitation failed: ${invitationMessage}`;
+        }
+      }
+
       resetForm();
       onClose();
-      onCreated(createdWallet);
+      onCreated(createdWallet, invitationWarning);
     } catch (requestError) {
       const message =
         requestError instanceof Error
@@ -122,6 +168,36 @@ const NewWalletModal = ({
             multiline
             rows={3}
           />
+
+          <Typography variant="h6" sx={{ pt: 1 }}>
+            Invite a member (optional)
+          </Typography>
+
+          <Typography color="text.secondary">
+            The member will receive a link and will join the wallet only after
+            signing in and accepting the invitation.
+          </Typography>
+
+          <BaseInputField
+            label="Member E-mail"
+            type="email"
+            placeholder="friend@email.com"
+            value={inviteEmail}
+            onChange={(event) => setInviteEmail(event.target.value)}
+          />
+
+          <BaseInputField
+            select
+            label="Member Role"
+            value={inviteRole}
+            onChange={(event) =>
+              setInviteRole(event.target.value as WalletInvitationRole)
+            }
+            disabled={!inviteEmail.trim()}
+          >
+            <MenuItem value="VIEWER">Viewer</MenuItem>
+            <MenuItem value="EDITOR">Editor</MenuItem>
+          </BaseInputField>
         </Stack>
 
         <Stack
@@ -134,7 +210,7 @@ const NewWalletModal = ({
           </Button>
 
           <BaseButton variant="contained" onClick={handleCreate} loading={saving}>
-            Create Wallet
+            {inviteEmail.trim() ? "Create and Send Invite" : "Create Wallet"}
           </BaseButton>
         </Stack>
       </Box>

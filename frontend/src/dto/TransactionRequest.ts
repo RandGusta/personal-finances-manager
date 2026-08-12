@@ -5,5 +5,5 @@ export interface TransactionRequest {
   amount: number;
   description?: string;
   date: string;
-  categoryId: number | null;
+  categoryId: number;
 }

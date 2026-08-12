@@ -3,11 +3,14 @@ package com.gustavo.finance.finance_control.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ChangePasswordRequest;
+import com.gustavo.finance.finance_control.dto.RegisterRequest;
 import com.gustavo.finance.finance_control.dto.UpdateUserRequest;
 import com.gustavo.finance.finance_control.dto.UserProfileResponse;
 import com.gustavo.finance.finance_control.entity.User;
@@ -36,6 +41,9 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private EmailSenderService emailSenderService;
+
     private UserService userService;
     private User user;
 
@@ -44,7 +52,8 @@ class UserServiceTest {
         userService = new UserService(
             userRepository,
             transactionRepository,
-            passwordEncoder
+            passwordEncoder,
+            emailSenderService
         );
 
         user = new User();
@@ -54,6 +63,31 @@ class UserServiceTest {
         user.setPassword("encoded-current-password");
         user.setCreatedDate(LocalDateTime.now().minusDays(1));
         user.setUpdatedDate(LocalDateTime.now().minusDays(1));
+    }
+
+    @Test
+    void shouldRegisterUserAndSendWelcomeEmail() {
+        RegisterRequest request = new RegisterRequest();
+        request.setName("Gustavo");
+        request.setEmail("gustavo@example.com");
+        request.setPassword("password123");
+
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(request.getPassword())).thenReturn("encoded-password");
+        when(userRepository.save(any(User.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        User savedUser = userService.register(request);
+
+        assertEquals("Gustavo", savedUser.getUsername());
+        assertEquals("gustavo@example.com", savedUser.getEmail());
+        assertEquals("encoded-password", savedUser.getPassword());
+        verify(emailSenderService).sendEmailTemplate(
+            eq("gustavo@example.com"),
+            eq("Success"),
+            eq("newRegister"),
+            any(Context.class)
+        );
     }
 
     @Test

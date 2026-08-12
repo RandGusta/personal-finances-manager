@@ -28,5 +28,6 @@ public class TransactionRequest {
     @PastOrPresent(message = "Date cannot be in the future")
     private LocalDate date;
 
+    @NotNull(message = "Category is required")
     private Long categoryId;
 }

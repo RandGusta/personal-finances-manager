@@ -7,24 +7,10 @@ import type {
   WalletResponse,
 } from "../dto/UserSummaryResponse";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+import { getErrorMessage, getStoredToken } from "./api";
 
-function getStoredToken() {
-  return localStorage.getItem("token") ?? sessionStorage.getItem("token");
-}
+const API_BASE_URL = "http://localhost:8081";
 
-async function getErrorMessage(response: Response, fallbackMessage: string) {
-  try {
-    const error = (await response.json()) as {
-      message?: string;
-      detail?: string;
-    };
-
-    return error.message ?? error.detail ?? fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-}
 
 export async function getProfilePage(): Promise<ProfilePageResponse> {
   const token = getStoredToken();

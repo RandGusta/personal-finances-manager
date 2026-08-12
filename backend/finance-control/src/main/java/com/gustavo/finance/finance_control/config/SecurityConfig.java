@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,10 +26,14 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+
+    // delimitamos as paginas publicas e privadas
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         // HttpSecurity podem lançar exceções durante a construção da configuração, por isso o exception 
-        http.csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth -> 
+        http
+            .cors(Customizer.withDefaults())
+            .csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth ->
             auth.requestMatchers(
                 "/auth/register",
                 "/auth/login",
@@ -43,8 +48,6 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
     }
-
-
 
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {

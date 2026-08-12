@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ChangePasswordRequest;
 import com.gustavo.finance.finance_control.dto.CurrentUserResponse;
@@ -34,15 +35,18 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailSenderService emailSenderService;
 
     public UserService(
         UserRepository userRepository,
         TransactionRepository transactionRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        EmailSenderService emailSenderService
     ) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailSenderService = emailSenderService;
     }
 
     @Transactional
@@ -57,7 +61,18 @@ public class UserService implements UserDetailsService {
         user.setCreatedDate(LocalDateTime.now());
         user.setUpdatedDate(LocalDateTime.now());
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+
+        Context context = new Context();
+        context.setVariable("name", savedUser.getUsername());
+        emailSenderService.sendEmailTemplate(
+            savedUser.getEmail(),
+            "Success",
+            "newRegister",
+            context
+        );
+
+        return savedUser;
     }
 
     @Transactional(readOnly = true)

@@ -1,26 +1,15 @@
 import type { TransactionPageResponse } from "../dto/TransactionResponse";
 import type { WalletMemberResponse } from "../dto/WalletMemberResponse";
 import type { WalletRequest } from "../dto/WalletRequest";
+import type {
+  MessageResponse,
+  WalletInvitationRequest,
+} from "../dto/WalletInvitation";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
+import { getErrorMessage, getStoredToken } from "./api";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
+const API_BASE_URL = "http://localhost:8081";
 
-function getStoredToken() {
-  return localStorage.getItem("token") ?? sessionStorage.getItem("token");
-}
-
-async function getErrorMessage(response: Response, fallbackMessage: string) {
-  try {
-    const error = (await response.json()) as {
-      message?: string;
-      detail?: string;
-    };
-
-    return error.message ?? error.detail ?? fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-}
 
 export async function getWallets(): Promise<WalletResponse[]> {
   const token = getStoredToken();
@@ -129,4 +118,67 @@ export async function getWalletRecentTransactions(
 
   const transactions = (await response.json()) as TransactionPageResponse;
   return transactions;
+}
+
+export async function sendWalletInvitation(
+  walletId: number,
+  request: WalletInvitationRequest,
+): Promise<MessageResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You need to sign in to invite a wallet member");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallets/${walletId}/invitations`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(request),
+    },
+  );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while sending the wallet invitation",
+    );
+    throw new Error(message);
+  }
+
+  return (await response.json()) as MessageResponse;
+}
+
+export async function acceptWalletInvitation(
+  invitationToken: string,
+): Promise<WalletMemberResponse> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You need to sign in to accept the wallet invitation");
+  }
+
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallet-invitations/${invitationToken}/accept`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while accepting the wallet invitation",
+    );
+    throw new Error(message);
+  }
+
+  return (await response.json()) as WalletMemberResponse;
 }
