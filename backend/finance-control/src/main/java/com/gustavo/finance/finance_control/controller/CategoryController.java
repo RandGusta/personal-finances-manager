@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavo.finance.finance_control.dto.CategoryRequest;
 import com.gustavo.finance.finance_control.dto.CategoryResponse;
-import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.enums.TransactionType;
+import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.CategoryService;
 
 import jakarta.validation.Valid;

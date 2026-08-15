@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BaseButton } from "../components/Button";
 import BaseNavBar from "../components/NavBar";
 import { acceptWalletInvitation } from "../services/WalletPageService";
-import { getStoredToken } from "../services/UserService";
+import { getStoredToken } from "../services/api";
 
 const WalletInvitation = () => {
   const { token } = useParams<{ token: string }>();

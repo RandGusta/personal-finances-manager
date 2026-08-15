@@ -19,13 +19,13 @@ import com.gustavo.finance.finance_control.dto.CurrentUserResponse;
 import com.gustavo.finance.finance_control.dto.RegisterRequest;
 import com.gustavo.finance.finance_control.dto.UpdateUserRequest;
 import com.gustavo.finance.finance_control.dto.UserProfileResponse;
-import com.gustavo.finance.finance_control.entity.Transaction;
-import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.enums.TransactionType;
 import com.gustavo.finance.finance_control.enums.UserType;
 import com.gustavo.finance.finance_control.exception.BusinessException;
 import com.gustavo.finance.finance_control.exception.ExistingEmailException;
 import com.gustavo.finance.finance_control.exception.InvalidTransactionTypeException;
+import com.gustavo.finance.finance_control.entity.Transaction;
+import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.repository.TransactionRepository;
 import com.gustavo.finance.finance_control.repository.UserRepository;
 

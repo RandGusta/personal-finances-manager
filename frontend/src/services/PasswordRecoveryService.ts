@@ -5,9 +5,8 @@ import type {
   ResetPasswordRequest,
 } from "../dto/PasswordRecovery";
 
-import { getErrorMessage, getStoredToken } from "./api";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8081";
 
 
 export async function requestPasswordRecovery(

@@ -7,9 +7,8 @@ import type {
   WalletResponse,
 } from "../dto/UserSummaryResponse";
 
-import { getErrorMessage, getStoredToken } from "./api";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api";
 
-const API_BASE_URL = "http://localhost:8081";
 
 
 export async function getProfilePage(): Promise<ProfilePageResponse> {
@@ -71,8 +70,7 @@ export async function getProfilePage(): Promise<ProfilePageResponse> {
       throw new Error(message);
     }
 
-    const summary =
-      (await summaryResponse.json()) as ProfileFinancialSummaryResponse;
+    const summary = (await summaryResponse.json()) as ProfileFinancialSummaryResponse;
     transactionCount += summary.transactionCount;
     memberCount += wallet.memberCount;
   }

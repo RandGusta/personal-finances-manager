@@ -80,13 +80,13 @@ const NewWalletModal = ({
       return;
     }
 
-    if (normalizedName.length > 100) {
-      setError("Wallet name must have at most 100 characters");
+    if (normalizedName.length > 50) {
+      setError("Wallet name must have at most 50 characters");
       return;
     }
 
-    if (normalizedDescription.length > 255) {
-      setError("Description must have at most 255 characters");
+    if (normalizedDescription.length > 40) {
+      setError("Description must have at most 40 characters");
       return;
     }
 

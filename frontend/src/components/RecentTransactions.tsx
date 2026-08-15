@@ -1,11 +1,4 @@
-import {
-  Alert,
-  Box,
-  Card,
-  CardContent,
-  Skeleton,
-  Typography,
-} from "@mui/material";
+import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { TransactionResponse } from "../dto/TransactionResponse";
 import { getRecentTransactions } from "../services/RecentTransactionsService";

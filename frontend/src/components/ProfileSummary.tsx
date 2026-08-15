@@ -11,13 +11,7 @@ interface ProfileSummaryProps {
   loading: boolean;
 }
 
-const ProfileSummary = ({
-  profile,
-  walletCount,
-  transactionCount,
-  memberCount,
-  loading,
-}: ProfileSummaryProps) => {
+const ProfileSummary = ({profile, walletCount, transactionCount, memberCount, loading }: ProfileSummaryProps) => {
   const navigate = useNavigate();
   const userInitial = profile?.name.trim().charAt(0).toUpperCase() || "?";
 

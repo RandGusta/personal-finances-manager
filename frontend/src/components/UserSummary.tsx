@@ -14,6 +14,9 @@ const UserSummary = () => {
   const [userError, setUserError] = useState("");
   const [loading, setLoading] = useState(true);
 
+
+  
+
   useEffect(() => {
     let componentIsMounted = true;
 
@@ -39,9 +42,7 @@ const UserSummary = () => {
         }
       }
     };
-
     loadUserSummary();
-
     return () => {
       componentIsMounted = false;
     };

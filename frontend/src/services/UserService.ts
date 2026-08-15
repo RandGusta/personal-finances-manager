@@ -1,12 +1,7 @@
 import type { LoginRequest, LoginResponse } from "../dto/LoginRequest";
-import type {
-    ChangePasswordRequest,
-    MessageResponse,
-} from "../dto/PasswordRecovery";
+import type { ChangePasswordRequest, MessageResponse, } from "../dto/PasswordRecovery";
 import type { SignUpResponse, SingUpRequest } from "../dto/SingUpRequest";
-import { getErrorMessage, getStoredToken } from "./api";
-
-const API_BASE_URL = "http://localhost:8081";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
 export async function login(
     request: LoginRequest,

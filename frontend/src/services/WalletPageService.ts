@@ -6,9 +6,7 @@ import type {
   WalletInvitationRequest,
 } from "../dto/WalletInvitation";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
-import { getErrorMessage, getStoredToken } from "./api";
-
-const API_BASE_URL = "http://localhost:8081";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
 
 export async function getWallets(): Promise<WalletResponse[]> {

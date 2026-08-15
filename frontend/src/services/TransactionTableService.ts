@@ -1,24 +1,7 @@
 import type { TransactionPageResponse } from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
-const API_BASE_URL = "http://localhost:8081";
-
-function getStoredToken() {
-  return localStorage.getItem("token") ?? sessionStorage.getItem("token");
-}
-
-async function getErrorMessage(response: Response, fallbackMessage: string) {
-  try {
-    const error = (await response.json()) as {
-      message?: string;
-      detail?: string;
-    };
-
-    return error.message ?? error.detail ?? fallbackMessage;
-  } catch {
-    return fallbackMessage;
-  }
-}
 
 async function authenticatedGet<T>(
   path: string,

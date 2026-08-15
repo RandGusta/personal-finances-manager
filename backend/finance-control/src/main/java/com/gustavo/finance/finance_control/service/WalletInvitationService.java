@@ -60,8 +60,10 @@ public class WalletInvitationService {
         validateRole(request.getRole());
 
         String email = request.getEmail().trim().toLowerCase();
+        
+
         validateUserIsNotAlreadyMember(walletId, email);
-        validateNoActiveInvitation(walletId, email);
+        // validateNoActiveInvitation(walletId, email);
 
         WalletInvitation invitation = new WalletInvitation();
         invitation.setWallet(ownerMembership.getWallet());
@@ -138,21 +140,21 @@ public class WalletInvitationService {
         }
     }
 
-    private void validateNoActiveInvitation(Long walletId, String email) {
-        Optional<WalletInvitation> existingInvitation = invitationRepository
-            .findFirstByWalletIdAndEmailIgnoreCaseAndAcceptedFalseOrderByCreatedAtDesc(
-                walletId,
-                email
-            );
+    // private void validateNoActiveInvitation(Long walletId, String email) {
+    //     Optional<WalletInvitation> existingInvitation = invitationRepository
+    //         .findFirstByWalletIdAndEmailIgnoreCaseAndAcceptedFalseOrderByCreatedAtDesc(
+    //             walletId,
+    //             email
+    //         );
 
-        if (existingInvitation.isPresent()) {
-            WalletInvitation invitation = existingInvitation.get();
+    //     if (existingInvitation.isPresent()) {
+    //         WalletInvitation invitation = existingInvitation.get();
 
-            if (invitation.getExpiresAt().isAfter(LocalDateTime.now())) {
-                throw new ConflictException("An active invitation already exists for this e-mail");
-            }
-        }
-    }
+    //         if (invitation.getExpiresAt().isAfter(LocalDateTime.now())) {
+    //             throw new ConflictException("An active invitation already exists for this e-mail");
+    //         }
+    //     }
+    // }
 
     private UserWallet findOwnerMembership(User user, Long walletId) {
         UserWallet membership = userWalletRepository.findByWalletIdAndUser(walletId, user)
