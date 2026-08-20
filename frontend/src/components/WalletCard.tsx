@@ -1,10 +1,5 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Button,
-} from "@mui/material";
+import { Card, CardContent, Typography, Box, Button } from "@mui/material";
+import { BaseCheckBox } from "./Checkbox";
 
 export interface Wallet {
   id: number;
@@ -19,11 +14,17 @@ export interface Wallet {
 interface WalletCardProps {
   wallet: Wallet;
   onOpen: () => void;
+  showCheckbox?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: () => void;
 }
 
 const WalletCard = ({
   wallet,
   onOpen,
+  showCheckbox = false,
+  isSelected = false,
+  onSelectionChange,
 }: WalletCardProps) => {
   const members = wallet.memberCount ?? wallet.members ?? 0;
   const formattedRole = wallet.role
@@ -57,6 +58,15 @@ const WalletCard = ({
             View Wallet
           </Button>
         </Box>
+        {showCheckbox && (
+          <Box>
+            <BaseCheckBox
+              label="Select"
+              checked={isSelected}
+              onChange={onSelectionChange}
+            />
+          </Box>
+        )}
       </CardContent>
     </Card>
   );

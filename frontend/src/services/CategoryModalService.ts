@@ -1,8 +1,6 @@
 import type { CategoryRequest } from "../dto/CategoryRequest";
 import type { CategoryResponse } from "../dto/CategoryResponse";
-import { getErrorMessage, getStoredToken } from "./api";
-
-const API_BASE_URL ="http://localhost:8081";
+import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
 export async function createCategory(
   request: CategoryRequest,

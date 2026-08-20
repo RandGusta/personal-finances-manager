@@ -52,8 +52,8 @@ const RedifinePassword = () => {
     } else if (newPassword.length < 8) {
       setNewPasswordError("The password must have at least 8 characters");
       formIsValid = false;
-    } else if (newPassword.length > 100) {
-      setNewPasswordError("The password must have at most 100 characters");
+    } else if (newPassword.length > 20) {
+      setNewPasswordError("The password must have at most 20 characters");
       formIsValid = false;
     }
 
@@ -100,8 +100,7 @@ const RedifinePassword = () => {
     }
   };
 
-  const progressValue =
-    newPassword.length > 0 ? (passwordStrength.score + 1) * 20 : 0;
+  const progressValue = newPassword.length > 0 ? (passwordStrength.score + 1) * 20 : 0;
 
   return (
     <>
@@ -168,31 +167,50 @@ const RedifinePassword = () => {
           </Box>
         }
         right={
-          <Box sx={{ width: "100%", maxWidth: "35rem" }}>
-            <Card
+         <>
+            <Box
               sx={{
-                borderRadius: "80px",
-                boxShadow: "-7px 7px 5px 2px #00000038",
-                overflow: "hidden",
+                width: "100%",
+                maxWidth: "35rem",
+                minHeight: "19rem",
+                maxHeight: "19rem",
               }}
             >
-              <Typography color="primary" variant="h2" sx={{ p: "40px 23px 10px" }}>
-                Account security
-              </Typography>
-              <Box sx={{ display: "flex" }}>
-                <Typography color="primary" sx={{ pl: "23px", minWidth: "20rem" }}>
-                  Confirm your current password, then choose a new password with
-                  at least eight characters.
+              <Card
+                sx={{
+                  borderRadius: "80",
+                  boxShadow: "-7px 7px 5px 2px #00000038",
+                  overflow: "hidden",
+                }}
+              >
+                <Typography
+                  color="primary"
+                  variant="h2"
+                  sx={{ padding: "40px 23px 10px 23px" }}
+                >
+                   Account security
                 </Typography>
-                <Box
-                  component="img"
-                  src={cardImage}
-                  alt="Finance cards"
-                  sx={{ minWidth: "23rem", maxHeight: "18rem", transform: "translateY(-10px)" }}
-                />
-              </Box>
-            </Card>
-          </Box>
+                <Box sx={{ display: "flex", gap: "px" }}>
+                  <Typography
+                    color="primary"
+                    sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
+                  >
+                   Confirm your current password, then choose a new password with
+                  at least eight characters.
+                  </Typography>
+                  <Box
+                    component="img"
+                    src={cardImage}
+                    sx={{
+                      minWidth: "23rem",
+                      maxHeight: "18rem",
+                      transform: "translate(0px, -10px)",
+                    }}
+                  />
+                </Box>
+              </Card>
+            </Box>
+          </>
         }
       />
 

@@ -25,7 +25,7 @@ import com.gustavo.finance.finance_control.service.CategoryService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173"})
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
 

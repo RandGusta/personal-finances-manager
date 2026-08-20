@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.gustavo.finance.finance_control.dto.WalletMemberRequest;
 import com.gustavo.finance.finance_control.dto.WalletMemberResponse;
 import com.gustavo.finance.finance_control.dto.WalletMemberRoleRequest;
-import com.gustavo.finance.finance_control.entity.User;
-import com.gustavo.finance.finance_control.entity.UserWallet;
 import com.gustavo.finance.finance_control.enums.UserRelationWallet;
 import com.gustavo.finance.finance_control.exception.ConflictException;
 import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
+import com.gustavo.finance.finance_control.entity.User;
+import com.gustavo.finance.finance_control.entity.UserWallet;
 import com.gustavo.finance.finance_control.repository.UserRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
 

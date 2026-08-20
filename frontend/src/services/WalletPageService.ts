@@ -58,6 +58,26 @@ export async function createWallet(
   return createdWallet;
 }
 
+export async function deleteWallet(walletId: number): Promise<void> {
+  const token = getStoredToken();
+
+  if (!token) {
+    throw new Error("You need to sign in to delete a wallet");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/v1/wallets/${walletId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const message = await getErrorMessage(response, "Error while deleting the wallet");
+    throw new Error(message);
+  }
+}
+
 export async function getWalletMembers(
   walletId: number,
 ): Promise<WalletMemberResponse[]> {

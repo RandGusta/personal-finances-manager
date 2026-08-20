@@ -42,6 +42,7 @@ const UserSummary = () => {
         }
       }
     };
+    
     loadUserSummary();
     return () => {
       componentIsMounted = false;

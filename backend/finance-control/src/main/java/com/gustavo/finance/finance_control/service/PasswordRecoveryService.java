@@ -12,17 +12,16 @@ import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ForgotPasswordResponse;
 import com.gustavo.finance.finance_control.dto.ResetPasswordRequest;
+import com.gustavo.finance.finance_control.exception.InvalidPasswordResetTokenException;
 import com.gustavo.finance.finance_control.entity.RedifinationPasswordToken;
 import com.gustavo.finance.finance_control.entity.User;
-import com.gustavo.finance.finance_control.exception.InvalidPasswordResetTokenException;
 import com.gustavo.finance.finance_control.repository.RedifinationPasswordTokenRepository;
 import com.gustavo.finance.finance_control.repository.UserRepository;
 
 @Service
 public class PasswordRecoveryService {
 
-    private static final String NEUTRAL_MESSAGE =
-        "If this e-mail is registered, you will receive the instructions shortly.";
+    private static final String NEUTRAL_MESSAGE =  "If this e-mail is registered, you will receive the instructions shortly.";
 
     private final UserRepository userRepository;
     private final RedifinationPasswordTokenRepository tokenRepository;

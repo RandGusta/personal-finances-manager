@@ -23,14 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.gustavo.finance.finance_control.dto.TransactionRequest;
 import com.gustavo.finance.finance_control.dto.TransactionResponse;
-import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.enums.TransactionType;
+import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.TransactionService;
 
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
+@CrossOrigin(origins = {"http://localhost:5173"})
 @RequestMapping("/api/v1/wallets/{walletId}/transactions")
 public class TransactionController {
 
