@@ -8,6 +8,7 @@ import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api";
 
 
 export async function getRecentTransactions(
+  wallets: WalletResponse[],
   limit = 5,
 ): Promise<TransactionResponse[]> {
   const token = getStoredToken();
@@ -16,21 +17,6 @@ export async function getRecentTransactions(
     throw new Error("You need to sign in to view recent transactions");
   }
 
-  const walletsResponse = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!walletsResponse.ok) {
-    const message = await getErrorMessage(
-      walletsResponse,
-      "Error while loading the wallets",
-    );
-    throw new Error(message);
-  }
-
-  const wallets = (await walletsResponse.json()) as WalletResponse[];
   const transactions: TransactionResponse[] = [];
 
   for (const wallet of wallets) {

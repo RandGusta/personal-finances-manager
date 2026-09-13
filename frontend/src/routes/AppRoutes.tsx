@@ -5,7 +5,7 @@ import RedifinePassword from '../pages/RedifinePassword';
 import ResetPassword from '../pages/ResetPassword';
 import Transactions from '../pages/Transactions';
 import {Routes, Route} from 'react-router-dom';
-import Dashboard from '../pages/Dashboard';
+import Dashboard from '../pages/new/Dashboard';
 import Category  from '../pages/Category';
 import Wallets from '../pages/Wallets';
 import Profile from '../pages/Profile';

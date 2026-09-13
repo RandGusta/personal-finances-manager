@@ -2,14 +2,19 @@ import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/materi
 import profile from "../assets/svg/profile.svg";
 import { useEffect, useState } from "react";
 import { getUserSummary } from "../services/UserSummaryService";
-import type { UserSummaryResponse } from "../dto/UserSummaryResponse";
+import type { UserSummaryResponse, WalletResponse } from "../dto/UserSummaryResponse";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
 
-const UserSummary = () => {
+type UserSummaryProps = {
+  wallets: WalletResponse[] | null;
+  walletsError: string;
+};
+
+const UserSummary = ({ wallets, walletsError }: UserSummaryProps) => {
   const [summary, setSummary] = useState<UserSummaryResponse | null>(null);
   const [userError, setUserError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -21,8 +26,16 @@ const UserSummary = () => {
     let componentIsMounted = true;
 
     const loadUserSummary = async () => {
+      if (wallets === null) {
+        if (walletsError && componentIsMounted) {
+          setUserError(walletsError);
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
-        const response = await getUserSummary();
+        const response = await getUserSummary(wallets);
 
         if (componentIsMounted) {
           setSummary(response);
@@ -42,12 +55,11 @@ const UserSummary = () => {
         }
       }
     };
-    
     loadUserSummary();
     return () => {
       componentIsMounted = false;
     };
-  }, []);
+  }, [wallets, walletsError]);
 
   const formatCurrency = (value: number | undefined) =>
     currencyFormatter.format(value ?? 0);

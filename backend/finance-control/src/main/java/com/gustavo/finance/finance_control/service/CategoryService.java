@@ -76,7 +76,7 @@ public class CategoryService {
             .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 
-    private void copyRequest(Category category, CategoryRequest request) {
+    private void copyRequest(Category category, CategoryRequest request) { //setando request do user
         category.setName(request.getName().trim());
         category.setType(request.getType());
     }

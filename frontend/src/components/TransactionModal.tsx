@@ -6,6 +6,7 @@ import type { TransactionType } from "../dto/TransactionResponse";
 import { getCategories } from "../services/CategoryTableService";
 import { createTransaction } from "../services/TransactionModalService";
 import { BaseButton } from "./Button";
+import CategoryModal from "./CategoryModal";
 import { BaseInputField } from "./Input";
 
 interface TransactionModalProps {
@@ -34,6 +35,8 @@ const TransactionModal = ({
   const [date, setDate] = useState(getCurrentDate());
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [openCategoryModal, setOpenCategoryModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -47,6 +50,7 @@ const TransactionModal = ({
     const loadCategories = async () => {
       try {
         setCategoriesLoading(true);
+        setCategoriesLoaded(false);
         const response = await getCategories(type as CategoryType);
 
         if (componentIsMounted) {
@@ -64,6 +68,7 @@ const TransactionModal = ({
         }
       } finally {
         if (componentIsMounted) {
+          setCategoriesLoaded(true);
           setCategoriesLoading(false);
         }
       }
@@ -83,6 +88,7 @@ const TransactionModal = ({
     setType("");
     setDate(getCurrentDate());
     setCategories([]);
+    setCategoriesLoaded(false);
     setError("");
   };
 
@@ -150,6 +156,7 @@ const TransactionModal = ({
   };
 
   return (
+    <>
     <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
@@ -179,6 +186,8 @@ const TransactionModal = ({
           onChange={(event) => {
             setType(event.target.value as TransactionType);
             setCategoryId("");
+            setCategories([]);
+            setCategoriesLoaded(false);
           }}
           required
         >
@@ -231,6 +240,16 @@ const TransactionModal = ({
           ))}
         </BaseInputField>
 
+        {type !== "" && categoriesLoaded && categories.length === 0 && (
+          <Button
+            variant="outlined"
+            onClick={() => setOpenCategoryModal(true)}
+            sx={{ mt: 1 }}
+          >
+            Create {type === "INCOME" ? "income" : "expense"} category
+          </Button>
+        )}
+
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
           <Button variant="outlined" onClick={handleClose} disabled={saving}>
             Cancel
@@ -242,6 +261,18 @@ const TransactionModal = ({
         </Box>
       </Box>
     </Modal>
+    <CategoryModal
+      open={openCategoryModal}
+      fixedType={type === "" ? undefined : type}
+      onClose={() => setOpenCategoryModal(false)}
+      onCreated={(createdCategory) => {
+        setCategories([createdCategory]);
+        setCategoryId(createdCategory.id);
+        setCategoriesLoaded(true);
+        setOpenCategoryModal(false);
+      }}
+    />
+    </>
   );
 };
 

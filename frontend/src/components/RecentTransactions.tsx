@@ -1,6 +1,7 @@
 import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import type { TransactionResponse } from "../dto/TransactionResponse";
+import type { WalletResponse } from "../dto/UserSummaryResponse";
 import { getRecentTransactions } from "../services/RecentTransactionsService";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
@@ -18,7 +19,12 @@ function formatType(type: TransactionResponse["type"]) {
   return type === "INCOME" ? "Income" : "Expense";
 }
 
-const RecentTransaction = () => {
+type RecentTransactionProps = {
+  wallets: WalletResponse[] | null;
+  walletsError: string;
+};
+
+const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) => {
   const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,8 +33,16 @@ const RecentTransaction = () => {
     let componentIsMounted = true;
 
     const loadTransactions = async () => {
+      if (wallets === null) {
+        if (walletsError && componentIsMounted) {
+          setError(walletsError);
+          setLoading(false);
+        }
+        return;
+      }
+
       try {
-        const response = await getRecentTransactions();
+        const response = await getRecentTransactions(wallets);
 
         if (componentIsMounted) {
           setTransactions(response);
@@ -54,7 +68,7 @@ const RecentTransaction = () => {
     return () => {
       componentIsMounted = false;
     };
-  }, []);
+  }, [wallets, walletsError]);
 
   return (
     <Card

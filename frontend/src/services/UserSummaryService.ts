@@ -6,7 +6,9 @@ import type {
 } from "../dto/UserSummaryResponse";
 import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
 
-export async function getUserSummary(): Promise<UserSummaryResponse> {
+export async function getUserSummary(
+  wallets: WalletResponse[],
+): Promise<UserSummaryResponse> {
   const token = getStoredToken();
 
   if (!token) {
@@ -29,21 +31,6 @@ export async function getUserSummary(): Promise<UserSummaryResponse> {
 
   const profile = (await profileResponse.json()) as UserProfileResponse;
 
-  const walletsResponse = await fetch(`${API_BASE_URL}/api/v1/wallets`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!walletsResponse.ok) {
-    const message = await getErrorMessage(
-      walletsResponse,
-      "Error while loading the wallets",
-    );
-    throw new Error(message);
-  }
-
-  const wallets = (await walletsResponse.json()) as WalletResponse[];
   let balance = 0;
   let revenue = 0;
   let expenses = 0;

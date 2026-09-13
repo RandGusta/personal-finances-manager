@@ -83,7 +83,9 @@ public class FinancialSummaryService {
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
 
+        //agrupando por categoria "food", shopping etc --> facilitando a soma 
         Map<Long, CategorySummaryResponse> categories = new LinkedHashMap<>();
+        //agrupando por mes 
         Map<String, MonthlySummaryResponse> months = new LinkedHashMap<>();
 
         for (Transaction transaction : transactions) {

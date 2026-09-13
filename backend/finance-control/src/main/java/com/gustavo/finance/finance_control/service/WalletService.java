@@ -54,7 +54,7 @@ public class WalletService {
     public WalletResponse create(User user, WalletRequest request) {
         Wallet wallet = new Wallet();
         copyRequest(wallet, request);
-        wallet.setCreatedDate(LocalDateTime.now());
+        wallet.setCreatedDate(LocalDateTime.now()); // pesquisar notação
         Wallet savedWallet = walletRepository.save(wallet);
 
         UserWallet ownerMembership = new UserWallet();
