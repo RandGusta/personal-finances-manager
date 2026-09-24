@@ -2,7 +2,7 @@ import { Alert, Box, Button, Card, CardContent, Typography } from "@mui/material
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BaseButton } from "../components/Button";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/NavBar";
 import { acceptWalletInvitation } from "../services/WalletPageService";
 import { getStoredToken } from "../services/api";
 
@@ -50,7 +50,7 @@ const WalletInvitation = () => {
 
   return (
     <>
-      {isAuthenticated && <BaseNavBar />}
+      {isAuthenticated && <Sidebar />}
 
       <Box
         sx={{

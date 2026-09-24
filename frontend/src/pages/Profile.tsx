@@ -1,7 +1,7 @@
 import { Alert, Box, Skeleton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/NavBar";
 import ProfileSummary from "../components/ProfileSummary";
 import WalletCard from "../components/WalletCard";
 import type { ProfilePageResponse } from "../dto/ProfilePageResponse";
@@ -49,7 +49,7 @@ const Profile = () => {
 
   return (
     <>
-      <BaseNavBar />
+      <Sidebar />
       <ProfileLayout
         summary={
           <>

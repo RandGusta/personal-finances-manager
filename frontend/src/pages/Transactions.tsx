@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/NavBar";
 import TransactionModal from "../components/TransactionModal";
 import TransactionTable from "../components/TransactionTable";
 
@@ -11,7 +11,7 @@ const Transactions = () => {
 
   return (
     <>
-      <BaseNavBar />
+      <Sidebar />
 
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box

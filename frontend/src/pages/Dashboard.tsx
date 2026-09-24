@@ -1,18 +1,39 @@
 import { useEffect, useState } from "react";
 import ExpensesChart from "../components/ExpensesChart";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/new/NavBar";
 import RecentTransaction from "../components/RecentTransactions";
 import UserSummary from "../components/UserSummary";
-import type { WalletResponse } from "../dto/UserSummaryResponse";
+import type { UserProfileResponse, WalletResponse } from "../dto/UserSummaryResponse";
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import { getWallets } from "../services/WalletPageService";
+import { Typography, Box, Skeleton } from "@mui/material";
+import { getProfilePage } from "../services/ProfileService";
+
 
 const Dashboard = () => {
   const [wallets, setWallets] = useState<WalletResponse[] | null>(null);
   const [walletsError, setWalletsError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState("");
+  const [summaryError, setSummaryError] = useState("");
+  
+
 
   useEffect(() => {
     let componentIsMounted = true;
+
+
+    const loadSummary = async () =>{
+      try{
+        const response = await getProfilePage();
+        setSummary(response.profile?.name.trim());
+        setSummaryError("");
+        setLoading(false);
+      } catch (error){
+          const message = error instanceof Error ? error.message : "Error while loading user name";
+          setSummaryError(message);
+      }
+    }
 
     const loadWallets = async () => {
       try {
@@ -30,7 +51,7 @@ const Dashboard = () => {
         }
       }
     };
-
+    loadSummary();
     loadWallets();
 
     return () => {
@@ -40,7 +61,19 @@ const Dashboard = () => {
 
   return (
     <>
-      <BaseNavBar />
+    <Box sx={{}}>
+      <Sidebar />
+          <Box sx={{textAlign:"left"}}>
+          <Typography
+                variant="h6" sx={{color: "#000000"}}>
+                Hello, {loading ? <Skeleton /> : summary}! <span>👋</span>
+          </Typography>
+          <Typography
+                variant="h6" sx={{color: "#000000" }}>
+                What you are looking for today?
+          </Typography>
+          </Box>
+      </Box>
       <DashboardLayout
         userSummary={<UserSummary wallets={wallets} walletsError={walletsError} />}
         expensesChart={<ExpensesChart />}

@@ -1,6 +1,6 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useState } from "react";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/NavBar";
 import CategoryModal from "../components/CategoryModal";
 import CategoryTable from "../components/CategoryTable";
 
@@ -10,7 +10,8 @@ const Category = () => {
 
   return (
     <>
-      <BaseNavBar />
+            <Sidebar />
+      
 
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box

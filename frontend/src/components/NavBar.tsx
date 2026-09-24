@@ -1,135 +1,107 @@
-import { useState } from "react";
 import {
-  AppBar,
-  Toolbar,
-  Box,
-  Button,
-  IconButton,
-  Menu,
-  MenuItem,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  Tooltip,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Link } from "react-router-dom";
-import logo from "../assets/svg/navbarIcon.svg";
 
-const BaseNavBar = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+import HouseRoundedIcon from "@mui/icons-material/HouseRounded";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import CategoryIcon from "@mui/icons-material/Category";
+import PersonIcon from "@mui/icons-material/Person";
+import WalletIcon from "@mui/icons-material/Wallet";
+import AccountBalanceRoundedIcon from "@mui/icons-material/AccountBalanceRounded";
 
-  const handleOpenMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
+import { useLocation, useNavigate } from "react-router-dom";
 
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-  };
+const navigation = [
+  {
+    label: "Login",
+    path: "/login",
+    icon: <AccountBalanceRoundedIcon />,
+  },
+  {
+    label: "Home",
+    path: "/home",
+    icon: <HouseRoundedIcon />,
+  },
+  {
+    label: "Transactions",
+    path: "/transactions",
+    icon: <BarChartIcon />,
+  },
+  {
+    label: "Wallets",
+    path: "/wallets",
+    icon: <WalletIcon />,
+  },
+  {
+    label: "Profile",
+    path: "/profile",
+    icon: <PersonIcon />,
+  },
+  {
+    label: "Categories",
+    path: "/categories",
+    icon: <CategoryIcon />,
+  },
+];
+
+export function Sidebar() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
   return (
-    <>
-      <AppBar position="sticky">
-        <Toolbar
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-          }}
-        >
-          <Box
-            sx={{
-              display: {
-                xs: "none",
-                md: "flex",
-              },
-              gap: 7,
-              alignItems: "center",
-            }}
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: 72,
+        flexShrink: 0,
+
+        "& .MuiDrawer-paper": {
+          width: 72,
+          boxSizing: "border-box",
+          backgroundColor: "#0D330E",
+        },
+                        "&.Mui-selected:hover": {
+                  backgroundColor: "#051605",
+                },
+      }}
+    >
+      <List>
+        {navigation.map((item) => (
+          <Tooltip
+            key={item.path}
+            title={item.label}
+            placement="right"
           >
-            <Box
-              component={Link}
-              to="/login"
+            <ListItemButton
+              selected={location.pathname === item.path}
+              onClick={() => navigate(item.path)}
               sx={{
-                display: "flex",
-                alignItems: "center",
-                cursor: "pointer",
+                color: "#F6FAFD",
+
+                "&.Mui-selected": {
+                  backgroundColor: "#2D531A",
+                },
+
+                "&.Mui-selected:hover": {
+                  backgroundColor: "rgb(37, 69, 22)",
+                },
               }}
             >
-              <Box component="img" src={logo} sx={{ width: "2rem" }} />
-            </Box>
-
-            <Button component={Link} to="/home" sx={{ color: "#F6FAFD" }}>
-              Home
-            </Button>
-
-            <Button component={Link} to="/profile" sx={{ color: "#F6FAFD" }}>
-              Profile
-            </Button>
-
-            <Button
-              component={Link}
-              to="/transactions"
-              sx={{ color: "#F6FAFD" }}
-            >
-              Transactions
-            </Button>
-
-            <Button component={Link} to="/category" sx={{ color: "#F6FAFD" }}>
-              Categories
-            </Button>
-
-            <Button component={Link} to="/wallets" sx={{ color: "#F6FAFD" }}>
-              Wallets
-            </Button>
-          </Box>
-
-          <Box
-            sx={{
-              display: {
-                xs: "flex",
-                md: "none",
-              },
-              width: "100%",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Box component="img" src={logo} sx={{ width: "2rem" }} />
-
-            <IconButton color="inherit" onClick={handleOpenMenu}>
-              <MenuIcon />
-            </IconButton>
-          </Box>
-        </Toolbar>
-
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleCloseMenu}
-        >
-          <MenuItem component={Link} to="/home" onClick={handleCloseMenu}>
-            Home
-          </MenuItem>
-
-          <MenuItem component={Link} to="/profile" onClick={handleCloseMenu}>
-            Profile
-          </MenuItem>
-
-          <MenuItem
-            component={Link}
-            to="/transactions"
-            onClick={handleCloseMenu}
-          >
-            Transactions
-          </MenuItem>
-
-          <MenuItem component={Link} to="/category" onClick={handleCloseMenu}>
-            Categories
-          </MenuItem>
-
-          <MenuItem component={Link} to="/wallets" onClick={handleCloseMenu}>
-            Wallets
-          </MenuItem>
-        </Menu>
-      </AppBar>
-    </>
+              <ListItemIcon
+                sx={{
+                  color: "inherit",
+                }}
+              >
+                {item.icon}
+              </ListItemIcon>
+            </ListItemButton>
+          </Tooltip>
+        ))}
+      </List>
+    </Drawer>
   );
-};
-
-export default BaseNavBar;
+}

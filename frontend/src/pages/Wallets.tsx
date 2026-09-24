@@ -10,7 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import BaseNavBar from "../components/NavBar";
+import { Sidebar } from "../components/NavBar";
 import NewWalletModal from "../components/NewWalletModal";
 import WalletCard from "../components/WalletCard";
 import WalletMembersModal from "../components/WalletMembersModal";
@@ -126,7 +126,7 @@ const Wallets = () => {
 
   return (
     <>
-      <BaseNavBar />
+      <Sidebar />
 
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box
