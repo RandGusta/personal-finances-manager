@@ -1,39 +1,26 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ExpensesChart from "../components/ExpensesChart";
 import { Sidebar } from "../components/new/NavBar";
 import RecentTransaction from "../components/RecentTransactions";
 import UserSummary from "../components/UserSummary";
-import type { UserProfileResponse, WalletResponse } from "../dto/UserSummaryResponse";
+import type { UserSummaryResponse, WalletResponse } from "../dto/UserSummaryResponse";
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import { getWallets } from "../services/WalletPageService";
 import { Typography, Box, Skeleton } from "@mui/material";
-import { getProfilePage } from "../services/ProfileService";
 
 
 const Dashboard = () => {
   const [wallets, setWallets] = useState<WalletResponse[] | null>(null);
   const [walletsError, setWalletsError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [summary, setSummary] = useState("");
-  const [summaryError, setSummaryError] = useState("");
-  
+  const [userName, setUserName] = useState("");
 
+  const handleSummaryLoaded = useCallback((summary: UserSummaryResponse) => {
+    setUserName(summary.userName.trim());
+  }, []);
 
   useEffect(() => {
     let componentIsMounted = true;
 
-
-    const loadSummary = async () =>{
-      try{
-        const response = await getProfilePage();
-        setSummary(response.profile?.name.trim());
-        setSummaryError("");
-        setLoading(false);
-      } catch (error){
-          const message = error instanceof Error ? error.message : "Error while loading user name";
-          setSummaryError(message);
-      }
-    }
 
     const loadWallets = async () => {
       try {
@@ -51,7 +38,6 @@ const Dashboard = () => {
         }
       }
     };
-    loadSummary();
     loadWallets();
 
     return () => {
@@ -61,26 +47,30 @@ const Dashboard = () => {
 
   return (
     <>
-    <Box sx={{}}>
+    <Box sx={{ display: "flex" }}>
       <Sidebar />
-          <Box sx={{textAlign:"left"}}>
+          <Box sx={{ flex: 1, minWidth: 0, p: { xs: 2, md: 4 }, textAlign: "left" }}>
           <Typography
-                variant="h6" sx={{color: "#000000"}}>
-                Hello, {loading ? <Skeleton /> : summary}! <span>👋</span>
+                variant="h6" sx={{color: "#000000", fontWeight: 700}}>
+                Hello, {userName || <Skeleton width={120} sx={{ display: "inline-block" }} />}! <span>🧐</span>
           </Typography>
           <Typography
-                variant="h6" sx={{color: "#000000" }}>
+                variant="h6" sx={{color: "#000000", fontWeight: 500 }}>
                 What you are looking for today?
           </Typography>
+          <UserSummary
+            wallets={wallets}
+            walletsError={walletsError}
+            onLoaded={handleSummaryLoaded}
+          />
+          <DashboardLayout
+            expensesChart={<ExpensesChart />}
+            recentTransactions={
+              <RecentTransaction wallets={wallets} walletsError={walletsError} />
+            }
+          />
           </Box>
       </Box>
-      <DashboardLayout
-        userSummary={<UserSummary wallets={wallets} walletsError={walletsError} />}
-        expensesChart={<ExpensesChart />}
-        recentTransactions={
-          <RecentTransaction wallets={wallets} walletsError={walletsError} />
-        }
-      />
     </>
   );
 };

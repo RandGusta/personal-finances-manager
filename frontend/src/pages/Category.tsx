@@ -10,9 +10,7 @@ const Category = () => {
 
   return (
     <>
-            <Sidebar />
-      
-
+      <Sidebar />
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box
           sx={{
