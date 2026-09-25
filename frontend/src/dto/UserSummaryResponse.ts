@@ -5,6 +5,7 @@ export interface UserSummaryResponse {
   revenue: number;
   expenses: number;
   categories: CategorySummaryResponse[];
+  months: MonthlySummaryResponse[];
 }
 
 export interface UserProfileResponse {

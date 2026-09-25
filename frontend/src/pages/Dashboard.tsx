@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import ExpensesChart from "../components/ExpensesChart";
+import FinancialTrendChart from "../components/FinancialTrendChart";
 import { Sidebar } from "../components/new/NavBar";
 import RecentTransaction from "../components/RecentTransactions";
 import UserSummary from "../components/UserSummary";
@@ -76,6 +77,12 @@ const Dashboard = () => {
             expensesChart={
               <ExpensesChart
                 categories={financialSummary?.categories ?? null}
+                error={summaryError}
+              />
+            }
+            financialTrendChart={
+              <FinancialTrendChart
+                months={financialSummary?.months ?? null}
                 error={summaryError}
               />
             }

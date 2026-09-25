@@ -1,6 +1,7 @@
 import type {
   FinancialSummaryResponse,
   CategorySummaryResponse,
+  MonthlySummaryResponse,
   UserProfileResponse,
   UserSummaryResponse,
   WalletResponse,
@@ -36,6 +37,7 @@ export async function getUserSummary(
   let revenue = 0;
   let expenses = 0;
   const categories = new Map<string, CategorySummaryResponse>();
+  const months = new Map<string, MonthlySummaryResponse>();
 
   for (const wallet of wallets) {
     const summaryResponse = await fetch(
@@ -71,6 +73,18 @@ export async function getUserSummary(
 
       categories.set(categoryKey, { ...category });
     });
+
+    summary.byMonth.forEach((month) => {
+      const currentMonth = months.get(month.month);
+
+      if (currentMonth) {
+        currentMonth.income += month.income;
+        currentMonth.expense += month.expense;
+        return;
+      }
+
+      months.set(month.month, { ...month });
+    });
   }
 
   return {
@@ -81,6 +95,9 @@ export async function getUserSummary(
     expenses,
     categories: Array.from(categories.values()).sort(
       (first, second) => second.total - first.total,
+    ),
+    months: Array.from(months.values()).sort((first, second) =>
+      first.month.localeCompare(second.month),
     ),
   };
 }
