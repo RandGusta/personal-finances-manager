@@ -13,9 +13,17 @@ const Dashboard = () => {
   const [wallets, setWallets] = useState<WalletResponse[] | null>(null);
   const [walletsError, setWalletsError] = useState("");
   const [userName, setUserName] = useState("");
+  const [financialSummary, setFinancialSummary] = useState<UserSummaryResponse | null>(null);
+  const [summaryError, setSummaryError] = useState("");
 
   const handleSummaryLoaded = useCallback((summary: UserSummaryResponse) => {
     setUserName(summary.userName.trim());
+    setFinancialSummary(summary);
+    setSummaryError("");
+  }, []);
+
+  const handleSummaryError = useCallback((message: string) => {
+    setSummaryError(message);
   }, []);
 
   useEffect(() => {
@@ -62,9 +70,15 @@ const Dashboard = () => {
             wallets={wallets}
             walletsError={walletsError}
             onLoaded={handleSummaryLoaded}
+            onError={handleSummaryError}
           />
           <DashboardLayout
-            expensesChart={<ExpensesChart />}
+            expensesChart={
+              <ExpensesChart
+                categories={financialSummary?.categories ?? null}
+                error={summaryError}
+              />
+            }
             recentTransactions={
               <RecentTransaction wallets={wallets} walletsError={walletsError} />
             }

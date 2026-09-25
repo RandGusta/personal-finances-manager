@@ -15,7 +15,7 @@ export function AutenticationLayout({ left, right}: { right: React.ReactNode, le
             {left}
             </Box>
         </Box >
-        <Box sx={{flex:"1", justifyContent:"center", alignItems:"center", bgcolor:"#1C4632", display:{xs:'none', lg:'flex'}}}>
+        <Box sx={{flex:"1", justifyContent:"center", alignItems:"center", bgcolor:"#0D330E", display:{xs:'none', lg:'flex'}}}>
             <Box>
             {right}
             </Box>

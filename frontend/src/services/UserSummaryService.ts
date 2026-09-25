@@ -1,5 +1,6 @@
 import type {
   FinancialSummaryResponse,
+  CategorySummaryResponse,
   UserProfileResponse,
   UserSummaryResponse,
   WalletResponse,
@@ -34,6 +35,7 @@ export async function getUserSummary(
   let balance = 0;
   let revenue = 0;
   let expenses = 0;
+  const categories = new Map<string, CategorySummaryResponse>();
 
   for (const wallet of wallets) {
     const summaryResponse = await fetch(
@@ -57,6 +59,18 @@ export async function getUserSummary(
     balance += summary.balance;
     revenue += summary.totalIncome;
     expenses += summary.totalExpense;
+
+    summary.byCategory.forEach((category) => {
+      const categoryKey = category.categoryId?.toString() ?? "uncategorized";
+      const currentCategory = categories.get(categoryKey);
+
+      if (currentCategory) {
+        currentCategory.total += category.total;
+        return;
+      }
+
+      categories.set(categoryKey, { ...category });
+    });
   }
 
   return {
@@ -65,5 +79,8 @@ export async function getUserSummary(
     balance,
     revenue,
     expenses,
+    categories: Array.from(categories.values()).sort(
+      (first, second) => second.total - first.total,
+    ),
   };
 }

@@ -13,12 +13,14 @@ type UserSummaryProps = {
   wallets: WalletResponse[] | null;
   walletsError: string;
   onLoaded?: (summary: UserSummaryResponse) => void;
+  onError?: (message: string) => void;
 };
 
 const UserSummary = ({
   wallets,
   walletsError,
   onLoaded,
+  onError,
 }: UserSummaryProps) => {
   const [summary, setSummary] = useState<UserSummaryResponse | null>(null);
   const [userError, setUserError] = useState("");
@@ -35,6 +37,7 @@ const UserSummary = ({
         if (walletsError && componentIsMounted) {
           setUserError(walletsError);
           setLoading(false);
+          onError?.(walletsError);
         }
         return;
       }
@@ -54,6 +57,7 @@ const UserSummary = ({
               ? error.message
               : "Error occurred while loading";
           setUserError(message);
+          onError?.(message);
         }
       } finally {
         if (componentIsMounted) {
@@ -65,7 +69,7 @@ const UserSummary = ({
     return () => {
       componentIsMounted = false;
     };
-  }, [wallets, walletsError, onLoaded]);
+  }, [wallets, walletsError, onError, onLoaded]);
 
   const formatCurrency = (value: number | undefined) =>
     currencyFormatter.format(value ?? 0);

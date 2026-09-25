@@ -166,7 +166,7 @@ export function Login() {
                 }}
               >
                 <Typography
-                  color="primary"
+                  color="#0D330E"
                   variant="h2"
                   sx={{ padding: "40px 23px 10px 23px" }}
                 >
@@ -174,7 +174,7 @@ export function Login() {
                 </Typography>
                 <Box sx={{ display: "flex", gap: "px" }}>
                   <Typography
-                    color="primary"
+                    color="#0D330E"
                     sx={{ padding: "0 0px 0px 23px", minWidth: "20rem" }}
                   >
                     Manage expenses and savings with clarity. Share and explore
