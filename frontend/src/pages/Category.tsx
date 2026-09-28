@@ -22,12 +22,22 @@ const Category = () => {
             gap: 2,
           }}
         >
-          <Typography
-            variant="h4"
-            sx={{ fontSize: { xs: "2rem", md: "2.35rem" } }}
-          >
-            Categories
-          </Typography>
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: { xs: "2rem", md: "2.35rem" },
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.15,
+              }}
+            >
+              Categories
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Organize your income and expense transactions.
+            </Typography>
+          </Box>
 
           <BaseButton
             variant="contained"

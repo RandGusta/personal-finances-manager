@@ -9,6 +9,12 @@ import {
   MenuItem,
   Select,
   Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -65,20 +71,16 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
 
   return (
     <Card sx={{ mt: 3 }}>
-      <CardContent>
-        <Typography
-          variant="h5"
-          sx={{
-            bgcolor: "#1C4632",
-            textAlign: "center",
-            p: 1,
-            borderRadius: 1,
-          }}
-        >
-          Categories
-        </Typography>
+      <CardContent sx={{ p: 0 }}>
+        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #E2E8E3" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1C4632" }}>
+            Category list
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Filter and review the categories available to your account.
+          </Typography>
 
-        <FormControl fullWidth sx={{ mt: 3 }}>
+          <FormControl fullWidth sx={{ mt: 2 }}>
           <InputLabel id="category-type-filter-label">Type</InputLabel>
           <Select
             labelId="category-type-filter-label"
@@ -90,60 +92,56 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
             <MenuItem value="INCOME">Income</MenuItem>
             <MenuItem value="EXPENSE">Expense</MenuItem>
           </Select>
-        </FormControl>
-
-        {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-
-        <Box
-          sx={{
-            display: { xs: "none", md: "grid" },
-            gridTemplateColumns: "2fr 1fr",
-            gap: 2,
-            mt: 3,
-          }}
-        >
-          <Typography variant="h6">Name</Typography>
-          <Typography variant="h6">Type</Typography>
+          </FormControl>
         </Box>
 
-        {loading && (
-          <Box sx={{ mt: 2 }}>
-            <Skeleton height={56} />
-            <Skeleton height={56} />
-            <Skeleton height={56} />
-          </Box>
-        )}
+        {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
-        {!loading && !error && categories.length === 0 && (
-          <Alert severity="info" sx={{ mt: 2 }}>
-            There are no categories for this filter.
-          </Alert>
-        )}
+        <TableContainer sx={{ overflowX: "auto" }}>
+          <Table size="small" aria-label="Category list" sx={{ minWidth: 420 }}>
+            <TableHead sx={{ backgroundColor: "#F3F8F4" }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Name</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Type</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading &&
+                Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Skeleton width="55%" /></TableCell>
+                    <TableCell><Skeleton width="40%" /></TableCell>
+                  </TableRow>
+                ))}
 
-        {!loading &&
-          categories.map((category) => (
-            <Box
-              key={category.id}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "2fr 1fr",
-                },
-                gap: 2,
-                mt: 2,
-                p: 2,
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <Typography>{category.name}</Typography>
+              {!loading && !error && categories.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} sx={{ py: 3, textAlign: "center" }}>
+                    <Alert severity="info">There are no categories for this filter.</Alert>
+                  </TableCell>
+                </TableRow>
+              )}
 
-              <Chip
-                label={category.type === "INCOME" ? "Income" : "Expense"}
-                color={category.type === "INCOME" ? "success" : "error"}
-              />
-            </Box>
-          ))}
+              {!loading && !error && categories.map((category) => (
+                <TableRow key={category.id} hover sx={{ "&:last-child td": { borderBottom: 0 } }}>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      {category.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={category.type === "INCOME" ? "Income" : "Expense"}
+                      size="small"
+                      color={category.type === "INCOME" ? "success" : "error"}
+                      variant="outlined"
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
     </Card>
   );
