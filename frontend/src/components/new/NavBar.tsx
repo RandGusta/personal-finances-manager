@@ -62,10 +62,10 @@ export function Sidebar() {
         "& .MuiDrawer-paper": {
           width: 72,
           boxSizing: "border-box",
-          backgroundColor: "#0D330E",
+          backgroundColor: "#051F20",
         },
                         "&.Mui-selected:hover": {
-                  backgroundColor: "#051605",
+                  backgroundColor: "#0B2B26",
                 },
       }}
     >
@@ -80,14 +80,14 @@ export function Sidebar() {
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               sx={{
-                color: "#F6FAFD",
+                color: "#DAF1DE",
 
                 "&.Mui-selected": {
-                  backgroundColor: "#2D531A",
+                  backgroundColor: "#235347",
                 },
 
                 "&.Mui-selected:hover": {
-                  backgroundColor: "rgb(37, 69, 22)",
+                  backgroundColor: "#235347",
                 },
               }}
             >

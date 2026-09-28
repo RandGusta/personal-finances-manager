@@ -72,8 +72,8 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
   return (
     <Card sx={{ mt: 3 }}>
       <CardContent sx={{ p: 0 }}>
-        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #E2E8E3" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1C4632" }}>
+        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #8EB69B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#163832" }}>
             Category list
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -99,12 +99,12 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
 
         <TableContainer>
           <Table size="small" aria-label="Category list" sx={{ tableLayout: "fixed" }}>
-            <TableHead sx={{ backgroundColor: "#F3F8F4" }}>
+            <TableHead sx={{ backgroundColor: "#DAF1DE" }}>
               <TableRow>
-                <TableCell align="center" sx={{ fontWeight: 700, color: "#1C4632" }}>
+                <TableCell align="center" sx={{ fontWeight: 700, color: "#163832" }}>
                   Name
                 </TableCell>
-                <TableCell align="center" sx={{ fontWeight: 700, color: "#1C4632" }}>
+                <TableCell align="center" sx={{ fontWeight: 700, color: "#163832" }}>
                   Type
                 </TableCell>
               </TableRow>

@@ -55,7 +55,7 @@ const WalletInvitation = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "#F6FAFD",
+          bgcolor: "#DAF1DE",
           p: 2,
         }}
       >

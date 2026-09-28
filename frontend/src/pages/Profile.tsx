@@ -74,7 +74,7 @@ const Profile = () => {
                 mb: 2,
               }}
             >
-              <Typography variant="h5" sx={{ color: "#1C4632", fontSize: "1.5rem" }}>
+              <Typography variant="h5" sx={{ color: "#163832", fontSize: "1.5rem" }}>
                 Wallets
               </Typography>
               <Typography variant="body2" color="text.secondary">

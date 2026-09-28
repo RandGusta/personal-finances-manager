@@ -77,7 +77,7 @@ const RecoverPassword = () => {
       <AutenticationLayout
         left={
           <Box sx={{ width: "100%", maxWidth: "32rem" }}>
-            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#163832" }}>
               Forgot password
             </Typography>
 
@@ -88,7 +88,7 @@ const RecoverPassword = () => {
               sx={{ display: "block", height: "7rem", margin: "2rem auto" }}
             />
 
-            <Typography variant="h3" sx={{ textAlign: "center", color: "#1C4632" }}>
+            <Typography variant="h3" sx={{ textAlign: "center", color: "#163832" }}>
               Enter your registered email to recover your password
             </Typography>
 

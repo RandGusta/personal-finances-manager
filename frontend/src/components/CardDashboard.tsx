@@ -20,7 +20,7 @@ const MetricCard = ({
   return (
     <Card
       sx={{
-        backgroundColor: "#0D330E",
+        backgroundColor: "#163832",
         color: "#FFFFFF",
         borderRadius: 2,
         minHeight: 150,
@@ -43,7 +43,7 @@ const MetricCard = ({
               <Chip
                 label={status}
                 size="small"
-                sx={{ backgroundColor: "#A5E6A6", color: "#1C4632" }}
+                sx={{ backgroundColor: "#8EB69B", color: "#0B2B26" }}
               />
             )}
           </Stack>
@@ -65,12 +65,12 @@ const MetricCard = ({
               justifyContent: "space-between",
             }}
           >
-            <Typography variant="caption" sx={{ color: "#D5E6DA" }}>
+            <Typography variant="caption" sx={{ color: "#DAF1DE" }}>
               {description}
             </Typography>
 
             {variation && (
-              <Typography variant="caption" sx={{ color: "#D5E6DA" }}>
+              <Typography variant="caption" sx={{ color: "#DAF1DE" }}>
                 {variation}
               </Typography>
             )}

@@ -58,11 +58,11 @@ const Dashboard = () => {
     <SidebarLayout>
           <Box sx={{ p: { xs: 2, md: 4 }, textAlign: "left" }}>
           <Typography
-                variant="h6" sx={{color: "#000000", fontWeight: 700}}>
+                variant="h6" sx={{color: "#0B2B26", fontWeight: 700}}>
                 Hello, {userName || <Skeleton width={120} sx={{ display: "inline-block" }} />}! <span>🧐</span>
           </Typography>
           <Typography
-                variant="h6" sx={{color: "#000000", fontWeight: 500 }}>
+                variant="h6" sx={{color: "#0B2B26", fontWeight: 500 }}>
                 What you are looking for today?
           </Typography>
           <UserSummary

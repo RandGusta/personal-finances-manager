@@ -75,12 +75,12 @@ export function Sidebar() {
           left: 0,
           zIndex: theme.zIndex.drawer + 1,
           height: 64,
-          borderTop: "1px solid #DDE7DF",
-          backgroundColor: "#0D330E",
+          borderTop: "1px solid #8EB69B",
+          backgroundColor: "#051F20",
           "& .MuiBottomNavigationAction-root": {
             minWidth: 0,
             px: 0.5,
-            color: "#D5E6DA",
+            color: "#DAF1DE",
           },
           "& .MuiBottomNavigationAction-label": {
             maxWidth: "100%",
@@ -92,7 +92,7 @@ export function Sidebar() {
           },
           "& .Mui-selected": {
             color: "#FFFFFF",
-            backgroundColor: "#2D531A",
+            backgroundColor: "#235347",
           },
         }}
       >
@@ -126,10 +126,10 @@ export function Sidebar() {
         "& .MuiDrawer-paper": {
           width: 72,
           boxSizing: "border-box",
-          backgroundColor: "#0D330E",
+          backgroundColor: "#051F20",
         },
                         "&.Mui-selected:hover": {
-                  backgroundColor: "#051605",
+                  backgroundColor: "#0B2B26",
                 },
       }}
     >
@@ -144,14 +144,14 @@ export function Sidebar() {
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               sx={{
-                color: "#F6FAFD",
+                color: "#DAF1DE",
 
                 "&.Mui-selected": {
-                  backgroundColor: "#2D531A",
+                  backgroundColor: "#235347",
                 },
 
                 "&.Mui-selected:hover": {
-                  backgroundColor: "rgb(37, 69, 22)",
+                  backgroundColor: "#235347",
                 },
               }}
             >

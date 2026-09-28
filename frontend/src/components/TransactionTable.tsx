@@ -146,8 +146,8 @@ const TransactionTable = ({
   return (
     <Card sx={{ mt: 3 }}>
       <CardContent sx={{ p: 0 }}>
-        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #E2E8E3" }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1C4632" }}>
+        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #8EB69B" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#163832" }}>
             Transaction history
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -181,15 +181,15 @@ const TransactionTable = ({
 
         <TableContainer sx={{ overflowX: "auto" }}>
           <Table size="small" aria-label="Transaction history table" sx={{ minWidth: 720 }}>
-            <TableHead sx={{ backgroundColor: "#F3F8F4" }}>
+            <TableHead sx={{ backgroundColor: "#DAF1DE" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Description</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }} align="right">
+                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#163832" }} align="right">
                   Value
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Category</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Type</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>

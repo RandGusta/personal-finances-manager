@@ -101,7 +101,7 @@ const ResetPassword = () => {
       <AutenticationLayout
         left={
           <Box sx={{ width: "100%", maxWidth: "32rem" }}>
-            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#163832" }}>
               Reset password
             </Typography>
 
@@ -112,7 +112,7 @@ const ResetPassword = () => {
               sx={{ display: "block", height: "7rem", margin: "2rem auto" }}
             />
 
-            <Typography variant="h3" sx={{ textAlign: "center", color: "#1C4632" }}>
+            <Typography variant="h3" sx={{ textAlign: "center", color: "#163832" }}>
               Create a new password for your account
             </Typography>
 

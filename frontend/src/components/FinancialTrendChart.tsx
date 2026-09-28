@@ -138,7 +138,7 @@ const FinancialTrendChart = ({ months, error }: FinancialTrendChartProps) => {
                   x2={chartWidth - rightPadding}
                   y1={y}
                   y2={y}
-                  stroke="#E2E8E3"
+                  stroke="#8EB69B"
                   strokeDasharray="4 4"
                 />
               );
@@ -155,7 +155,7 @@ const FinancialTrendChart = ({ months, error }: FinancialTrendChartProps) => {
                   x={pointX(index)}
                   y={chartHeight - 10}
                   textAnchor="middle"
-                  fill="#5B625C"
+                  fill="#235347"
                   fontSize="11"
                 >
                   {formatMonth(month.month)}

@@ -37,9 +37,9 @@ const ProfileSummary = ({profile, walletCount, transactionCount, memberCount, lo
             sx={{
               width: { xs: 80, md: 96 },
               height: { xs: 80, md: 96 },
-              bgcolor: "#1C4632",
+              bgcolor: "#163832",
               fontSize: "2.25rem",
-              border: "3px solid #E8F5E9",
+              border: "3px solid #DAF1DE",
             }}
           >
             {loading ? <Skeleton variant="circular" width={72} height={72} /> : userInitial}

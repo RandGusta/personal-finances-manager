@@ -107,7 +107,7 @@ const RedifinePassword = () => {
       <AutenticationLayout
         left={
           <Box sx={{ width: "100%", maxWidth: "32rem" }}>
-            <Typography variant="h2" sx={{ textAlign: "center", color: "#1C4632" }}>
+            <Typography variant="h2" sx={{ textAlign: "center", color: "#163832" }}>
               Change password
             </Typography>
 

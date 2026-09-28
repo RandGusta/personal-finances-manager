@@ -11,7 +11,7 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 });
 
-const chartColors = ["#65C76A", "#3E8B43", "#28632F", "#17491F", "#A5E6A6", "#7AB77D"];
+const chartColors = ["#8EB69B", "#235347", "#163832", "#0B2B26", "#051F20"];
 
 const ExpensesChart = ({ categories, error }: ExpensesChartProps) => {
   if (error) {
