@@ -11,6 +11,7 @@ import com.gustavo.finance.finance_control.dto.WalletMemberRequest;
 import com.gustavo.finance.finance_control.dto.WalletMemberResponse;
 import com.gustavo.finance.finance_control.dto.WalletMemberRoleRequest;
 import com.gustavo.finance.finance_control.enums.UserRelationWallet;
+import com.gustavo.finance.finance_control.exception.BusinessException;
 import com.gustavo.finance.finance_control.exception.ConflictException;
 import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
 import com.gustavo.finance.finance_control.entity.User;
@@ -49,6 +50,7 @@ public class WalletMemberService {
         WalletMemberRequest request
     ) {
         UserWallet ownerMembership = findOwnerMembership(requester, walletId);
+        validateMemberRole(request.getRole());
         User newMember = userRepository.findByEmail(request.getEmail().trim())
             .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -74,6 +76,8 @@ public class WalletMemberService {
     ) {
         findOwnerMembership(requester, walletId);
         UserWallet membership = findMembership(walletId, userId);
+        validateOwnerMembershipIsNotChanged(membership);
+        validateMemberRole(request.getRole());
         membership.setUserRelationWallet(request.getRole());
         return WalletMemberResponse.from(userWalletRepository.save(membership));
     }
@@ -81,7 +85,9 @@ public class WalletMemberService {
     @Transactional
     public void remove(User requester, Long walletId, Long userId) {
         findOwnerMembership(requester, walletId);
-        userWalletRepository.delete(findMembership(walletId, userId));
+        UserWallet membership = findMembership(walletId, userId);
+        validateOwnerMembershipIsNotChanged(membership);
+        userWalletRepository.delete(membership);
     }
 
     private UserWallet findMembership(User user, Long walletId) {
@@ -100,5 +106,17 @@ public class WalletMemberService {
             throw new AccessDeniedException("Only the wallet owner can perform this operation");
         }
         return membership;
+    }
+
+    private void validateMemberRole(UserRelationWallet role) {
+        if (role == null || role == UserRelationWallet.OWNER) {
+            throw new BusinessException("Member role must be EDITOR or VIEWER");
+        }
+    }
+
+    private void validateOwnerMembershipIsNotChanged(UserWallet membership) {
+        if (membership.getUserRelationWallet() == UserRelationWallet.OWNER) {
+            throw new BusinessException("The wallet owner cannot be changed or removed");
+        }
     }
 }

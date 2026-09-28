@@ -11,6 +11,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.gustavo.finance.finance_control.service.UserService;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +25,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
     private final UserService userService;
 
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserService userService) {
+    public JwtAuthenticationFilter(
+        JwtService jwtService,
+        UserService userService
+    ) {
         this.jwtService = jwtService;
         this.userService = userService;
     }
@@ -43,31 +47,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter  {
         //extrai o token
         String jwt = authHeader.substring(7);
 
-        //extrai o email do token
-        String userEmail = jwtService.extractEmail(jwt);
+        try {
+            //extrai o email do token
+            String userEmail = jwtService.extractEmail(jwt);
 
-        //se existe usuário e ninguém está autenticado ainda
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            //se existe usuário e ninguém está autenticado ainda
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            //busca o usuário no banco
-            UserDetails userDetails = userService.loadUserByUsername(userEmail);
+                //busca o usuário no banco
+                UserDetails userDetails = userService.loadUserByUsername(userEmail);
 
-            //valida o token
-            if (jwtService.isTokenValid(jwt, userDetails)) {
+                //valida o token
+                if (jwtService.isTokenValid(jwt, userDetails)) {
 
-                // criando para validar usuários autenticados 
-                UsernamePasswordAuthenticationToken authToken = 
-                new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    // criando para validar usuários autenticados
+                    UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // setta o usuário esse request
-                SecurityContextHolder.getContext()
-                        .setAuthentication(authToken); // DURA APENAS UMA REQUISIÇÃO
+                    // setta o usuário esse request
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authToken); // DURA APENAS UMA REQUISIÇÃO
+                }
             }
+        } catch (JwtException | IllegalArgumentException ex) {
+            writeUnauthorizedResponse(response);
+            return;
         }
 
         //continua a cadeia de filtros --> proximos filtros do spring 
         filterChain.doFilter(request, response);    
+    }
+
+    private void writeUnauthorizedResponse(HttpServletResponse response) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write(
+            "{\"message\":\"Invalid or expired authentication token\"}"
+        );
     }
 }

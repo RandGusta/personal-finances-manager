@@ -1,5 +1,8 @@
 package com.gustavo.finance.finance_control.config;
 
+import java.io.IOException;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,6 +15,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import com.gustavo.finance.finance_control.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -33,13 +37,32 @@ public class SecurityConfig {
         // HttpSecurity podem lançar exceções durante a construção da configuração, por isso o exception 
         http
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth ->
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, ex) ->
+                    writeErrorResponse(
+                        response,
+                        HttpStatus.UNAUTHORIZED,
+                        "Authentication is required"
+                    )
+                )
+                .accessDeniedHandler((request, response, ex) ->
+                    writeErrorResponse(
+                        response,
+                        HttpStatus.FORBIDDEN,
+                        "You do not have permission to perform this operation"
+                    )
+                )
+            )
+            .authorizeHttpRequests(auth ->
             auth.requestMatchers(
                 "/auth/register",
                 "/auth/login",
                 "/auth/forgot-password",
                 "/auth/reset-password",
-                "/actuator/health",
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())
@@ -47,6 +70,16 @@ public class SecurityConfig {
             .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
+    }
+
+    private void writeErrorResponse(
+        jakarta.servlet.http.HttpServletResponse response,
+        HttpStatus status,
+        String message
+    ) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 
     @Bean

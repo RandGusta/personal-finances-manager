@@ -89,13 +89,21 @@ public class GlobalExceptionHandler {
             .body(new com.gustavo.finance.finance_control.dto.ErrorResponse(ex.getMessage()));
     }
 
+    @ExceptionHandler(InvalidTransactionTypeException.class)
     public ResponseEntity<?> handleInvalidTransactionTypeException(InvalidTransactionTypeException ex){
         return ResponseEntity
-        .status(HttpStatus.NOT_FOUND)
+        .status(HttpStatus.UNPROCESSABLE_CONTENT)
         .body(
             new com.gustavo.finance.finance_control.dto.ErrorResponse(ex.getMessage())
         );
 
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception ex) {
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(new ErrorResponse("An unexpected error occurred"));
     }
 
 }
