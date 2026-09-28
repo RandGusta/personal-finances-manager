@@ -1,6 +1,6 @@
 export const palette ={
     primary: {
-        main: '#1C4632',
+        main: '#0D330E',
     },
 
     secondary: {
