@@ -8,7 +8,7 @@ interface ProfileLayoutProps {
 
 const ProfileLayout = ({summary, wallets, members}: ProfileLayoutProps)=>{
     return(
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
       {/* Resumo do usuário */}
       <Box sx={{ mb: 4 }}>
         {summary}

@@ -7,6 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useState } from "react";
 import type { WalletRequest } from "../dto/WalletRequest";
 import type { WalletInvitationRole } from "../dto/WalletInvitation";
@@ -38,7 +39,7 @@ const modalStyle = {
   boxShadow: 24,
   maxHeight: "90vh",
   overflowY: "auto",
-  p: 4,
+  p: { xs: 2.5, sm: 4 },
 };
 
 const NewWalletModal = ({
@@ -209,8 +210,13 @@ const NewWalletModal = ({
             Cancel
           </Button>
 
-          <BaseButton variant="contained" onClick={handleCreate} loading={saving}>
-            {inviteEmail.trim() ? "Create and Send Invite" : "Create Wallet"}
+          <BaseButton
+            variant="contained"
+            icon={<AddRoundedIcon />}
+            onClick={handleCreate}
+            loading={saving}
+          >
+            {inviteEmail.trim() ? "Add & Invite" : "Add"}
           </BaseButton>
         </Stack>
       </Box>

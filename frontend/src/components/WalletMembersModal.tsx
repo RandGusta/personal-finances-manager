@@ -92,9 +92,9 @@ const WalletMembersModal = ({
             transform: "translate(-50%, -50%)",
             bgcolor: "background.paper",
             width: { xs: "90%", md: "35rem" },
-            maxHeight: "85vh",
+            maxHeight: "85dvh",
             overflowY: "auto",
-            p: 4,
+            p: { xs: 2.5, sm: 4 },
             borderRadius: 2,
           }}
         >

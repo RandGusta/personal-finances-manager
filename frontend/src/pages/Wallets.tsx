@@ -1,7 +1,6 @@
 import {
   Alert,
   Box,
-  Button,
   Dialog,
   DialogActions,
   DialogContent,
@@ -9,13 +8,17 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import { useEffect, useState } from "react";
-import { Sidebar } from "../components/NavBar";
+import { BaseButton } from "../components/Button";
 import NewWalletModal from "../components/NewWalletModal";
 import WalletCard from "../components/WalletCard";
 import WalletMembersModal from "../components/WalletMembersModal";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
 import { deleteWallet, getWallets } from "../services/WalletPageService";
+import SidebarLayout from "../layouts/SidebarLayout";
 
 const Wallets = () => {
   const [wallets, setWallets] = useState<WalletResponse[]>([]);
@@ -125,44 +128,72 @@ const Wallets = () => {
   }, []);
 
   return (
-    <>
-      <Sidebar />
-
+    <SidebarLayout>
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
             mb: 4,
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
             gap: 2,
           }}
         >
-          <Typography variant="h4">Wallets</Typography>
+          <Typography
+            variant="h4"
+            sx={{ fontSize: { xs: "2rem", md: "2.35rem" } }}
+          >
+            Wallets
+          </Typography>
 
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <Button variant="contained" onClick={() => setOpenNewWallet(true)}>
-              New Wallet
-            </Button>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              flexWrap: "wrap",
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
+            <BaseButton
+              variant="contained"
+              icon={<AddRoundedIcon />}
+              onClick={() => setOpenNewWallet(true)}
+              sx={{ flex: { xs: "1 1 8rem", sm: "0 0 auto" } }}
+            >
+              Add
+            </BaseButton>
 
             {!showCheckboxes ? (
-              <Button variant="outlined" color="error" onClick={startWalletSelection}>
-                Delete Wallets
-              </Button>
+              <BaseButton
+                variant="outlined"
+                color="error"
+                icon={<DeleteOutlineRoundedIcon />}
+                onClick={startWalletSelection}
+                sx={{ flex: { xs: "1 1 8rem", sm: "0 0 auto" } }}
+              >
+                Delete
+              </BaseButton>
             ) : (
               <>
-                <Button variant="outlined" onClick={cancelWalletSelection}>
+                <BaseButton
+                  variant="outlined"
+                  icon={<CloseRoundedIcon />}
+                  onClick={cancelWalletSelection}
+                  sx={{ flex: { xs: "1 1 8rem", sm: "0 0 auto" } }}
+                >
                   Cancel
-                </Button>
-                <Button
+                </BaseButton>
+                <BaseButton
                   variant="contained"
                   color="error"
+                  icon={<DeleteOutlineRoundedIcon />}
                   disabled={selectedWalletIds.length === 0}
                   onClick={() => setOpenDeleteDialog(true)}
+                  sx={{ flex: { xs: "1 1 8rem", sm: "0 0 auto" } }}
                 >
-                  Delete selected ({selectedWalletIds.length})
-                </Button>
+                  Delete ({selectedWalletIds.length})
+                </BaseButton>
               </>
             )}
           </Box>
@@ -232,20 +263,26 @@ const Wallets = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDeleteDialog(false)} disabled={deleting}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            onClick={confirmDeleteWallets}
+          <BaseButton
+            variant="outlined"
+            icon={<CloseRoundedIcon />}
+            onClick={() => setOpenDeleteDialog(false)}
             disabled={deleting}
           >
-            {deleting ? "Deleting..." : "Delete"}
-          </Button>
+            Cancel
+          </BaseButton>
+          <BaseButton
+            variant="contained"
+            color="error"
+            icon={<DeleteOutlineRoundedIcon />}
+            onClick={confirmDeleteWallets}
+            loading={deleting}
+          >
+            Delete
+          </BaseButton>
         </DialogActions>
       </Dialog>
-    </>
+    </SidebarLayout>
   );
 };
 
