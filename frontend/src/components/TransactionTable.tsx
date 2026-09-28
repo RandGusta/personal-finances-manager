@@ -181,15 +181,15 @@ const TransactionTable = ({
 
         <TableContainer sx={{ overflowX: "auto" }}>
           <Table size="small" aria-label="Transaction history table" sx={{ minWidth: 720 }}>
-            <TableHead sx={{ backgroundColor: "#DAF1DE" }}>
+            <TableHead sx={{ backgroundColor: "#051F20" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Description</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }} align="right">
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }} align="right">
                   Value
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Category</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Category</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Type</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
