@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import ExpensesChart from "../components/ExpensesChart";
 import FinancialTrendChart from "../components/FinancialTrendChart";
-import { Sidebar } from "../components/new/NavBar";
 import RecentTransaction from "../components/RecentTransactions";
 import UserSummary from "../components/UserSummary";
 import type { UserSummaryResponse, WalletResponse } from "../dto/UserSummaryResponse";
 import { DashboardLayout } from "../layouts/DashboardLayout";
+import SidebarLayout from "../layouts/SidebarLayout";
 import { getWallets } from "../services/WalletPageService";
 import { Typography, Box, Skeleton } from "@mui/material";
 
@@ -55,10 +55,8 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <>
-    <Box sx={{ display: "flex" }}>
-      <Sidebar />
-          <Box sx={{ flex: 1, minWidth: 0, p: { xs: 2, md: 4 }, textAlign: "left" }}>
+    <SidebarLayout>
+          <Box sx={{ p: { xs: 2, md: 4 }, textAlign: "left" }}>
           <Typography
                 variant="h6" sx={{color: "#000000", fontWeight: 700}}>
                 Hello, {userName || <Skeleton width={120} sx={{ display: "inline-block" }} />}! <span>🧐</span>
@@ -91,8 +89,7 @@ const Dashboard = () => {
             }
           />
           </Box>
-      </Box>
-    </>
+    </SidebarLayout>
   );
 };
 

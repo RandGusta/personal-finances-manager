@@ -120,10 +120,11 @@ const FinancialTrendChart = ({ months, error }: FinancialTrendChartProps) => {
           </Box>
         </Box>
 
-        <Box sx={{ width: "100%", overflowX: "auto" }}>
+        <Box sx={{ width: "100%", overflowX: "auto", pb: 0.5 }}>
           <svg
             viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-            width="100%"
+            width={chartWidth}
+            style={{ display: "block" }}
             role="img"
             aria-label="Monthly income and expenses chart"
           >

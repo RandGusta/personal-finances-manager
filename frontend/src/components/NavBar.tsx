@@ -1,9 +1,13 @@
 import {
+  BottomNavigation,
+  BottomNavigationAction,
   Drawer,
   List,
   ListItemButton,
   ListItemIcon,
   Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 import HouseRoundedIcon from "@mui/icons-material/HouseRounded";
@@ -51,6 +55,66 @@ const navigation = [
 export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const theme = useTheme();
+  const isMobileNavigation = useMediaQuery(theme.breakpoints.down("md"));
+  const selectedNavigationIndex = navigation.findIndex(
+    (item) => item.path === location.pathname,
+  );
+
+  if (isMobileNavigation) {
+    return (
+      <BottomNavigation
+        value={selectedNavigationIndex}
+        onChange={(_, selectedIndex: number) => navigate(navigation[selectedIndex].path)}
+        showLabels={false}
+        aria-label="Main navigation"
+        sx={{
+          position: "fixed",
+          right: 0,
+          bottom: 0,
+          left: 0,
+          zIndex: theme.zIndex.drawer + 1,
+          height: 64,
+          borderTop: "1px solid #DDE7DF",
+          backgroundColor: "#0D330E",
+          "& .MuiBottomNavigationAction-root": {
+            minWidth: 0,
+            px: 0.5,
+            color: "#D5E6DA",
+          },
+          "& .MuiBottomNavigationAction-label": {
+            maxWidth: "100%",
+            fontSize: "0.65rem",
+            lineHeight: 1.05,
+            textAlign: "center",
+            whiteSpace: "normal",
+            overflowWrap: "anywhere",
+          },
+          "& .Mui-selected": {
+            color: "#FFFFFF",
+            backgroundColor: "#2D531A",
+          },
+        }}
+      >
+        {navigation.map((item) => (
+          <BottomNavigationAction
+            key={item.path}
+            label={
+              item.label === "Transactions" ? (
+                <>
+                  Trans<br />actions
+                </>
+              ) : (
+                item.label
+              )
+            }
+            icon={item.icon}
+            aria-label={item.label}
+          />
+        ))}
+      </BottomNavigation>
+    );
+  }
 
   return (
     <Drawer
