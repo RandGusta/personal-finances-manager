@@ -85,7 +85,7 @@ const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) =>
   }, [wallets, walletsError]);
 
   return (
-    <Card>
+    <Card sx={{ border: "2px solid #051F20", boxShadow: "none" }}>
       <CardContent sx={{ p: 0 }}>
         <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #8EB69B" }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#163832" }}>
@@ -100,14 +100,14 @@ const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) =>
 
         <TableContainer sx={{ overflowX: "auto" }}>
           <Table size="small" aria-label="Recent transactions table" sx={{ minWidth: 560 }}>
-            <TableHead sx={{ backgroundColor: "#DAF1DE" }}>
+            <TableHead sx={{ backgroundColor: "#051F20" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Description</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }} align="right">
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }} align="right">
                   Value
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Date</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#163832" }}>Type</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Type</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
