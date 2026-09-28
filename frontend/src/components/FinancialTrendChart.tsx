@@ -145,12 +145,12 @@ const FinancialTrendChart = ({ months, error }: FinancialTrendChartProps) => {
             })}
 
             <path d={createPath("income")} fill="none" stroke="#235347" strokeWidth="3" />
-            <path d={createPath("expense")} fill="none" stroke="#57192E" strokeWidth="3" />
+            <path d={createPath("expense")} fill="none" stroke="#A30827" strokeWidth="3" />
 
             {chartMonths.map((month, index) => (
               <g key={month.month}>
                 <circle cx={pointX(index)} cy={pointY(month.income)} r="4" fill="#235347" />
-                <circle cx={pointX(index)} cy={pointY(month.expense)} r="4" fill="#57192E" />
+                <circle cx={pointX(index)} cy={pointY(month.expense)} r="4" fill="#A30827" />
                 <text
                   x={pointX(index)}
                   y={chartHeight - 10}
@@ -171,7 +171,7 @@ const FinancialTrendChart = ({ months, error }: FinancialTrendChartProps) => {
             <Typography variant="caption">Income</Typography>
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-            <Box sx={{ width: 9, height: 9, borderRadius: "50%", backgroundColor: "#57192E" }} />
+            <Box sx={{ width: 9, height: 9, borderRadius: "50%", backgroundColor: "#A30827" }} />
             <Typography variant="caption">Expenses</Typography>
           </Box>
         </Box>

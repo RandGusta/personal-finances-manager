@@ -12,7 +12,7 @@ export const palette ={
     },
 
     error: {
-        main: '#57192E',
+        main: '#A30827',
     },
 
     background: {
