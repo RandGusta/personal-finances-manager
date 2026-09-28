@@ -1,4 +1,18 @@
-import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  Skeleton,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 import type { TransactionResponse } from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
@@ -71,81 +85,87 @@ const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) =>
   }, [wallets, walletsError]);
 
   return (
-    <Card
-      sx={{
-        margin: { lg: "3rem", xs: "0rem" },
-      }}
-    >
-      <CardContent>
-        <Typography
-          variant="h5"
-          sx={{
-            backgroundColor: "#1C4632",
-            padding: { xs: "1rem", lg: "0.2rem" },
-            textAlign: "center",
-          }}
-        >
-          Recent Transactions
-        </Typography>
-
-        {error && <Alert severity="error">{error}</Alert>}
-
-        <Box
-          sx={{
-            display: {
-              xs: "none",
-              md: "grid",
-            },
-            gridTemplateColumns: "2fr 1fr 1fr 1fr",
-            gap: 2,
-            p: 2,
-          }}
-        >
-          <Typography variant="h6">Description</Typography>
-          <Typography variant="h6">Value</Typography>
-          <Typography variant="h6">Date</Typography>
-          <Typography variant="h6">Type</Typography>
+    <Card>
+      <CardContent sx={{ p: 0 }}>
+        <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #E2E8E3" }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: "#1C4632" }}>
+            Recent Transactions
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Your latest financial movements across all wallets.
+          </Typography>
         </Box>
 
-        {loading && (
-          <Box sx={{ p: 2 }}>
-            <Skeleton height={48} />
-            <Skeleton height={48} />
-            <Skeleton height={48} />
-          </Box>
-        )}
+        {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
-        {!loading && !error && transactions.length === 0 && (
-          <Alert severity="info">There are no transactions to display.</Alert>
-        )}
+        <TableContainer sx={{ overflowX: "auto" }}>
+          <Table size="small" aria-label="Recent transactions table" sx={{ minWidth: 560 }}>
+            <TableHead sx={{ backgroundColor: "#F3F8F4" }}>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Description</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }} align="right">
+                  Value
+                </TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Date</TableCell>
+                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Type</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading &&
+                Array.from({ length: 3 }).map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell><Skeleton width="75%" /></TableCell>
+                    <TableCell><Skeleton width="65%" /></TableCell>
+                    <TableCell><Skeleton width="65%" /></TableCell>
+                    <TableCell><Skeleton width="70%" /></TableCell>
+                  </TableRow>
+                ))}
 
-        {!loading &&
-          transactions.map((transaction) => (
-            <Box
-              key={`${transaction.walletId}-${transaction.id}`}
-              sx={{
-                display: {
-                  xs: "block",
-                  md: "grid",
-                },
-                gridTemplateColumns: "2fr 1fr 1fr 1fr",
-                gap: 2,
-                p: 2,
-                borderBottom: "1px solid #ddd",
-              }}
-            >
-              <Typography>
-                {transaction.description ?? transaction.categoryName ?? "No description"}
-              </Typography>
-              <Typography
-                color={transaction.type === "INCOME" ? "success.main" : "error.main"}
-              >
-                {currencyFormatter.format(transaction.amount)}
-              </Typography>
-              <Typography>{formatDate(transaction.date)}</Typography>
-              <Typography>{formatType(transaction.type)}</Typography>
-            </Box>
-          ))}
+              {!loading && !error && transactions.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={4} sx={{ py: 3, textAlign: "center" }}>
+                    <Alert severity="info">There are no transactions to display.</Alert>
+                  </TableCell>
+                </TableRow>
+              )}
+
+              {!loading &&
+                !error &&
+                transactions.map((transaction) => (
+                  <TableRow
+                    key={`${transaction.walletId}-${transaction.id}`}
+                    hover
+                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                  >
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {transaction.description ?? transaction.categoryName ?? "No description"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sx={{
+                        color: transaction.type === "INCOME" ? "success.main" : "error.main",
+                        fontWeight: 700,
+                      }}
+                    >
+                      {transaction.type === "INCOME" ? "+" : "-"}
+                      {currencyFormatter.format(transaction.amount)}
+                    </TableCell>
+                    <TableCell>{formatDate(transaction.date)}</TableCell>
+                    <TableCell>
+                      <Chip
+                        label={formatType(transaction.type)}
+                        size="small"
+                        color={transaction.type === "INCOME" ? "success" : "error"}
+                        variant="outlined"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </CardContent>
     </Card>
   );

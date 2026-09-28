@@ -1,4 +1,5 @@
 import { Alert, Box, Button, MenuItem, Modal, Typography } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useEffect, useState } from "react";
 import type { CategoryRequest } from "../dto/CategoryRequest";
 import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
@@ -98,7 +99,9 @@ const CategoryModal = ({
           transform: "translate(-50%, -50%)",
           bgcolor: "background.paper",
           width: { xs: "90%", sm: "30rem" },
-          p: 4,
+          maxHeight: "90dvh",
+          overflowY: "auto",
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 2,
           boxShadow: 24,
         }}
@@ -134,8 +137,13 @@ const CategoryModal = ({
             Cancel
           </Button>
 
-          <BaseButton variant="contained" onClick={handleSave} loading={saving}>
-            Save
+          <BaseButton
+            variant="contained"
+            icon={<AddRoundedIcon />}
+            onClick={handleSave}
+            loading={saving}
+          >
+            Add
           </BaseButton>
         </Box>
       </Box>

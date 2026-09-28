@@ -1,4 +1,5 @@
 import { Alert, Box, Button, MenuItem, Modal, Typography } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useEffect, useState } from "react";
 import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
 import type { TransactionRequest } from "../dto/TransactionRequest";
@@ -168,7 +169,7 @@ const TransactionModal = ({
           width: { xs: "90%", sm: "30rem" },
           maxHeight: "90vh",
           overflowY: "auto",
-          p: 4,
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 2,
           boxShadow: 24,
         }}
@@ -241,13 +242,14 @@ const TransactionModal = ({
         </BaseInputField>
 
         {type !== "" && categoriesLoaded && categories.length === 0 && (
-          <Button
+          <BaseButton
             variant="outlined"
+            icon={<AddRoundedIcon />}
             onClick={() => setOpenCategoryModal(true)}
             sx={{ mt: 1 }}
           >
-            Create {type === "INCOME" ? "income" : "expense"} category
-          </Button>
+            Add category
+          </BaseButton>
         )}
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
@@ -255,8 +257,13 @@ const TransactionModal = ({
             Cancel
           </Button>
 
-          <BaseButton variant="contained" onClick={handleSave} loading={saving}>
-            Save
+          <BaseButton
+            variant="contained"
+            icon={<AddRoundedIcon />}
+            onClick={handleSave}
+            loading={saving}
+          >
+            Add
           </BaseButton>
         </Box>
       </Box>

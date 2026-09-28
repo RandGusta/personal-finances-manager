@@ -1,8 +1,10 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useState } from "react";
-import { Sidebar } from "../components/NavBar";
+import { BaseButton } from "../components/Button";
 import TransactionModal from "../components/TransactionModal";
 import TransactionTable from "../components/TransactionTable";
+import SidebarLayout from "../layouts/SidebarLayout";
 
 const Transactions = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -10,29 +12,44 @@ const Transactions = () => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
-    <>
-      <Sidebar />
-
+    <SidebarLayout>
       <Box sx={{ p: { xs: 2, md: 4 } }}>
         <Box
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
-            flexDirection: { xs: "column", md: "row" },
+            flexDirection: { xs: "column", sm: "row" },
+            alignItems: { xs: "stretch", sm: "center" },
             gap: 2,
           }}
         >
-          <Typography variant="h4">Transactions</Typography>
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontSize: { xs: "2rem", md: "2.35rem" },
+                fontWeight: 700,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.15,
+              }}
+            >
+              Transactions
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              Manage the financial movements in your wallets.
+            </Typography>
+          </Box>
 
-          <Button
+          <BaseButton
             variant="contained"
             color="primary"
+            icon={<AddRoundedIcon />}
             onClick={() => setOpenModal(true)}
             disabled={selectedWalletId === null}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
           >
-            New Transaction
-          </Button>
+            Add
+          </BaseButton>
         </Box>
 
         <TransactionTable
@@ -47,7 +64,7 @@ const Transactions = () => {
         onClose={() => setOpenModal(false)}
         onCreated={() => setRefreshKey((current) => current + 1)}
       />
-    </>
+    </SidebarLayout>
   );
 };
 
