@@ -97,20 +97,24 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
 
         {error && <Alert severity="error" sx={{ m: 2 }}>{error}</Alert>}
 
-        <TableContainer sx={{ overflowX: "auto" }}>
-          <Table size="small" aria-label="Category list" sx={{ minWidth: 420 }}>
+        <TableContainer>
+          <Table size="small" aria-label="Category list" sx={{ tableLayout: "fixed" }}>
             <TableHead sx={{ backgroundColor: "#F3F8F4" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 700, color: "#1C4632" }}>Type</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 700, color: "#1C4632" }}>
+                  Name
+                </TableCell>
+                <TableCell align="center" sx={{ fontWeight: 700, color: "#1C4632" }}>
+                  Type
+                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {loading &&
                 Array.from({ length: 3 }).map((_, index) => (
                   <TableRow key={index}>
-                    <TableCell><Skeleton width="55%" /></TableCell>
-                    <TableCell><Skeleton width="40%" /></TableCell>
+                    <TableCell align="center"><Skeleton sx={{ mx: "auto" }} width="55%" /></TableCell>
+                    <TableCell align="center"><Skeleton sx={{ mx: "auto" }} width="40%" /></TableCell>
                   </TableRow>
                 ))}
 
@@ -124,12 +128,12 @@ const CategoryTable = ({ refreshKey }: CategoryTableProps) => {
 
               {!loading && !error && categories.map((category) => (
                 <TableRow key={category.id} hover sx={{ "&:last-child td": { borderBottom: 0 } }}>
-                  <TableCell>
+                  <TableCell align="center">
                     <Typography variant="body2" sx={{ fontWeight: 500 }}>
                       {category.name}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={category.type === "INCOME" ? "Income" : "Expense"}
                       size="small"
