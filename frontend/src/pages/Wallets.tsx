@@ -142,7 +142,12 @@ const Wallets = () => {
         >
           <Typography
             variant="h4"
-            sx={{ fontSize: { xs: "2rem", md: "2.35rem" } }}
+            sx={{
+              fontSize: { xs: "2rem", md: "2.35rem" },
+              fontWeight: 700,
+              letterSpacing: "-0.03em",
+              lineHeight: 1.15,
+            }}
           >
             Wallets
           </Typography>
