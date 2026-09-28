@@ -85,7 +85,7 @@ const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) =>
   }, [wallets, walletsError]);
 
   return (
-    <Card sx={{ border: "2px solid #051F20", boxShadow: "none" }}>
+    <Card>
       <CardContent sx={{ p: 0 }}>
         <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #8EB69B" }}>
           <Typography variant="h6" sx={{ fontWeight: 700, color: "#163832" }}>
