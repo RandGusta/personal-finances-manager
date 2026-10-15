@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import ExpensesChart from "../components/ExpensesChart";
+import FinancialInsight from "../components/FinancialInsight";
 import FinancialTrendChart from "../components/FinancialTrendChart";
 import RecentTransaction from "../components/RecentTransactions";
 import UserSummary from "../components/UserSummary";
@@ -71,6 +72,7 @@ const Dashboard = () => {
             onLoaded={handleSummaryLoaded}
             onError={handleSummaryError}
           />
+          <FinancialInsight />
           <DashboardLayout
             expensesChart={
               <ExpensesChart

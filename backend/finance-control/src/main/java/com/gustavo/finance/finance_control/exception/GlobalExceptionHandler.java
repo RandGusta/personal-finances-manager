@@ -99,6 +99,13 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(AiIntegrationException.class)
+    public ResponseEntity<ErrorResponse> handleAiIntegrationException(AiIntegrationException ex) {
+        return ResponseEntity
+            .status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(new ErrorResponse(ex.getMessage()));
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpectedException(Exception ex) {
         return ResponseEntity
