@@ -22,7 +22,7 @@ import com.gustavo.finance.finance_control.service.PasswordRecoveryService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = "${app.frontend-url}")
 @RequestMapping("/auth")
 public class AuthController {
 
