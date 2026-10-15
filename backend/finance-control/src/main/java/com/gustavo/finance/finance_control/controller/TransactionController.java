@@ -1,6 +1,7 @@
 package com.gustavo.finance.finance_control.controller;
 
 import java.time.LocalDate;
+import java.nio.charset.StandardCharsets;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,6 +30,7 @@ import com.gustavo.finance.finance_control.dto.TransactionResponse;
 import com.gustavo.finance.finance_control.enums.TransactionType;
 import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.TransactionService;
+import com.gustavo.finance.finance_control.service.TransactionReportService;
 
 import jakarta.validation.Valid;
 
@@ -35,9 +40,44 @@ import jakarta.validation.Valid;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final TransactionReportService transactionReportService;
 
-    public TransactionController(TransactionService transactionService) {
+    public TransactionController(
+        TransactionService transactionService,
+        TransactionReportService transactionReportService
+    ) {
         this.transactionService = transactionService;
+        this.transactionReportService = transactionReportService;
+    }
+
+    @GetMapping("/report")
+    public ResponseEntity<byte[]> downloadReport(
+        Authentication authentication,
+        @PathVariable Long walletId,
+        @RequestParam(required = false) TransactionType type,
+        @RequestParam(required = false) Long categoryId,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        byte[] report = transactionReportService.generateCsv(
+            authenticatedUser(authentication),
+            walletId,
+            type,
+            categoryId,
+            startDate,
+            endDate
+        );
+
+        ContentDisposition contentDisposition = ContentDisposition.attachment()
+            .filename("wallet-" + walletId + "-transactions.csv", StandardCharsets.UTF_8)
+            .build();
+
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType("text/csv"))
+            .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString())
+            .body(report);
     }
 
     @GetMapping

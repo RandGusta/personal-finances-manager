@@ -2,9 +2,11 @@ package com.gustavo.finance.finance_control.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -54,15 +56,42 @@ public class TransactionService {
         findMembership(user, walletId);
         validateDateRange(startDate, endDate);
 
-        Specification<Transaction> filters = Specification
-            .where(hasWallet(walletId))
-            .and(hasType(type))
-            .and(hasCategory(categoryId))
-            .and(dateOnOrAfter(startDate))
-            .and(dateOnOrBefore(endDate));
+        Specification<Transaction> filters = createFilters(
+            walletId,
+            type,
+            categoryId,
+            startDate,
+            endDate
+        );
 
         return transactionRepository.findAll(filters, pageable)
             .map(TransactionResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> listForReport(
+        User user,
+        Long walletId,
+        TransactionType type,
+        Long categoryId,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        findMembership(user, walletId);
+        validateDateRange(startDate, endDate);
+
+        Specification<Transaction> filters = createFilters(
+            walletId,
+            type,
+            categoryId,
+            startDate,
+            endDate
+        );
+
+        return transactionRepository.findAll(filters, Sort.by(Sort.Direction.DESC, "date"))
+            .stream()
+            .map(TransactionResponse::from)
+            .toList();
     }
 
     @Transactional
@@ -148,6 +177,21 @@ public class TransactionService {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new BusinessException("Start date cannot be after end date");
         }
+    }
+
+    private Specification<Transaction> createFilters(
+        Long walletId,
+        TransactionType type,
+        Long categoryId,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        return Specification
+            .where(hasWallet(walletId))
+            .and(hasType(type))
+            .and(hasCategory(categoryId))
+            .and(dateOnOrAfter(startDate))
+            .and(dateOnOrBefore(endDate));
     }
 
     private String normalizeOptionalText(String value) {

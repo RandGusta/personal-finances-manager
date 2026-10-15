@@ -1,15 +1,39 @@
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import { useState } from "react";
 import { BaseButton } from "../components/Button";
 import TransactionModal from "../components/TransactionModal";
 import TransactionTable from "../components/TransactionTable";
 import SidebarLayout from "../layouts/SidebarLayout";
+import { downloadTransactionReport } from "../services/TransactionTableService";
 
 const Transactions = () => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState<number | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [downloadingReport, setDownloadingReport] = useState(false);
+  const [reportError, setReportError] = useState("");
+
+  const handleDownloadReport = async () => {
+    if (selectedWalletId === null) {
+      return;
+    }
+
+    try {
+      setDownloadingReport(true);
+      setReportError("");
+      await downloadTransactionReport(selectedWalletId);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Error while downloading the transaction report";
+      setReportError(message);
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
 
   return (
     <SidebarLayout>
@@ -40,17 +64,37 @@ const Transactions = () => {
             </Typography>
           </Box>
 
-          <BaseButton
-            variant="contained"
-            color="primary"
-            icon={<AddRoundedIcon />}
-            onClick={() => setOpenModal(true)}
-            disabled={selectedWalletId === null}
-            sx={{ width: { xs: "100%", sm: "auto" } }}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              flexDirection: { xs: "column", sm: "row" },
+            }}
           >
-            Add
-          </BaseButton>
+            <BaseButton
+              variant="outlined"
+              icon={<FileDownloadOutlinedIcon />}
+              onClick={handleDownloadReport}
+              disabled={selectedWalletId === null}
+              loading={downloadingReport}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
+              Report
+            </BaseButton>
+            <BaseButton
+              variant="contained"
+              color="primary"
+              icon={<AddRoundedIcon />}
+              onClick={() => setOpenModal(true)}
+              disabled={selectedWalletId === null}
+              sx={{ width: { xs: "100%", sm: "auto" } }}
+            >
+              Add
+            </BaseButton>
+          </Box>
         </Box>
+
+        {reportError && <Alert severity="error" sx={{ mt: 2 }}>{reportError}</Alert>}
 
         <TransactionTable
           refreshKey={refreshKey}
