@@ -16,7 +16,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
+import com.gustavo.finance.finance_control.security.AuthenticationRateLimitFilter;
 import com.gustavo.finance.finance_control.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -25,9 +27,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationRateLimitFilter authenticationRateLimitFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthenticationFilter,
+        AuthenticationRateLimitFilter authenticationRateLimitFilter
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationRateLimitFilter = authenticationRateLimitFilter;
     }
 
 
@@ -38,6 +45,15 @@ public class SecurityConfig {
         http
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.deny())
+                .referrerPolicy(referrerPolicy ->
+                    referrerPolicy.policy(ReferrerPolicy.NO_REFERRER)
+                )
+                .permissionsPolicyHeader(permissions ->
+                    permissions.policy("camera=(), microphone=(), geolocation=()")
+                )
+            )
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
@@ -69,6 +85,7 @@ public class SecurityConfig {
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())
+            .addFilterBefore(authenticationRateLimitFilter, JwtAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
