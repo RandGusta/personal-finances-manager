@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.gustavo.finance.finance_control.dto.TransactionRequest;
@@ -41,6 +42,7 @@ import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
 import com.gustavo.finance.finance_control.repository.CategoryRepository;
 import com.gustavo.finance.finance_control.repository.TransactionRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
+import com.gustavo.finance.finance_control.realtime.WalletTransactionChangedEvent;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceTest {
@@ -54,6 +56,9 @@ class TransactionServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private TransactionService transactionService;
     private User user;
     private Wallet wallet;
@@ -63,7 +68,8 @@ class TransactionServiceTest {
         transactionService = new TransactionService(
             transactionRepository,
             userWalletRepository,
-            categoryRepository
+            categoryRepository,
+            eventPublisher
         );
 
         user = new User();
@@ -171,6 +177,10 @@ class TransactionServiceTest {
 
         assertEquals(5L, response.getCategoryId());
         assertEquals("Food", response.getCategoryName());
+        org.mockito.ArgumentCaptor<WalletTransactionChangedEvent> eventCaptor =
+            org.mockito.ArgumentCaptor.forClass(WalletTransactionChangedEvent.class);
+        verify(eventPublisher).publishEvent(eventCaptor.capture());
+        assertEquals(10L, eventCaptor.getValue().getWalletId());
     }
 
     @Test
