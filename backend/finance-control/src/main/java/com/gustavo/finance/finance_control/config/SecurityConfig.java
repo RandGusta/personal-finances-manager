@@ -86,8 +86,8 @@ public class SecurityConfig {
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())
-            .addFilterBefore(authenticationRateLimitFilter, JwtAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(authenticationRateLimitFilter, JwtAuthenticationFilter.class)
             .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
