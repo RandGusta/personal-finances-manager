@@ -8,6 +8,7 @@ import type { UserSummaryResponse, WalletResponse } from "../dto/UserSummaryResp
 import { DashboardLayout } from "../layouts/DashboardLayout";
 import SidebarLayout from "../layouts/SidebarLayout";
 import { getWallets } from "../services/WalletPageService";
+import { subscribeToWalletUpdates } from "../services/WalletRealtimeService";
 import { Typography, Box, Skeleton } from "@mui/material";
 
 
@@ -17,6 +18,7 @@ const Dashboard = () => {
   const [userName, setUserName] = useState("");
   const [financialSummary, setFinancialSummary] = useState<UserSummaryResponse | null>(null);
   const [summaryError, setSummaryError] = useState("");
+  const [realtimeRefreshKey, setRealtimeRefreshKey] = useState(0);
 
   const handleSummaryLoaded = useCallback((summary: UserSummaryResponse) => {
     setUserName(summary.userName.trim());
@@ -55,6 +57,12 @@ const Dashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    return subscribeToWalletUpdates(() => {
+      setRealtimeRefreshKey((current) => current + 1);
+    });
+  }, []);
+
   return (
     <SidebarLayout>
           <Box sx={{ p: { xs: 2, md: 4 }, textAlign: "left" }}>
@@ -69,6 +77,7 @@ const Dashboard = () => {
           <UserSummary
             wallets={wallets}
             walletsError={walletsError}
+            refreshKey={realtimeRefreshKey}
             onLoaded={handleSummaryLoaded}
             onError={handleSummaryError}
           />
@@ -87,7 +96,11 @@ const Dashboard = () => {
               />
             }
             recentTransactions={
-              <RecentTransaction wallets={wallets} walletsError={walletsError} />
+              <RecentTransaction
+                wallets={wallets}
+                walletsError={walletsError}
+                refreshKey={realtimeRefreshKey}
+              />
             }
           />
           </Box>

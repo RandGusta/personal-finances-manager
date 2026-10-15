@@ -12,6 +12,7 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
 type UserSummaryProps = {
   wallets: WalletResponse[] | null;
   walletsError: string;
+  refreshKey?: number;
   onLoaded?: (summary: UserSummaryResponse) => void;
   onError?: (message: string) => void;
 };
@@ -19,6 +20,7 @@ type UserSummaryProps = {
 const UserSummary = ({
   wallets,
   walletsError,
+  refreshKey = 0,
   onLoaded,
   onError,
 }: UserSummaryProps) => {
@@ -69,7 +71,7 @@ const UserSummary = ({
     return () => {
       componentIsMounted = false;
     };
-  }, [wallets, walletsError, onError, onLoaded]);
+  }, [wallets, walletsError, refreshKey, onError, onLoaded]);
 
   const formatCurrency = (value: number | undefined) =>
     currencyFormatter.format(value ?? 0);

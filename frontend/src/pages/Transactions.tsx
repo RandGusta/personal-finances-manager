@@ -1,12 +1,13 @@
 import { Alert, Box, Typography } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BaseButton } from "../components/Button";
 import TransactionModal from "../components/TransactionModal";
 import TransactionTable from "../components/TransactionTable";
 import SidebarLayout from "../layouts/SidebarLayout";
 import { downloadTransactionReport } from "../services/TransactionTableService";
+import { subscribeToWalletUpdates } from "../services/WalletRealtimeService";
 
 const Transactions = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -14,6 +15,12 @@ const Transactions = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [downloadingReport, setDownloadingReport] = useState(false);
   const [reportError, setReportError] = useState("");
+
+  useEffect(() => {
+    return subscribeToWalletUpdates(() => {
+      setRefreshKey((current) => current + 1);
+    });
+  }, []);
 
   const handleDownloadReport = async () => {
     if (selectedWalletId === null) {

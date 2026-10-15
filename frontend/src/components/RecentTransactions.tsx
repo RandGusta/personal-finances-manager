@@ -36,9 +36,14 @@ function formatType(type: TransactionResponse["type"]) {
 type RecentTransactionProps = {
   wallets: WalletResponse[] | null;
   walletsError: string;
+  refreshKey?: number;
 };
 
-const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) => {
+const RecentTransaction = ({
+  wallets,
+  walletsError,
+  refreshKey = 0,
+}: RecentTransactionProps) => {
   const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -82,7 +87,7 @@ const RecentTransaction = ({ wallets, walletsError }: RecentTransactionProps) =>
     return () => {
       componentIsMounted = false;
     };
-  }, [wallets, walletsError]);
+  }, [wallets, walletsError, refreshKey]);
 
   return (
     <Card>
