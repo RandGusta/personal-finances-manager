@@ -58,6 +58,17 @@ class GeminiInsightClientTest {
         assertEquals("The AI service did not return a financial insight.", exception.getMessage());
     }
 
+    @Test
+    void shouldNotReturnPartialTextWhenTheOutputLimitIsReached() {
+        AiIntegrationException exception = assertThrows(AiIntegrationException.class,
+            () -> generate(200, """
+                {"candidates":[{"finishReason":"MAX_TOKENS", "content":{"parts":[
+                    {"text":"* **Total Balance:** Your"}
+                ]}}]}
+                """));
+        assertEquals("The AI response was cut short. Please generate the insight again.", exception.getMessage());
+    }
+
     private String generate(int status, String responseJson) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {

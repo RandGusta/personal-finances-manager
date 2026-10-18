@@ -2,6 +2,7 @@ package com.gustavo.finance.finance_control.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.LinkedHashMap;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -39,14 +40,17 @@ public class GeminiInsightClient {
             );
         }
 
+        Map<String, Object> generationConfig = new LinkedHashMap<>();
+        generationConfig.put("maxOutputTokens", 2048);
+        if (model.startsWith("gemini-3") || model.startsWith("gemini-4")) {
+            generationConfig.put("thinkingConfig", Map.of("thinkingLevel", "low"));
+        }
+
         Map<String, Object> requestBody = Map.of(
             "contents", List.of(
                 Map.of("parts", List.of(Map.of("text", prompt)))
             ),
-            "generationConfig", Map.of(
-                "temperature", 0.2,
-                "maxOutputTokens", 250
-            )
+            "generationConfig", generationConfig
         );
 
         try {
@@ -57,6 +61,14 @@ public class GeminiInsightClient {
                 .body(requestBody)
                 .retrieve()
                 .body(JsonNode.class);
+
+            if (response != null && "MAX_TOKENS".equals(
+                response.path("candidates").path(0).path("finishReason").asText("")
+            )) {
+                throw new AiIntegrationException(
+                    "The AI response was cut short. Please generate the insight again."
+                );
+            }
 
             String insight = extractText(response);
 
