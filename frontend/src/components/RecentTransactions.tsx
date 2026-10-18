@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import type { TransactionResponse } from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
 import { getRecentTransactions } from "../services/RecentTransactionsService";
+import TransactionModal from "./TransactionModal";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -37,16 +38,20 @@ type RecentTransactionProps = {
   wallets: WalletResponse[] | null;
   walletsError: string;
   refreshKey?: number;
+  onChanged?: () => void;
 };
 
 const RecentTransaction = ({
   wallets,
   walletsError,
   refreshKey = 0,
+  onChanged,
 }: RecentTransactionProps) => {
   const [transactions, setTransactions] = useState<TransactionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<TransactionResponse | null>(null);
 
   useEffect(() => {
     let componentIsMounted = true;
@@ -89,7 +94,13 @@ const RecentTransaction = ({
     };
   }, [wallets, walletsError, refreshKey]);
 
+  const canModifyTransaction = (transaction: TransactionResponse) => {
+    const wallet = wallets?.find((currentWallet) => currentWallet.id === transaction.walletId);
+    return wallet?.role !== "VIEWER";
+  };
+
   return (
+    <>
     <Card>
       <CardContent sx={{ p: 0 }}>
         <Box sx={{ px: { xs: 2, md: 3 }, py: 2, borderBottom: "1px solid #8EB69B" }}>
@@ -136,11 +147,22 @@ const RecentTransaction = ({
 
               {!loading &&
                 !error &&
-                transactions.map((transaction) => (
+                transactions.map((transaction) => {
+                  const canModify = canModifyTransaction(transaction);
+
+                  return (
                   <TableRow
                     key={`${transaction.walletId}-${transaction.id}`}
                     hover
-                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                    onClick={() => {
+                      if (canModify) {
+                        setSelectedTransaction(transaction);
+                      }
+                    }}
+                    sx={{
+                      "&:last-child td": { borderBottom: 0 },
+                      cursor: canModify ? "pointer" : "default",
+                    }}
                   >
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
@@ -167,12 +189,24 @@ const RecentTransaction = ({
                       />
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
             </TableBody>
           </Table>
         </TableContainer>
       </CardContent>
     </Card>
+    <TransactionModal
+      open={selectedTransaction !== null}
+      walletId={selectedTransaction?.walletId ?? null}
+      transaction={selectedTransaction}
+      onClose={() => setSelectedTransaction(null)}
+      onSaved={() => {
+        setSelectedTransaction(null);
+        onChanged?.();
+      }}
+    />
+    </>
   );
 };
 

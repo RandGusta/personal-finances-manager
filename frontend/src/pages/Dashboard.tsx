@@ -30,6 +30,10 @@ const Dashboard = () => {
     setSummaryError(message);
   }, []);
 
+  const handleTransactionChanged = useCallback(() => {
+    setRealtimeRefreshKey((current) => current + 1);
+  }, []);
+
   useEffect(() => {
     let componentIsMounted = true;
 
@@ -100,6 +104,7 @@ const Dashboard = () => {
                 wallets={wallets}
                 walletsError={walletsError}
                 refreshKey={realtimeRefreshKey}
+                onChanged={handleTransactionChanged}
               />
             }
           />

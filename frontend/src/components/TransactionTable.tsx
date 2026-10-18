@@ -3,6 +3,7 @@ import {
   Box,
   Card,
   CardContent,
+  Checkbox,
   Chip,
   FormControl,
   InputLabel,
@@ -39,12 +40,18 @@ function formatDate(date: string) {
 
 interface TransactionTableProps {
   refreshKey: number;
-  onWalletChange: (walletId: number | null) => void;
+  onWalletChange: (wallet: WalletResponse | null) => void;
+  showCheckboxes: boolean;
+  selectedTransactionIds: number[];
+  onTransactionSelectionChange: (transactionIds: number[]) => void;
 }
 
 const TransactionTable = ({
   refreshKey,
   onWalletChange,
+  showCheckboxes,
+  selectedTransactionIds,
+  onTransactionSelectionChange,
 }: TransactionTableProps) => {
   const [wallets, setWallets] = useState<WalletResponse[]>([]);
   const [selectedWalletId, setSelectedWalletId] = useState<number | "">("");
@@ -65,10 +72,10 @@ const TransactionTable = ({
 
         if (componentIsMounted) {
           setWallets(response);
-          const firstWalletId: number | "" =
-            response.length > 0 ? response[0].id : "";
+          const firstWallet = response[0] ?? null;
+          const firstWalletId: number | "" = firstWallet?.id ?? "";
           setSelectedWalletId(firstWalletId);
-          onWalletChange(firstWalletId === "" ? null : firstWalletId);
+          onWalletChange(firstWallet);
           setError("");
         }
       } catch (requestError) {
@@ -138,9 +145,41 @@ const TransactionTable = ({
   }, [page, refreshKey, rowsPerPage, selectedWalletId]);
 
   const handleWalletChange = (walletId: number) => {
+    const wallet = wallets.find((currentWallet) => currentWallet.id === walletId) ?? null;
     setSelectedWalletId(walletId);
-    onWalletChange(walletId);
+    onWalletChange(wallet);
+    onTransactionSelectionChange([]);
     setPage(0);
+  };
+
+  const toggleTransactionSelection = (transactionId: number) => {
+    if (selectedTransactionIds.includes(transactionId)) {
+      onTransactionSelectionChange(
+        selectedTransactionIds.filter((currentId) => currentId !== transactionId),
+      );
+      return;
+    }
+
+    onTransactionSelectionChange([...selectedTransactionIds, transactionId]);
+  };
+
+  const visibleTransactionIds = transactionPage?.content.map((transaction) => transaction.id) ?? [];
+  const allVisibleTransactionsSelected =
+    visibleTransactionIds.length > 0 &&
+    visibleTransactionIds.every((transactionId) => selectedTransactionIds.includes(transactionId));
+
+  const toggleVisibleTransactionSelection = () => {
+    if (allVisibleTransactionsSelected) {
+      onTransactionSelectionChange(
+        selectedTransactionIds.filter(
+          (transactionId) => !visibleTransactionIds.includes(transactionId),
+        ),
+      );
+      return;
+    }
+
+    const transactionIds = new Set([...selectedTransactionIds, ...visibleTransactionIds]);
+    onTransactionSelectionChange(Array.from(transactionIds));
   };
 
   return (
@@ -183,6 +222,22 @@ const TransactionTable = ({
           <Table size="small" aria-label="Transaction history table" sx={{ minWidth: 720 }}>
             <TableHead sx={{ backgroundColor: "#051F20" }}>
               <TableRow>
+                {showCheckboxes && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      checked={allVisibleTransactionsSelected}
+                      indeterminate={
+                        !allVisibleTransactionsSelected &&
+                        visibleTransactionIds.some((transactionId) =>
+                          selectedTransactionIds.includes(transactionId),
+                        )
+                      }
+                      onChange={toggleVisibleTransactionSelection}
+                      slotProps={{ input: { "aria-label": "Select visible transactions" } }}
+                      sx={{ color: "#DAF1DE", "&.Mui-checked": { color: "#DAF1DE" } }}
+                    />
+                  </TableCell>
+                )}
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Description</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }} align="right">
                   Value
@@ -196,6 +251,7 @@ const TransactionTable = ({
               {(walletsLoading || transactionsLoading) &&
                 Array.from({ length: 3 }).map((_, index) => (
                   <TableRow key={index}>
+                    {showCheckboxes && <TableCell padding="checkbox"><Skeleton width={24} /></TableCell>}
                     <TableCell><Skeleton width="75%" /></TableCell>
                     <TableCell><Skeleton width="65%" /></TableCell>
                     <TableCell><Skeleton width="65%" /></TableCell>
@@ -206,7 +262,7 @@ const TransactionTable = ({
 
               {!walletsLoading && !transactionsLoading && transactionPage?.empty && !error && (
                 <TableRow>
-                  <TableCell colSpan={5} sx={{ py: 3, textAlign: "center" }}>
+                  <TableCell colSpan={showCheckboxes ? 6 : 5} sx={{ py: 3, textAlign: "center" }}>
                     <Alert severity="info">There are no transactions in this wallet.</Alert>
                   </TableCell>
                 </TableRow>
@@ -220,6 +276,15 @@ const TransactionTable = ({
                     hover
                     sx={{ "&:last-child td": { borderBottom: 0 } }}
                   >
+                    {showCheckboxes && (
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={selectedTransactionIds.includes(transaction.id)}
+                          onChange={() => toggleTransactionSelection(transaction.id)}
+                          slotProps={{ input: { "aria-label": `Select transaction ${transaction.id}` } }}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>
                         {transaction.description ?? "No description"}

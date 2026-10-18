@@ -1,11 +1,29 @@
-import { Alert, Box, Button, MenuItem, Modal, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  MenuItem,
+  Modal,
+  Typography,
+} from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { useEffect, useState } from "react";
 import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
 import type { TransactionRequest } from "../dto/TransactionRequest";
-import type { TransactionType } from "../dto/TransactionResponse";
+import type { TransactionResponse, TransactionType } from "../dto/TransactionResponse";
 import { getCategories } from "../services/CategoryTableService";
-import { createTransaction } from "../services/TransactionModalService";
+import {
+  createTransaction,
+  deleteTransaction,
+  updateTransaction,
+} from "../services/TransactionModalService";
 import { BaseButton } from "./Button";
 import CategoryModal from "./CategoryModal";
 import { BaseInputField } from "./Input";
@@ -14,7 +32,8 @@ interface TransactionModalProps {
   open: boolean;
   walletId: number | null;
   onClose: () => void;
-  onCreated: () => void;
+  onSaved: () => void;
+  transaction?: TransactionResponse | null;
 }
 
 function getCurrentDate() {
@@ -27,7 +46,8 @@ const TransactionModal = ({
   open,
   walletId,
   onClose,
-  onCreated,
+  onSaved,
+  transaction = null,
 }: TransactionModalProps) => {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
@@ -39,7 +59,11 @@ const TransactionModal = ({
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+
+  const isEditing = transaction !== null;
 
   useEffect(() => {
     if (!open || type === "") {
@@ -82,6 +106,27 @@ const TransactionModal = ({
     };
   }, [open, type]);
 
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    if (transaction === null) {
+      setDescription("");
+      setAmount("");
+      setCategoryId("");
+      setType("");
+      setDate(getCurrentDate());
+      return;
+    }
+
+    setDescription(transaction.description ?? "");
+    setAmount(transaction.amount.toString());
+    setCategoryId(transaction.categoryId ?? "");
+    setType(transaction.type);
+    setDate(transaction.date);
+  }, [open, transaction]);
+
   const resetForm = () => {
     setDescription("");
     setAmount("");
@@ -94,7 +139,7 @@ const TransactionModal = ({
   };
 
   const handleClose = () => {
-    if (saving) {
+    if (saving || deleting) {
       return;
     }
 
@@ -106,7 +151,7 @@ const TransactionModal = ({
     const parsedAmount = Number(amount);
 
     if (walletId === null) {
-      setError("Select a wallet before creating a transaction");
+      setError("Select a wallet before saving a transaction");
       return;
     }
 
@@ -141,18 +186,47 @@ const TransactionModal = ({
     try {
       setSaving(true);
       setError("");
-      await createTransaction(walletId, request);
+      if (transaction === null) {
+        await createTransaction(walletId, request);
+      } else {
+        await updateTransaction(walletId, transaction.id, request);
+      }
       resetForm();
       onClose();
-      onCreated();
+      onSaved();
     } catch (requestError) {
       const message =
         requestError instanceof Error
           ? requestError.message
-          : "Error occurred while creating the transaction";
+          : "Error occurred while saving the transaction";
       setError(message);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (walletId === null || transaction === null) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      await deleteTransaction(walletId, transaction.id);
+      setOpenDeleteDialog(false);
+      resetForm();
+      onClose();
+      onSaved();
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Error occurred while deleting the transaction";
+      setError(message);
+      setOpenDeleteDialog(false);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -175,7 +249,7 @@ const TransactionModal = ({
         }}
       >
         <Typography variant="h4" sx={{ mb: 2, textAlign: "center" }}>
-          New Transaction
+          {isEditing ? "Edit Transaction" : "New Transaction"}
         </Typography>
 
         {error && <Alert severity="error">{error}</Alert>}
@@ -253,21 +327,64 @@ const TransactionModal = ({
         )}
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 3 }}>
+          {isEditing && (
+            <BaseButton
+              variant="outlined"
+              color="error"
+              icon={<DeleteOutlineRoundedIcon />}
+              onClick={() => setOpenDeleteDialog(true)}
+              disabled={saving}
+            >
+              Delete
+            </BaseButton>
+          )}
           <Button variant="outlined" onClick={handleClose} disabled={saving}>
             Cancel
           </Button>
 
           <BaseButton
             variant="contained"
-            icon={<AddRoundedIcon />}
+            icon={isEditing ? <EditRoundedIcon /> : <AddRoundedIcon />}
             onClick={handleSave}
             loading={saving}
           >
-            Add
+            {isEditing ? "Save changes" : "Add"}
           </BaseButton>
         </Box>
       </Box>
     </Modal>
+    <Dialog
+      open={openDeleteDialog}
+      onClose={() => {
+        if (!deleting) {
+          setOpenDeleteDialog(false);
+        }
+      }}
+    >
+      <DialogTitle>Delete transaction?</DialogTitle>
+      <DialogContent>
+        <Typography>This transaction will be permanently deleted.</Typography>
+      </DialogContent>
+      <DialogActions>
+        <BaseButton
+          variant="outlined"
+          icon={<CloseRoundedIcon />}
+          onClick={() => setOpenDeleteDialog(false)}
+          disabled={deleting}
+        >
+          Cancel
+        </BaseButton>
+        <BaseButton
+          variant="contained"
+          color="error"
+          icon={<DeleteOutlineRoundedIcon />}
+          onClick={handleDelete}
+          loading={deleting}
+        >
+          Delete
+        </BaseButton>
+      </DialogActions>
+    </Dialog>
     <CategoryModal
       open={openCategoryModal}
       fixedType={type === "" ? undefined : type}
