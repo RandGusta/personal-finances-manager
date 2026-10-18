@@ -20,7 +20,10 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import type { TransactionPageResponse } from "../dto/TransactionResponse";
+import type {
+  TransactionPageResponse,
+  TransactionResponse,
+} from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
 import {
   getTransactionsPage,
@@ -44,6 +47,7 @@ interface TransactionTableProps {
   showCheckboxes: boolean;
   selectedTransactionIds: number[];
   onTransactionSelectionChange: (transactionIds: number[]) => void;
+  onTransactionClick?: (transaction: TransactionResponse) => void;
 }
 
 const TransactionTable = ({
@@ -52,6 +56,7 @@ const TransactionTable = ({
   showCheckboxes,
   selectedTransactionIds,
   onTransactionSelectionChange,
+  onTransactionClick,
 }: TransactionTableProps) => {
   const [wallets, setWallets] = useState<WalletResponse[]>([]);
   const [selectedWalletId, setSelectedWalletId] = useState<number | "">("");
@@ -274,7 +279,15 @@ const TransactionTable = ({
                   <TableRow
                     key={transaction.id}
                     hover
-                    sx={{ "&:last-child td": { borderBottom: 0 } }}
+                    onClick={() => {
+                      if (!showCheckboxes) {
+                        onTransactionClick?.(transaction);
+                      }
+                    }}
+                    sx={{
+                      "&:last-child td": { borderBottom: 0 },
+                      cursor: !showCheckboxes && onTransactionClick ? "pointer" : "default",
+                    }}
                   >
                     {showCheckboxes && (
                       <TableCell padding="checkbox">

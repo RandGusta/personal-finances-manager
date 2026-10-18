@@ -20,9 +20,12 @@ import { downloadTransactionReport } from "../services/TransactionTableService";
 import { subscribeToWalletUpdates } from "../services/WalletRealtimeService";
 import { deleteTransaction } from "../services/TransactionModalService";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
+import type { TransactionResponse } from "../dto/TransactionResponse";
 
 const Transactions = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [editingTransaction, setEditingTransaction] =
+    useState<TransactionResponse | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<WalletResponse | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [downloadingReport, setDownloadingReport] = useState(false);
@@ -66,6 +69,15 @@ const Transactions = () => {
     setShowCheckboxes(false);
     setSelectedTransactionIds([]);
   }, []);
+
+  const handleTransactionClick = useCallback((transaction: TransactionResponse) => {
+    setEditingTransaction(transaction);
+  }, []);
+
+  const closeTransactionModal = () => {
+    setOpenModal(false);
+    setEditingTransaction(null);
+  };
 
   const startTransactionSelection = () => {
     setShowCheckboxes(true);
@@ -216,14 +228,19 @@ const Transactions = () => {
           showCheckboxes={showCheckboxes}
           selectedTransactionIds={selectedTransactionIds}
           onTransactionSelectionChange={setSelectedTransactionIds}
+          onTransactionClick={canModifyTransactions ? handleTransactionClick : undefined}
         />
       </Box>
 
       <TransactionModal
-        open={openModal}
-        walletId={selectedWallet?.id ?? null}
-        onClose={() => setOpenModal(false)}
-        onSaved={() => setRefreshKey((current) => current + 1)}
+        open={openModal || editingTransaction !== null}
+        walletId={editingTransaction?.walletId ?? selectedWallet?.id ?? null}
+        transaction={editingTransaction}
+        onClose={closeTransactionModal}
+        onSaved={() => {
+          closeTransactionModal();
+          setRefreshKey((current) => current + 1);
+        }}
       />
 
       <Dialog
