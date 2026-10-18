@@ -21,6 +21,7 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.79.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.14.2",
     "zxcvbn": "^4.4.2"
   },

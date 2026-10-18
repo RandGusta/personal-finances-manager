@@ -1,6 +1,7 @@
 import AutoAwesomeOutlinedIcon from "@mui/icons-material/AutoAwesomeOutlined";
 import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
 import { getMonthlyFinancialInsight } from "../services/FinancialInsightService";
 import { BaseButton } from "./Button";
 
@@ -60,13 +61,26 @@ const FinancialInsight = () => {
         {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
 
         {insight && !error && (
-          <Typography
-            component="div"
-            variant="body2"
-            sx={{ mt: 2, whiteSpace: "pre-line", lineHeight: 1.7 }}
+          <Box
+            sx={{
+              mt: 2,
+              typography: "body2",
+              lineHeight: 1.7,
+              overflowWrap: "anywhere",
+              "& p": { my: 1 },
+              "& ul, & ol": { pl: 3, my: 1 },
+              "& li": { mb: 0.75 },
+              "& strong": { fontWeight: 700 },
+            }}
           >
-            {insight}
-          </Typography>
+            <ReactMarkdown
+              skipHtml
+              allowedElements={["p", "strong", "em", "ul", "ol", "li", "br", "code"]}
+              unwrapDisallowed
+            >
+              {insight}
+            </ReactMarkdown>
+          </Box>
         )}
       </CardContent>
     </Card>
