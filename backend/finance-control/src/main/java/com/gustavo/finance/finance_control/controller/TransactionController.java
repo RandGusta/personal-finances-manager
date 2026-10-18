@@ -3,7 +3,7 @@ package com.gustavo.finance.finance_control.controller;
 import java.time.LocalDate;
 import java.nio.charset.StandardCharsets;
 
-import org.springframework.data.domain.Page;
+import com.gustavo.finance.finance_control.dto.TransactionPageResponse;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -81,7 +81,7 @@ public class TransactionController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<TransactionResponse>> list(
+    public ResponseEntity<TransactionPageResponse> list(
         Authentication authentication,
         @PathVariable Long walletId,
         @RequestParam(required = false) TransactionType type,
@@ -93,7 +93,7 @@ public class TransactionController {
         @PageableDefault(size = 20, sort = "date", direction = Sort.Direction.DESC)
         Pageable pageable
     ) {
-        return ResponseEntity.ok(transactionService.list(
+        return ResponseEntity.ok(new TransactionPageResponse(transactionService.list(
             authenticatedUser(authentication),
             walletId,
             type,
@@ -101,7 +101,7 @@ public class TransactionController {
             startDate,
             endDate,
             pageable
-        ));
+        )));
     }
 
     @PostMapping

@@ -3,6 +3,8 @@ package com.gustavo.finance.finance_control.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
+import com.gustavo.finance.finance_control.exception.InvalidRequestException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,6 +63,7 @@ public class TransactionService {
     ) {
         findMembership(user, walletId);
         validateDateRange(startDate, endDate);
+        validateSort(pageable.getSort());
 
         Specification<Transaction> filters = createFilters(
             walletId,
@@ -191,6 +194,15 @@ public class TransactionService {
     private void validateDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new BusinessException("Start date cannot be after end date");
+        }
+    }
+
+    private void validateSort(Sort sort) {
+        Set<String> allowedFields = Set.of("id", "date", "amount", "type", "description", "createdDate");
+        for (Sort.Order order : sort) {
+            if (!allowedFields.contains(order.getProperty())) {
+                throw new InvalidRequestException("Unsupported transaction sort field");
+            }
         }
     }
 

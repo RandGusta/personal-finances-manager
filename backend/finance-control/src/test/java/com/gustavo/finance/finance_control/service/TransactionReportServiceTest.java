@@ -34,8 +34,6 @@ class TransactionReportServiceTest {
             2L,
             3L,
             "Food",
-            4L,
-            "Gustavo",
             TransactionType.EXPENSE,
             new BigDecimal("25.50"),
             "=SUM(A1:A2)",

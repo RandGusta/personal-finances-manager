@@ -5,8 +5,6 @@ export interface TransactionResponse {
   walletId: number;
   categoryId: number | null;
   categoryName: string | null;
-  createdById: number;
-  createdByName: string;
   type: TransactionType;
   amount: number;
   description: string | null;
