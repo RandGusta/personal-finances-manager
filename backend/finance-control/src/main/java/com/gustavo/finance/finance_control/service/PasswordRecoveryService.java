@@ -7,6 +7,8 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import com.gustavo.finance.finance_control.security.UserSessionsRevokedEvent;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 
@@ -28,19 +30,22 @@ public class PasswordRecoveryService {
     private final PasswordEncoder passwordEncoder;
     private final EmailSenderService emailSenderService;
     private final String frontendUrl;
+    private final ApplicationEventPublisher eventPublisher;
 
     public PasswordRecoveryService(
         UserRepository userRepository,
         RedifinationPasswordTokenRepository tokenRepository,
         PasswordEncoder passwordEncoder,
         EmailSenderService emailSenderService,
-        @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl
+        @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl,
+        ApplicationEventPublisher eventPublisher
     ) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailSenderService = emailSenderService;
         this.frontendUrl = frontendUrl;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -65,11 +70,13 @@ public class PasswordRecoveryService {
 
         User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setTokenVersion(user.getTokenVersion() + 1);
         user.setUpdatedDate(LocalDateTime.now());
         resetToken.setUsed(true);
 
         userRepository.save(user);
         tokenRepository.save(resetToken);
+        eventPublisher.publishEvent(new UserSessionsRevokedEvent(user.getId()));
     }
 
     private ForgotPasswordResponse createResetToken(User user) {

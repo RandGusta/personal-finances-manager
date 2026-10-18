@@ -29,6 +29,7 @@ public class JwtService {
         return Jwts.builder()
             .subject(user.getId().toString())
             .claim("email", user.getEmail())
+            .claim("version", user.getTokenVersion())
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
             .signWith(getSecretKey())
@@ -48,12 +49,20 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        String tokenEmail = extractEmail(token);
-        String authenticatedEmail = userDetails instanceof User user
-            ? user.getEmail()
-            : userDetails.getUsername();
+        Claims claims = extractAllClaims(token);
+        if (!(userDetails instanceof User user)) {
+            return false;
+        }
 
-        return tokenEmail.equals(authenticatedEmail) && !isTokenExpired(token);
+        Long version = claims.get("version", Long.class);
+        return user.getId().toString().equals(claims.getSubject())
+            && user.getEmail().equals(claims.get("email", String.class))
+            && version != null && version == user.getTokenVersion()
+            && claims.getExpiration().after(new Date());
+    }
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     private SecretKey getSecretKey() {
@@ -73,11 +82,4 @@ public class JwtService {
         return claimsResolver.apply(extractAllClaims(token));
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
 }

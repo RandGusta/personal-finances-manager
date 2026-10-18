@@ -84,6 +84,9 @@ const RedifinePassword = () => {
         newPassword,
       });
 
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
+
       setSuccessMessage(response.message);
       setOpenDialog(true);
       setCurrentPassword("");
@@ -214,14 +217,15 @@ const RedifinePassword = () => {
         }
       />
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+      <Dialog open={openDialog} onClose={() => navigate("/login", { replace: true })}>
         <DialogTitle>Password changed</DialogTitle>
         <DialogContent>
           <Typography>{successMessage}</Typography>
+          <Typography sx={{ mt: 1 }}>Please sign in again with your new password.</Typography>
         </DialogContent>
         <DialogActions>
-          <BaseButton onClick={() => navigate("/profile")} variant="contained">
-            Return to profile
+          <BaseButton onClick={() => navigate("/login", { replace: true })} variant="contained">
+            Sign in
           </BaseButton>
         </DialogActions>
       </Dialog>

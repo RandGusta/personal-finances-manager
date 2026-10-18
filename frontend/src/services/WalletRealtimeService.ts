@@ -36,6 +36,16 @@ export function subscribeToWalletUpdates(onUpdate: (update: WalletUpdate) => voi
     });
   };
 
+  client.onStompError = () => {
+    void client.deactivate();
+  };
+
+  client.onWebSocketClose = (event) => {
+    if (event.code === 1008) {
+      void client.deactivate();
+    }
+  };
+
   client.activate();
 
   return () => {

@@ -80,6 +80,8 @@ const ResetPassword = () => {
       setGeneralError("");
 
       const response = await resetPassword(token, newPassword);
+      localStorage.removeItem("token");
+      sessionStorage.removeItem("token");
       setResponseMessage(response.message);
       setOpenDialog(true);
     } catch (error) {

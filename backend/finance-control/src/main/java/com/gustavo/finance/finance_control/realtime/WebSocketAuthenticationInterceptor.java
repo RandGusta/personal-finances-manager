@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.gustavo.finance.finance_control.security.JwtService;
 import com.gustavo.finance.finance_control.service.UserService;
+import com.gustavo.finance.finance_control.entity.User;
 
 @Component
 public class WebSocketAuthenticationInterceptor implements ChannelInterceptor {
@@ -21,10 +22,14 @@ public class WebSocketAuthenticationInterceptor implements ChannelInterceptor {
 
     private final JwtService jwtService;
     private final UserService userService;
+    private final WebSocketSessionRegistry sessionRegistry;
 
-    public WebSocketAuthenticationInterceptor(JwtService jwtService, UserService userService) {
+    public WebSocketAuthenticationInterceptor(
+        JwtService jwtService, UserService userService, WebSocketSessionRegistry sessionRegistry
+    ) {
         this.jwtService = jwtService;
         this.userService = userService;
+        this.sessionRegistry = sessionRegistry;
     }
 
     @Override
@@ -74,6 +79,9 @@ public class WebSocketAuthenticationInterceptor implements ChannelInterceptor {
                 null,
                 userDetails.getAuthorities()
             ));
+            sessionRegistry.authenticate(
+                accessor.getSessionId(), (User) userDetails, jwtService.extractExpiration(token).toInstant()
+            );
         } catch (AccessDeniedException exception) {
             throw exception;
         } catch (RuntimeException exception) {
@@ -82,7 +90,7 @@ public class WebSocketAuthenticationInterceptor implements ChannelInterceptor {
     }
 
     private void validateSubscription(StompHeaderAccessor accessor) {
-        if (accessor.getUser() == null) {
+        if (accessor.getUser() == null || !sessionRegistry.isValid(accessor.getSessionId())) {
             throw new AccessDeniedException("A valid token is required for realtime updates");
         }
 
