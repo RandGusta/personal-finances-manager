@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Comparator;
+import com.gustavo.finance.finance_control.dto.UserSummaryResponse;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,18 @@ public class FinancialSummaryService {
 
         List<Transaction> transactions = findTransactions(walletId, startDate, endDate);
         return summarize(transactions);
+    }
+
+    @Transactional(readOnly = true)
+    public UserSummaryResponse getForUser(User user) {
+        List<Transaction> transactions = transactionRepository.findAllAccessibleToUser(user);
+        FinancialSummaryResponse summary = summarize(transactions);
+        List<CategorySummaryResponse> categories = summary.getByCategory();
+        categories.sort(Comparator.comparing(CategorySummaryResponse::getTotal).reversed());
+        return new UserSummaryResponse(
+            user.getUsername(), summary.getBalance(), summary.getTotalIncome(),
+            summary.getTotalExpense(), categories, summary.getByMonth()
+        );
     }
 
     private List<Transaction> findTransactions(

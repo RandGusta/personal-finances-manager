@@ -45,7 +45,7 @@ const UserSummary = ({
       }
 
       try {
-        const response = await getUserSummary(wallets);
+        const response = await getUserSummary();
 
         if (componentIsMounted) {
           setSummary(response);

@@ -16,6 +16,8 @@ import com.gustavo.finance.finance_control.dto.UpdateUserRequest;
 import com.gustavo.finance.finance_control.dto.UserProfileResponse;
 import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.UserService;
+import com.gustavo.finance.finance_control.service.FinancialSummaryService;
+import com.gustavo.finance.finance_control.dto.UserSummaryResponse;
 
 import jakarta.validation.Valid;
 
@@ -25,9 +27,16 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final FinancialSummaryService financialSummaryService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, FinancialSummaryService financialSummaryService) {
         this.userService = userService;
+        this.financialSummaryService = financialSummaryService;
+    }
+
+    @GetMapping("/me/summary")
+    public ResponseEntity<UserSummaryResponse> getSummary(Authentication authentication) {
+        return ResponseEntity.ok(financialSummaryService.getForUser(authenticatedUser(authentication)));
     }
 
     @GetMapping("/me")

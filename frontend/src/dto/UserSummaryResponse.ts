@@ -1,6 +1,5 @@
 export interface UserSummaryResponse {
   userName: string;
-  email: string;
   balance: number;
   revenue: number;
   expenses: number;
