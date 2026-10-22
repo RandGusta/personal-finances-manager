@@ -1,54 +1,65 @@
-import { Client } from "@stomp/stompjs";
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { API_BASE_URL, getStoredToken } from "./api";
 
-export type WalletUpdate = {
-  walletId: number;
-  changeType: "CREATED" | "UPDATED" | "DELETED";
-};
+class RealtimeAuthenticationError extends Error {}
 
-function getWebSocketUrl() {
-  const websocketBaseUrl = API_BASE_URL.replace(/^http/, "ws");
-  return `${websocketBaseUrl}/ws`;
-}
-
-export function subscribeToWalletUpdates(onUpdate: (update: WalletUpdate) => void) {
+// Recebe avisos por SSE e chama a função passada pela página para atualizar os dados.
+export function subscribeToWalletUpdates(onUpdate: () => void) {
   const token = getStoredToken();
 
   if (!token) {
     return () => undefined;
   }
 
-  const client = new Client({
-    brokerURL: getWebSocketUrl(),
-    connectHeaders: {
+  const controller = new AbortController();
+  let hasConnected = false;
+
+  void fetchEventSource(`${API_BASE_URL}/api/v1/users/me/events`, {
+    headers: {
       Authorization: `Bearer ${token}`,
     },
-    reconnectDelay: 5000,
+    signal: controller.signal,
+    openWhenHidden: true,
+    async onopen(response) {
+      if (response.status === 401 || response.status === 403 || getStoredToken() !== token) {
+        throw new RealtimeAuthenticationError("Sign in again to receive live updates");
+      }
+
+      if (!response.ok || !response.headers.get("content-type")?.includes("text/event-stream")) {
+        throw new Error("Live updates are temporarily unavailable");
+      }
+    },
+    onmessage(message) {
+      if (controller.signal.aborted || getStoredToken() !== token) {
+        controller.abort();
+        return;
+      }
+
+      if (message.event === "connected") {
+        // Após reconectar, busca mudanças que podem ter ocorrido enquanto estava offline.
+        if (hasConnected) {
+          onUpdate();
+        }
+        hasConnected = true;
+      }
+
+      if (message.event === "wallet-update") {
+        onUpdate();
+      }
+    },
+    onclose() {
+      throw new Error("The live update connection was closed");
+    },
+    onerror(error) {
+      if (error instanceof RealtimeAuthenticationError || getStoredToken() !== token) {
+        throw error;
+      }
+      return 5000;
+    },
+  }).catch(() => {
+    // HTTP 401/403 encerra as tentativas; erros de rede são reconectados acima.
   });
 
-  client.onConnect = () => {
-    client.subscribe("/user/queue/wallet-updates", (message) => {
-      try {
-        onUpdate(JSON.parse(message.body) as WalletUpdate);
-      } catch {
-        // Ignore an invalid realtime message and keep the connection available.
-      }
-    });
-  };
-
-  client.onStompError = () => {
-    void client.deactivate();
-  };
-
-  client.onWebSocketClose = (event) => {
-    if (event.code === 1008) {
-      void client.deactivate();
-    }
-  };
-
-  client.activate();
-
-  return () => {
-    void client.deactivate();
-  };
+  // A limpeza do useEffect fecha a conexão ao sair da página.
+  return () => controller.abort();
 }
