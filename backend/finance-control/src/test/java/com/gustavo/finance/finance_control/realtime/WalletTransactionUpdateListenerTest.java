@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.entity.UserWallet;
@@ -24,11 +23,12 @@ class WalletTransactionUpdateListenerTest {
     private UserWalletRepository userWalletRepository;
 
     @Mock
-    private SimpMessagingTemplate messagingTemplate;
+    private WalletEventService walletEventService;
 
     @Test
     void shouldNotifyEachWalletMemberAfterTransactionChange() {
         User user = new User();
+        user.setId(10L);
         user.setEmail("member@example.com");
         UserWallet membership = new UserWallet();
         membership.setUser(user);
@@ -38,7 +38,7 @@ class WalletTransactionUpdateListenerTest {
 
         WalletTransactionUpdateListener listener = new WalletTransactionUpdateListener(
             userWalletRepository,
-            messagingTemplate
+            walletEventService
         );
 
         listener.notifyWalletMembers(new WalletTransactionChangedEvent(
@@ -48,9 +48,8 @@ class WalletTransactionUpdateListenerTest {
 
         org.mockito.ArgumentCaptor<WalletUpdateResponse> responseCaptor =
             org.mockito.ArgumentCaptor.forClass(WalletUpdateResponse.class);
-        verify(messagingTemplate).convertAndSendToUser(
-            eq("member@example.com"),
-            eq("/queue/wallet-updates"),
+        verify(walletEventService).sendToUser(
+            eq(10L),
             responseCaptor.capture()
         );
         assertEquals(20L, responseCaptor.getValue().getWalletId());

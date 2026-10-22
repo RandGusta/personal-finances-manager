@@ -2,6 +2,8 @@ package com.gustavo.finance.finance_control.config;
 
 import java.io.IOException;
 
+import jakarta.servlet.DispatcherType;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -74,7 +76,13 @@ public class SecurityConfig {
                 )
             )
             .authorizeHttpRequests(auth ->
-            auth.requestMatchers(
+            auth
+            // Permite apenas a finalização interna do stream; a requisição inicial exige JWT.
+            .requestMatchers(request ->
+                request.getDispatcherType() == DispatcherType.ASYNC
+                    && "/api/v1/users/me/events".equals(request.getServletPath())
+            ).permitAll()
+            .requestMatchers(
                 "/auth/register",
                 "/auth/login",
                 "/auth/forgot-password",
@@ -82,7 +90,6 @@ public class SecurityConfig {
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html",
-                "/ws",
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())

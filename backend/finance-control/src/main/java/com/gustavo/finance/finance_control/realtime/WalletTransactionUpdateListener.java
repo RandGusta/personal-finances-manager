@@ -2,7 +2,6 @@ package com.gustavo.finance.finance_control.realtime;
 
 import java.util.List;
 
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.transaction.event.TransactionPhase;
@@ -14,14 +13,14 @@ import com.gustavo.finance.finance_control.repository.UserWalletRepository;
 public class WalletTransactionUpdateListener {
 
     private final UserWalletRepository userWalletRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final WalletEventService walletEventService;
 
     public WalletTransactionUpdateListener(
         UserWalletRepository userWalletRepository,
-        SimpMessagingTemplate messagingTemplate
+        WalletEventService walletEventService
     ) {
         this.userWalletRepository = userWalletRepository;
-        this.messagingTemplate = messagingTemplate;
+        this.walletEventService = walletEventService;
     }
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
@@ -35,9 +34,8 @@ public class WalletTransactionUpdateListener {
         );
 
         for (UserWallet membership : memberships) {
-            messagingTemplate.convertAndSendToUser(
-                membership.getUser().getEmail(),
-                "/queue/wallet-updates",
+            walletEventService.sendToUser(
+                membership.getUser().getId(),
                 response
             );
         }

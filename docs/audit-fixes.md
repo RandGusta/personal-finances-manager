@@ -7,8 +7,8 @@ backend confere ID, e-mail, versão, assinatura e expiração. Troca e recupera�
 senha incrementam a versão; tokens anteriores deixam de autenticar.
 
 O evento `UserSessionsRevokedEvent`, processado após o commit, fecha conexões
-WebSocket do usuário. A validade também é conferida antes de entregar atualizações
-e ao se inscrever no canal. Uma tarefa fecha conexões expiradas, e o frontend
+SSE do usuário. A validade também é conferida antes de entregar atualizações
+e ao abrir o stream. Uma tarefa fecha conexões expiradas, e o frontend
 interrompe tentativas automáticas de reconexão após uma recusa de autenticação.
 
 Ao aplicar esta alteração, os tokens emitidos anteriormente (sem versão) exigem
@@ -19,9 +19,9 @@ A configuração local existente `spring.jpa.hibernate.ddl-auto=update` adiciona
 Em ambientes que não usam atualização automática de schema, a coluna deve ser
 adicionada por uma migração antes de executar esta versão.
 
-O gerenciamento de conexões é local à instância, assim como o broker simples já
-usado pelo projeto. Uma implantação com múltiplas instâncias exigiria propagação
-dos eventos de revogação entre elas. A versão persistida continua protegendo HTTP.
+O gerenciamento de conexões SSE é local à instância. Uma implantação com múltiplas
+instâncias exigiria propagação dos eventos de atualização e revogação entre elas.
+A versão persistida continua protegendo HTTP e a entrega de cada evento.
 
 ## Contratos HTTP
 
@@ -46,8 +46,13 @@ soma valores financeiros no JavaScript.
 
 ## Verificação
 
-A auditoria local em `teste/` (ignorada pelo Git) executa o backend com HTTP e
-WebSocket reais, H2 temporário e e-mail/Gemini simulados. Ela verifica os contratos,
+A auditoria original em `teste/` (ignorada pelo Git) executou o backend com HTTP e
+WebSocket reais, H2 temporário e e-mail/Gemini simulados. Ela verificou os contratos,
 isolamento, tentativas de adulteração, revogação após troca e recuperação de senha,
 fechamento do WebSocket e soma global de carteira pessoal e compartilhada.
 Não acessa o banco MySQL ou contas reais.
+
+Após a migração para SSE, os testes de tempo real atualizados estão em
+`WalletEventsIntegrationTest`, no backend. Usam HTTP real, H2 temporário e os mesmos
+serviços de produção, sem chamar e-mail ou IA externos. O script antigo de auditoria
+WebSocket é histórico e não verifica o transporte SSE atual. Veja `realtime.md`.
