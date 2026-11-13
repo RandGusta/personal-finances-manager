@@ -2,10 +2,15 @@ package com.gustavo.finance.finance_control.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import com.gustavo.finance.finance_control.exception.InvalidRequestException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +28,8 @@ import com.gustavo.finance.finance_control.entity.UserWallet;
 import com.gustavo.finance.finance_control.repository.CategoryRepository;
 import com.gustavo.finance.finance_control.repository.TransactionRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
+import com.gustavo.finance.finance_control.realtime.TransactionChangeType;
+import com.gustavo.finance.finance_control.realtime.WalletTransactionChangedEvent;
 
 @Service
 public class TransactionService {
@@ -30,15 +37,18 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserWalletRepository userWalletRepository;
     private final CategoryRepository categoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TransactionService(
         TransactionRepository transactionRepository,
         UserWalletRepository userWalletRepository,
-        CategoryRepository categoryRepository
+        CategoryRepository categoryRepository,
+        ApplicationEventPublisher eventPublisher
     ) {
         this.transactionRepository = transactionRepository;
         this.userWalletRepository = userWalletRepository;
         this.categoryRepository = categoryRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -53,16 +63,44 @@ public class TransactionService {
     ) {
         findMembership(user, walletId);
         validateDateRange(startDate, endDate);
+        validateSort(pageable.getSort());
 
-        Specification<Transaction> filters = Specification
-            .where(hasWallet(walletId))
-            .and(hasType(type))
-            .and(hasCategory(categoryId))
-            .and(dateOnOrAfter(startDate))
-            .and(dateOnOrBefore(endDate));
+        Specification<Transaction> filters = createFilters(
+            walletId,
+            type,
+            categoryId,
+            startDate,
+            endDate
+        );
 
         return transactionRepository.findAll(filters, pageable)
             .map(TransactionResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> listForReport(
+        User user,
+        Long walletId,
+        TransactionType type,
+        Long categoryId,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        findMembership(user, walletId);
+        validateDateRange(startDate, endDate);
+
+        Specification<Transaction> filters = createFilters(
+            walletId,
+            type,
+            categoryId,
+            startDate,
+            endDate
+        );
+
+        return transactionRepository.findAll(filters, Sort.by(Sort.Direction.DESC, "date"))
+            .stream()
+            .map(TransactionResponse::from)
+            .toList();
     }
 
     @Transactional
@@ -73,7 +111,9 @@ public class TransactionService {
         transaction.setCreatedBy(user);
         transaction.setCreatedDate(LocalDateTime.now());
         copyRequest(transaction, user, request);
-        return TransactionResponse.from(transactionRepository.save(transaction));
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        publishWalletUpdate(walletId, TransactionChangeType.CREATED);
+        return TransactionResponse.from(savedTransaction);
     }
 
     @Transactional(readOnly = true)
@@ -92,13 +132,16 @@ public class TransactionService {
         findWritableMembership(user, walletId);
         Transaction transaction = findTransaction(walletId, transactionId);
         copyRequest(transaction, user, request);
-        return TransactionResponse.from(transactionRepository.save(transaction));
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        publishWalletUpdate(walletId, TransactionChangeType.UPDATED);
+        return TransactionResponse.from(savedTransaction);
     }
 
     @Transactional
     public void delete(User user, Long walletId, Long transactionId) {
         findWritableMembership(user, walletId);
         transactionRepository.delete(findTransaction(walletId, transactionId));
+        publishWalletUpdate(walletId, TransactionChangeType.DELETED);
     }
 
     private void copyRequest(Transaction transaction, User user, TransactionRequest request) {
@@ -111,6 +154,10 @@ public class TransactionService {
             request.getCategoryId(),
             transaction.getCategory()
         ));
+    }
+
+    private void publishWalletUpdate(Long walletId, TransactionChangeType changeType) {
+        eventPublisher.publishEvent(new WalletTransactionChangedEvent(walletId, changeType));
     }
 
     private Category findCategory(User user, Long categoryId, Category currentCategory) {
@@ -148,6 +195,30 @@ public class TransactionService {
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new BusinessException("Start date cannot be after end date");
         }
+    }
+
+    private void validateSort(Sort sort) {
+        Set<String> allowedFields = Set.of("id", "date", "amount", "type", "description", "createdDate");
+        for (Sort.Order order : sort) {
+            if (!allowedFields.contains(order.getProperty())) {
+                throw new InvalidRequestException("Unsupported transaction sort field");
+            }
+        }
+    }
+
+    private Specification<Transaction> createFilters(
+        Long walletId,
+        TransactionType type,
+        Long categoryId,
+        LocalDate startDate,
+        LocalDate endDate
+    ) {
+        return Specification
+            .where(hasWallet(walletId))
+            .and(hasType(type))
+            .and(hasCategory(categoryId))
+            .and(dateOnOrAfter(startDate))
+            .and(dateOnOrBefore(endDate));
     }
 
     private String normalizeOptionalText(String value) {

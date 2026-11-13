@@ -1,5 +1,3 @@
-import { TextAlignCenter } from "lucide-react";
-
 export const typography = {
     fontFamily: 'Roboto, Arial, sans-serif',
     h1:{
@@ -17,7 +15,7 @@ export const typography = {
     h4:{
         fontSize: '3rem',
         fontWeight: 800, 
-        color: '#1C4632'
+        color: '#163832'
     },
     h5:{
         fontSize: '25px',
@@ -27,11 +25,10 @@ export const typography = {
     h6:{
         fontSize: '1rem',
         fontWeight: 800, 
-        color: '#1C4632'
+        color: '#163832'
     },
     body2:{
-        fontSize: '1.2rem',
-        fontWeight: 800, 
-        color: '#ffff',
+        fontSize: '0.875rem',
+        fontWeight: 400,
     },
-} 
+}

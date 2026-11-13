@@ -1,15 +1,29 @@
-import { Alert, Box, Card, CardContent, Skeleton, Typography } from "@mui/material";
-import profile from "../assets/svg/profile.svg";
+import { Alert, Box, Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
+import MetricCard from "./CardDashboard";
 import { getUserSummary } from "../services/UserSummaryService";
-import type { UserSummaryResponse } from "../dto/UserSummaryResponse";
+import type { UserSummaryResponse, WalletResponse } from "../dto/UserSummaryResponse";
 
 const currencyFormatter = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL",
 });
 
-const UserSummary = () => {
+type UserSummaryProps = {
+  wallets: WalletResponse[] | null;
+  walletsError: string;
+  refreshKey?: number;
+  onLoaded?: (summary: UserSummaryResponse) => void;
+  onError?: (message: string) => void;
+};
+
+const UserSummary = ({
+  wallets,
+  walletsError,
+  refreshKey = 0,
+  onLoaded,
+  onError,
+}: UserSummaryProps) => {
   const [summary, setSummary] = useState<UserSummaryResponse | null>(null);
   const [userError, setUserError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -21,12 +35,22 @@ const UserSummary = () => {
     let componentIsMounted = true;
 
     const loadUserSummary = async () => {
+      if (wallets === null) {
+        if (walletsError && componentIsMounted) {
+          setUserError(walletsError);
+          setLoading(false);
+          onError?.(walletsError);
+        }
+        return;
+      }
+
       try {
         const response = await getUserSummary();
 
         if (componentIsMounted) {
           setSummary(response);
           setUserError("");
+          onLoaded?.(response);
         }
       } catch (error) {
         if (componentIsMounted) {
@@ -35,6 +59,7 @@ const UserSummary = () => {
               ? error.message
               : "Error occurred while loading";
           setUserError(message);
+          onError?.(message);
         }
       } finally {
         if (componentIsMounted) {
@@ -42,56 +67,54 @@ const UserSummary = () => {
         }
       }
     };
-    
     loadUserSummary();
     return () => {
       componentIsMounted = false;
     };
-  }, []);
+  }, [wallets, walletsError, refreshKey, onError, onLoaded]);
 
   const formatCurrency = (value: number | undefined) =>
     currencyFormatter.format(value ?? 0);
 
   return (
-    <Card sx={{ margin: {lg:"3rem", xs:"0rem"},   width: {
-          xs: "100%",
-          md: "18rem",
-        }, minHeight:{xs:"block", lg:"25.6rem"}, display: 'flex', flexDirection:"column"}}>
-        <CardContent
-          component={"img"}
-          src={profile}
-          sx={{ height: "10rem", padding: '0px', backgroundColor:"#1C4632"}}
-        ></CardContent>
-        <Box>
-          <CardContent>
-            {userError ? (
-              <Alert severity="error">{userError}</Alert>
-            ) : (
-              <Typography
-                variant="body2"
-                sx={{ textAlign: "center", backgroundColor: "#1C4632" }}
-              >
-                {loading ? <Skeleton /> : summary?.userName}
-              </Typography>
-            )}
-          </CardContent>
-          <CardContent>
-            <Typography variant="h3">
-              Balance: {loading ? <Skeleton /> : formatCurrency(summary?.balance)}
-            </Typography>
-          </CardContent>
-          <CardContent>
-            <Typography variant="h3">
-              Revenue: {loading ? <Skeleton /> : formatCurrency(summary?.revenue)}
-            </Typography>
-          </CardContent>
-          <CardContent>
-            <Typography variant="h3">
-              Expenses: {loading ? <Skeleton /> : formatCurrency(summary?.expenses)}
-            </Typography>
-          </CardContent>
-        </Box>
-      </Card>
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
+        gap: 2,
+        mt: 3,
+      }}
+    >
+      {userError ? (
+        <Alert severity="error" sx={{ gridColumn: "1 / -1" }}>
+          {userError}
+        </Alert>
+      ) : loading ? (
+        <>
+          <Skeleton variant="rounded" height={150} />
+          <Skeleton variant="rounded" height={150} />
+          <Skeleton variant="rounded" height={150} />
+        </>
+      ) : (
+        <>
+          <MetricCard
+            title="Balance"
+            value={formatCurrency(summary?.balance)}
+            description="Available across your wallets"
+          />
+          <MetricCard
+            title="Revenue"
+            value={formatCurrency(summary?.revenue)}
+            description="Total income"
+          />
+          <MetricCard
+            title="Expenses"
+            value={formatCurrency(summary?.expenses)}
+            description="Total expenses"
+          />
+        </>
+      )}
+    </Box>
   );
 };
 

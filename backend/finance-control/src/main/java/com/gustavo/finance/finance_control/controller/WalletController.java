@@ -23,7 +23,7 @@ import com.gustavo.finance.finance_control.service.WalletService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = "${app.frontend-url}")
 @RequestMapping("/api/v1/wallets")
 public class WalletController {
 

@@ -31,6 +31,7 @@ import com.gustavo.finance.finance_control.entity.Wallet;
 import com.gustavo.finance.finance_control.entity.WalletInvitation;
 import com.gustavo.finance.finance_control.enums.UserRelationWallet;
 import com.gustavo.finance.finance_control.exception.BusinessException;
+import com.gustavo.finance.finance_control.exception.ConflictException;
 import com.gustavo.finance.finance_control.repository.UserRepository;
 import com.gustavo.finance.finance_control.repository.UserWalletRepository;
 import com.gustavo.finance.finance_control.repository.WalletInvitationRepository;
@@ -150,6 +151,41 @@ class WalletInvitationServiceTest {
         assertEquals(UserRelationWallet.EDITOR, response.getRole());
         assertTrue(invitation.isAccepted());
         verify(invitationRepository).save(invitation);
+    }
+
+    @Test
+    void shouldRejectAnotherActiveInvitationForTheSameEmail() {
+        mockOwnerMembership();
+        WalletInvitation activeInvitation = invitation(
+            "friend@example.com",
+            UserRelationWallet.VIEWER,
+            LocalDateTime.now().plusDays(1)
+        );
+        when(userRepository.findByEmailIgnoreCase("friend@example.com"))
+            .thenReturn(Optional.empty());
+        when(invitationRepository
+            .findFirstByWalletIdAndEmailIgnoreCaseAndAcceptedFalseOrderByCreatedAtDesc(
+                10L,
+                "friend@example.com"
+            ))
+            .thenReturn(Optional.of(activeInvitation));
+
+        assertThrows(
+            ConflictException.class,
+            () -> invitationService.invite(
+                owner,
+                10L,
+                request("friend@example.com", UserRelationWallet.VIEWER)
+            )
+        );
+
+        verify(invitationRepository, never()).save(any(WalletInvitation.class));
+        verify(emailSenderService, never()).sendEmailTemplate(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            any(Context.class)
+        );
     }
 
     @Test

@@ -6,8 +6,6 @@ import {
   Stack,
 } from "@mui/material";
 
-import { useState } from "react";
-
 import { BaseInputField } from "./Input";
 
 interface InviteMemberModalProps {
@@ -34,7 +32,6 @@ const InviteMemberModal = ({
   open,
   onClose,
 }: InviteMemberModalProps) => {
-const [openInviteMember, setOpenInviteMember] = useState(false);
   return (
     <Modal
       open={open}

@@ -27,6 +27,7 @@ import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.entity.UserWallet;
 import com.gustavo.finance.finance_control.entity.Wallet;
 import com.gustavo.finance.finance_control.enums.UserRelationWallet;
+import com.gustavo.finance.finance_control.exception.BusinessException;
 import com.gustavo.finance.finance_control.exception.ConflictException;
 import com.gustavo.finance.finance_control.exception.ResourceNotFoundException;
 import com.gustavo.finance.finance_control.repository.UserRepository;
@@ -181,6 +182,58 @@ class WalletMemberServiceTest {
     }
 
     @Test
+    void shouldRejectAddingAnotherOwner() {
+        mockRequesterAsOwner();
+
+        assertThrows(
+            BusinessException.class,
+            () -> walletMemberService.add(
+                requester,
+                10L,
+                memberRequest("new-owner@example.com", UserRelationWallet.OWNER)
+            )
+        );
+
+        verify(userRepository, never()).findByEmail(any());
+        verify(userWalletRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectChangingAMemberToOwner() {
+        User member = user(2L, "Member", "member@example.com");
+        UserWallet membership = membership(member, UserRelationWallet.VIEWER);
+        WalletMemberRoleRequest request = new WalletMemberRoleRequest();
+        request.setRole(UserRelationWallet.OWNER);
+        mockRequesterAsOwner();
+        when(userWalletRepository.findByWalletIdAndUserId(10L, 2L))
+            .thenReturn(Optional.of(membership));
+
+        assertThrows(
+            BusinessException.class,
+            () -> walletMemberService.updateRole(requester, 10L, 2L, request)
+        );
+
+        verify(userWalletRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectChangingTheOwnerRole() {
+        UserWallet ownerMembership = membership(requester, UserRelationWallet.OWNER);
+        WalletMemberRoleRequest request = new WalletMemberRoleRequest();
+        request.setRole(UserRelationWallet.EDITOR);
+        mockRequesterAsOwner();
+        when(userWalletRepository.findByWalletIdAndUserId(10L, 1L))
+            .thenReturn(Optional.of(ownerMembership));
+
+        assertThrows(
+            BusinessException.class,
+            () -> walletMemberService.updateRole(requester, 10L, 1L, request)
+        );
+
+        verify(userWalletRepository, never()).save(any());
+    }
+
+    @Test
     void shouldAllowOwnerToRemoveMember() {
         User member = user(2L, "Member", "member@example.com");
         UserWallet membership = membership(member, UserRelationWallet.VIEWER);
@@ -191,6 +244,21 @@ class WalletMemberServiceTest {
         walletMemberService.remove(requester, 10L, 2L);
 
         verify(userWalletRepository).delete(membership);
+    }
+
+    @Test
+    void shouldRejectRemovingTheOwner() {
+        UserWallet ownerMembership = membership(requester, UserRelationWallet.OWNER);
+        mockRequesterAsOwner();
+        when(userWalletRepository.findByWalletIdAndUserId(10L, 1L))
+            .thenReturn(Optional.of(ownerMembership));
+
+        assertThrows(
+            BusinessException.class,
+            () -> walletMemberService.remove(requester, 10L, 1L)
+        );
+
+        verify(userWalletRepository, never()).delete(any());
     }
 
     private void mockRequesterAsOwner() {

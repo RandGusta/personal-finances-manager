@@ -1,5 +1,10 @@
 package com.gustavo.finance.finance_control.config;
 
+import java.io.IOException;
+
+import jakarta.servlet.DispatcherType;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,7 +17,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy;
 
+import com.gustavo.finance.finance_control.security.AuthenticationRateLimitFilter;
 import com.gustavo.finance.finance_control.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -21,9 +29,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AuthenticationRateLimitFilter authenticationRateLimitFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(
+        JwtAuthenticationFilter jwtAuthenticationFilter,
+        AuthenticationRateLimitFilter authenticationRateLimitFilter
+    ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.authenticationRateLimitFilter = authenticationRateLimitFilter;
     }
 
 
@@ -33,20 +46,68 @@ public class SecurityConfig {
         // HttpSecurity podem lançar exceções durante a construção da configuração, por isso o exception 
         http
             .cors(Customizer.withDefaults())
-            .csrf(csrf -> csrf.disable()).authorizeHttpRequests(auth ->
-            auth.requestMatchers(
+            .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.deny())
+                .referrerPolicy(referrerPolicy ->
+                    referrerPolicy.policy(ReferrerPolicy.NO_REFERRER)
+                )
+                .permissionsPolicyHeader(permissions ->
+                    permissions.policy("camera=(), microphone=(), geolocation=()")
+                )
+            )
+            .sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, ex) ->
+                    writeErrorResponse(
+                        response,
+                        HttpStatus.UNAUTHORIZED,
+                        "Authentication is required"
+                    )
+                )
+                .accessDeniedHandler((request, response, ex) ->
+                    writeErrorResponse(
+                        response,
+                        HttpStatus.FORBIDDEN,
+                        "You do not have permission to perform this operation"
+                    )
+                )
+            )
+            .authorizeHttpRequests(auth ->
+            auth
+            // Permite apenas a finalização interna do stream; a requisição inicial exige JWT.
+            .requestMatchers(request ->
+                request.getDispatcherType() == DispatcherType.ASYNC
+                    && "/api/v1/users/me/events".equals(request.getServletPath())
+            ).permitAll()
+            .requestMatchers(
                 "/auth/register",
                 "/auth/login",
                 "/auth/forgot-password",
                 "/auth/reset-password",
-                "/actuator/health",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
                 "/error"
             ).permitAll()
             .anyRequest().authenticated())
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterBefore(authenticationRateLimitFilter, JwtAuthenticationFilter.class)
             .formLogin(form -> form.disable())
             .httpBasic(httpBasic -> httpBasic.disable());
         return http.build();
+    }
+
+    private void writeErrorResponse(
+        jakarta.servlet.http.HttpServletResponse response,
+        HttpStatus status,
+        String message
+    ) throws IOException {
+        response.setStatus(status.value());
+        response.setContentType("application/json");
+        response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 
     @Bean

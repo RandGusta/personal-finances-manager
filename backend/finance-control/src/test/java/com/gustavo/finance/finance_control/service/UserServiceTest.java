@@ -18,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ChangePasswordRequest;
@@ -44,6 +45,9 @@ class UserServiceTest {
     @Mock
     private EmailSenderService emailSenderService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private UserService userService;
     private User user;
 
@@ -53,7 +57,8 @@ class UserServiceTest {
             userRepository,
             transactionRepository,
             passwordEncoder,
-            emailSenderService
+            emailSenderService,
+            eventPublisher
         );
 
         user = new User();

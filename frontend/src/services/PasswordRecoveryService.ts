@@ -5,7 +5,7 @@ import type {
   ResetPasswordRequest,
 } from "../dto/PasswordRecovery";
 
-import { getErrorMessage, getStoredToken, API_BASE_URL } from "./api"; 
+import { getErrorMessage, API_BASE_URL } from "./api";
 
 
 

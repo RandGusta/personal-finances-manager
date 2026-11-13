@@ -56,3 +56,34 @@ export async function getTransactionsPage(walletId: number, page: number, size: 
     "Error while loading the transactions",
   );
 }
+
+export async function downloadTransactionReport(walletId: number): Promise<void> {
+  const token = requireToken();
+  const response = await fetch(
+    `${API_BASE_URL}/api/v1/wallets/${walletId}/transactions/report`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const message = await getErrorMessage(
+      response,
+      "Error while downloading the transaction report",
+    );
+    throw new Error(message);
+  }
+
+  const report = await response.blob();
+  const reportUrl = URL.createObjectURL(report);
+  const downloadLink = document.createElement("a");
+
+  downloadLink.href = reportUrl;
+  downloadLink.download = `wallet-${walletId}-transactions.csv`;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  URL.revokeObjectURL(reportUrl);
+}

@@ -17,7 +17,7 @@ import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.service.FinancialSummaryService;
 
 @RestController
-@CrossOrigin(origins = {"http://localhost:5173"})
+@CrossOrigin(origins = "${app.frontend-url}")
 @RequestMapping("/api/v1/wallets/{walletId}/summary")
 public class FinancialSummaryController {
 

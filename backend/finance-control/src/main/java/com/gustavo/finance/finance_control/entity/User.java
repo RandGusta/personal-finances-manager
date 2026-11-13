@@ -40,6 +40,9 @@ public class User implements UserDetails {
     @NotBlank(message = "Password is required")
     private String password;
 
+    @Column(nullable = false, columnDefinition = "bigint default 0")
+    private long tokenVersion;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime createdDate;
 

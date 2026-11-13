@@ -1,11 +1,11 @@
 import { Alert, Box, Skeleton, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import BaseNavBar from "../components/NavBar";
 import ProfileSummary from "../components/ProfileSummary";
 import WalletCard from "../components/WalletCard";
 import type { ProfilePageResponse } from "../dto/ProfilePageResponse";
 import ProfileLayout from "../layouts/ProfileLayout";
+import SidebarLayout from "../layouts/SidebarLayout";
 import { getProfilePage } from "../services/ProfileService";
 
 const Profile = () => {
@@ -48,8 +48,7 @@ const Profile = () => {
   }, []);
 
   return (
-    <>
-      <BaseNavBar />
+    <SidebarLayout>
       <ProfileLayout
         summary={
           <>
@@ -64,8 +63,24 @@ const Profile = () => {
           </>
         }
         wallets={
-          <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <Typography variant="h4">Wallets</Typography>
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: 1,
+                mb: 2,
+              }}
+            >
+              <Typography variant="h5" sx={{ color: "#163832", fontSize: "1.5rem" }}>
+                Wallets
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {profilePage?.wallets.length ?? 0} total
+              </Typography>
+            </Box>
 
             {loading && <Skeleton variant="rounded" height={140} />}
 
@@ -73,19 +88,27 @@ const Profile = () => {
               <Alert severity="info">You do not have any wallets yet.</Alert>
             )}
 
-            {!loading &&
-              profilePage?.wallets.map((wallet) => (
-                <WalletCard
-                  key={wallet.id}
-                  wallet={wallet}
-                  onOpen={() => navigate("/wallets")}
-                />
-              ))}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+                gap: 2,
+              }}
+            >
+              {!loading &&
+                profilePage?.wallets.map((wallet) => (
+                  <WalletCard
+                    key={wallet.id}
+                    wallet={wallet}
+                    onOpen={() => navigate("/wallets")}
+                  />
+                ))}
+            </Box>
           </Box>
         }
         members={null}
       />
-    </>
+    </SidebarLayout>
   );
 };
 

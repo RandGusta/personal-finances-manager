@@ -1,33 +1,28 @@
 import {Box} from "@mui/material";
 
 interface DashboardLayoutProps{
-    userSummary: React.ReactNode;
     expensesChart: React.ReactNode,
+    financialTrendChart: React.ReactNode,
     recentTransactions: React.ReactNode;
 }
 
 
 export function DashboardLayout({
-  userSummary,
   expensesChart,
+  financialTrendChart,
   recentTransactions,
 }: DashboardLayoutProps) {
   return (
-    <Box sx={{ p: 4 }}>
+    <Box sx={{ mt: 3 }}>
       <Box
         sx={{
-          display: "flex",
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", lg: "repeat(2, minmax(0, 1fr))" },
           gap: 3,
-          flexDirection: {xs:"column", lg: "row"}
         }}
       >
-        <Box sx={{ flex: 1 }}>
-          {userSummary}
-        </Box>
-
-        <Box sx={{ flex: 2 }}>
-          {expensesChart}
-        </Box>
+        {expensesChart}
+        {financialTrendChart}
       </Box>
 
       <Box sx={{ mt: 3 }}>

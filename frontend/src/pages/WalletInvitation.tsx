@@ -2,7 +2,7 @@ import { Alert, Box, Button, Card, CardContent, Typography } from "@mui/material
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BaseButton } from "../components/Button";
-import BaseNavBar from "../components/NavBar";
+import SidebarLayout from "../layouts/SidebarLayout";
 import { acceptWalletInvitation } from "../services/WalletPageService";
 import { getStoredToken } from "../services/api";
 
@@ -48,17 +48,14 @@ const WalletInvitation = () => {
     }
   };
 
-  return (
-    <>
-      {isAuthenticated && <BaseNavBar />}
-
-      <Box
+  const content = (
+    <Box
         sx={{
           minHeight: "100vh",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          bgcolor: "#F6FAFD",
+          bgcolor: "#DAF1DE",
           p: 2,
         }}
       >
@@ -126,9 +123,14 @@ const WalletInvitation = () => {
             )}
           </CardContent>
         </Card>
-      </Box>
-    </>
+    </Box>
   );
+
+  if (isAuthenticated) {
+    return <SidebarLayout>{content}</SidebarLayout>;
+  }
+
+  return content;
 };
 
 export default WalletInvitation;

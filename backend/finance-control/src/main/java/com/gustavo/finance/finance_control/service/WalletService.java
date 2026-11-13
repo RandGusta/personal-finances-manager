@@ -39,23 +39,23 @@ public class WalletService {
         this.walletInvitationRepository = walletInvitationRepository;
     }
 
-    @Transactional(readOnly = true)
-    public List<WalletResponse> list(User user) {
-        return userWalletRepository.findAllByUserOrderByAssociationDateDesc(user)
-            .stream()
-            .map(membership -> WalletResponse.from(
-                membership,
-                userWalletRepository.countByWallet(membership.getWallet())
+    @Transactional(readOnly = true) // --> read only --> sem flush ou necessidade de atualizar com o banco de dados
+    public List<WalletResponse> list(User user) { // devolvendo uma lista de WalletResponse --> com base no user
+        return userWalletRepository.findAllByUserOrderByAssociationDateDesc(user) // usando o userWalletRepository --> pega todos os user associados pela data usando user
+            .stream() //  fluxo de processamento elemento por elemento 
+            .map(membership -> WalletResponse.from( // com isso usando o map podemos substituir o for --> cada elemento atual -> 
+                membership,// cada elemento
+                userWalletRepository.countByWallet(membership.getWallet()) // --> quantidade associada
             ))
-            .toList();
+            .toList(); // transforma em lista 
     }
-
-    @Transactional
+ 
+    @Transactional // possibilidade de fazer roolback ao criar um  novo wallet 
     public WalletResponse create(User user, WalletRequest request) {
-        Wallet wallet = new Wallet();
-        copyRequest(wallet, request);
-        wallet.setCreatedDate(LocalDateTime.now());
-        Wallet savedWallet = walletRepository.save(wallet);
+        Wallet wallet = new Wallet(); // cria o objeto 
+        copyRequest(wallet, request); // setta name  e description 
+        wallet.setCreatedDate(LocalDateTime.now()); // setta quando criado 
+        Wallet savedWallet = walletRepository.save(wallet); // salva quando criado
 
         UserWallet ownerMembership = new UserWallet();
         ownerMembership.setWallet(savedWallet);
@@ -67,7 +67,7 @@ public class WalletService {
         return WalletResponse.from(savedMembership, 1);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // evitar flush
     public WalletResponse get(User user, Long walletId) {
         UserWallet membership = findMembership(user, walletId);
         return WalletResponse.from(
@@ -78,12 +78,12 @@ public class WalletService {
 
     @Transactional
     public WalletResponse update(User user, Long walletId, WalletRequest request) {
-        UserWallet membership = findOwnerMembership(user, walletId);
+        UserWallet membership = findOwnerMembership(user, walletId); // verificando se é owner  
         Wallet wallet = membership.getWallet();
-        copyRequest(wallet, request);
-        walletRepository.save(wallet);
+        copyRequest(wallet, request); // settar nome e description na alteração e na criação 
+        walletRepository.save(wallet); // salvar as alterações
 
-        return WalletResponse.from(
+        return WalletResponse.from( // retorno as informações do back apos atualizar para serem utilzadas no front 
             membership,
             userWalletRepository.countByWallet(wallet)
         );

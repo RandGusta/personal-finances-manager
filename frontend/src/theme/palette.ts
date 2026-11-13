@@ -1,14 +1,22 @@
 export const palette ={
     primary: {
-        main: '#1C4632',
+        main: '#163832',
     },
 
     secondary: {
-        main: '#466245',
+        main: '#235347',
+    },
+
+    success: {
+        main: '#235347',
+    },
+
+    error: {
+        main: '#A30827',
     },
 
     background: {
-        default : '#F6FAFD',
+        default : '#DAF1DE',
     }
 
 }

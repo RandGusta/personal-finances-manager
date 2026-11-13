@@ -21,6 +21,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.context.ApplicationEventPublisher;
 import org.thymeleaf.context.Context;
 
 import com.gustavo.finance.finance_control.dto.ForgotPasswordResponse;
@@ -46,6 +47,9 @@ class PasswordRecoveryServiceTest {
     @Mock
     private EmailSenderService emailSenderService;
 
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
+
     private PasswordRecoveryService passwordRecoveryService;
     private User user;
 
@@ -56,7 +60,8 @@ class PasswordRecoveryServiceTest {
             tokenRepository,
             passwordEncoder,
             emailSenderService,
-            "http://localhost:5173"
+            "http://localhost:5173",
+            eventPublisher
         );
 
         user = new User();

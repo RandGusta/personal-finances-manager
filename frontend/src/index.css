@@ -1,0 +1,16 @@
+html,
+body,
+#root {
+  min-height: 100dvh;
+  margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  overflow-x: hidden;
+}

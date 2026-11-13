@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import com.gustavo.finance.finance_control.entity.User;
 import com.gustavo.finance.finance_control.entity.UserWallet;
@@ -18,6 +20,14 @@ public interface UserWalletRepository extends JpaRepository<UserWallet, Long> {
     Optional<UserWallet> findByWalletIdAndUserId(Long walletId, Long userId);
 
     List<UserWallet> findAllByWalletOrderByAssociationDateAsc(Wallet wallet);
+
+    @Query("""
+        select userWallet
+        from UserWallet userWallet
+        join fetch userWallet.user
+        where userWallet.wallet.id = :walletId
+        """)
+    List<UserWallet> findAllByWalletIdWithUser(@Param("walletId") Long walletId);
 
     boolean existsByWalletIdAndUser(Long walletId, User user);
 

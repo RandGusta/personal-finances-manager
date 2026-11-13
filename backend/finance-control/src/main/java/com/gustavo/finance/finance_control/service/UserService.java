@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.context.ApplicationEventPublisher;
+import com.gustavo.finance.finance_control.security.UserSessionsRevokedEvent;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 
@@ -36,17 +38,20 @@ public class UserService implements UserDetailsService {
     private final TransactionRepository transactionRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailSenderService emailSenderService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserService(
         UserRepository userRepository,
         TransactionRepository transactionRepository,
         PasswordEncoder passwordEncoder,
-        EmailSenderService emailSenderService
+        EmailSenderService emailSenderService,
+        ApplicationEventPublisher eventPublisher
     ) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.passwordEncoder = passwordEncoder;
         this.emailSenderService = emailSenderService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -94,8 +99,10 @@ public class UserService implements UserDetailsService {
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setTokenVersion(user.getTokenVersion() + 1);
         user.setUpdatedDate(LocalDateTime.now());
         userRepository.save(user);
+        eventPublisher.publishEvent(new UserSessionsRevokedEvent(user.getId()));
     }
 
     public CurrentUserResponse getCurrentUser(Authentication authentication) {

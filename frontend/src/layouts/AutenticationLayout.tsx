@@ -7,15 +7,29 @@ export function AutenticationLayout({ left, right}: { right: React.ReactNode, le
     <Box
         component="img"
         src={logo}
-        sx={{ position: "absolute", top: 32, left: 23, width: "3rem" }}
+        sx={{
+          position: "absolute",
+          top: { xs: 16, sm: 32 },
+          left: { xs: 16, sm: 23 },
+          width: { xs: "2.5rem", sm: "3rem" },
+        }}
       />
-    <Box sx={{display:"flex", height:"100vh"}}>
-        <Box sx={{display:"flex", flex:"1", justifyContent:"center", alignItems:"center", m:{xs:2}}}>
+    <Box sx={{display:"flex", minHeight:"100dvh"}}>
+        <Box
+          sx={{
+            display:"flex",
+            flex:"1",
+            justifyContent:"center",
+            alignItems:"center",
+            px: { xs: 2, sm: 3 },
+            py: { xs: 9, sm: 4 },
+          }}
+        >
             <Box sx={{width: "100%", maxWidth: "28rem"}}>
             {left}
             </Box>
         </Box >
-        <Box sx={{flex:"1", justifyContent:"center", alignItems:"center", bgcolor:"#1C4632", display:{xs:'none', lg:'flex'}}}>
+        <Box sx={{flex:"1", justifyContent:"center", alignItems:"center", bgcolor:"#051F20", display:{xs:'none', lg:'flex'}}}>
             <Box>
             {right}
             </Box>

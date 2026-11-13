@@ -1,7 +1,8 @@
 import { Alert, Box, Button, MenuItem, Modal, Typography } from "@mui/material";
-import { useState } from "react";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { useEffect, useState } from "react";
 import type { CategoryRequest } from "../dto/CategoryRequest";
-import type { CategoryType } from "../dto/CategoryResponse";
+import type { CategoryResponse, CategoryType } from "../dto/CategoryResponse";
 import { createCategory } from "../services/CategoryModalService";
 import { BaseButton } from "./Button";
 import { BaseInputField } from "./Input";
@@ -9,18 +10,28 @@ import { BaseInputField } from "./Input";
 interface CategoryModalProps {
   open: boolean;
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (category: CategoryResponse) => void;
+  fixedType?: CategoryType;
 }
 
 const CategoryModal = ({
   open,
   onClose,
   onCreated,
+  fixedType,
 }: CategoryModalProps) => {
   const [name, setName] = useState("");
   const [type, setType] = useState<CategoryType | "">("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setName("");
+      setType(fixedType ?? "");
+      setError("");
+    }
+  }, [open, fixedType]);
 
   const resetForm = () => {
     setName("");
@@ -63,10 +74,10 @@ const CategoryModal = ({
     try {
       setSaving(true);
       setError("");
-      await createCategory(request);
+      const createdCategory = await createCategory(request);
       resetForm();
       onClose();
-      onCreated();
+      onCreated(createdCategory);
     } catch (requestError) {
       const message =
         requestError instanceof Error
@@ -88,7 +99,9 @@ const CategoryModal = ({
           transform: "translate(-50%, -50%)",
           bgcolor: "background.paper",
           width: { xs: "90%", sm: "30rem" },
-          p: 4,
+          maxHeight: "90dvh",
+          overflowY: "auto",
+          p: { xs: 2.5, sm: 4 },
           borderRadius: 2,
           boxShadow: 24,
         }}
@@ -112,6 +125,7 @@ const CategoryModal = ({
           label="Type"
           value={type}
           onChange={(event) => setType(event.target.value as CategoryType)}
+          disabled={fixedType !== undefined}
           required
         >
           <MenuItem value="INCOME">Income</MenuItem>
@@ -123,8 +137,13 @@ const CategoryModal = ({
             Cancel
           </Button>
 
-          <BaseButton variant="contained" onClick={handleSave} loading={saving}>
-            Save
+          <BaseButton
+            variant="contained"
+            icon={<AddRoundedIcon />}
+            onClick={handleSave}
+            loading={saving}
+          >
+            Add
           </BaseButton>
         </Box>
       </Box>

@@ -52,4 +52,14 @@ class JwtServiceTest {
         user.setEmail(email);
         return user;
     }
+
+    @Test
+    void shouldRejectTokenAfterSessionVersionChanges() {
+        User user = user("Gustavo", "gustavo@example.com");
+        String oldToken = jwtService.generateToken(user);
+        user.setTokenVersion(user.getTokenVersion() + 1);
+
+        assertFalse(jwtService.isTokenValid(oldToken, user));
+        assertTrue(jwtService.isTokenValid(jwtService.generateToken(user), user));
+    }
 }
