@@ -6,6 +6,7 @@ import {
   Checkbox,
   Chip,
   FormControl,
+  IconButton,
   InputLabel,
   MenuItem,
   Select,
@@ -19,6 +20,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useEffect, useState } from "react";
 import type {
   TransactionPageResponse,
@@ -67,6 +69,8 @@ const TransactionTable = ({
   const [walletsLoading, setWalletsLoading] = useState(true);
   const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [error, setError] = useState("");
+  const showEditButton = !showCheckboxes && Boolean(onTransactionClick);
+  const columnCount = showCheckboxes || showEditButton ? 6 : 5;
 
   useEffect(() => {
     let componentIsMounted = true;
@@ -250,6 +254,9 @@ const TransactionTable = ({
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Category</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Type</TableCell>
+                {showEditButton && (
+                  <TableCell padding="none" aria-label="Actions" sx={{ width: 56 }} />
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -262,12 +269,17 @@ const TransactionTable = ({
                     <TableCell><Skeleton width="65%" /></TableCell>
                     <TableCell><Skeleton width="70%" /></TableCell>
                     <TableCell><Skeleton width="60%" /></TableCell>
+                    {showEditButton && (
+                      <TableCell padding="none">
+                        <Skeleton variant="circular" width={20} height={20} sx={{ mx: "auto" }} />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
 
               {!walletsLoading && !transactionsLoading && transactionPage?.empty && !error && (
                 <TableRow>
-                  <TableCell colSpan={showCheckboxes ? 6 : 5} sx={{ py: 3, textAlign: "center" }}>
+                  <TableCell colSpan={columnCount} sx={{ py: 3, textAlign: "center" }}>
                     <Alert severity="info">There are no transactions in this wallet.</Alert>
                   </TableCell>
                 </TableRow>
@@ -286,7 +298,7 @@ const TransactionTable = ({
                     }}
                     sx={{
                       "&:last-child td": { borderBottom: 0 },
-                      cursor: !showCheckboxes && onTransactionClick ? "pointer" : "default",
+                      cursor: showEditButton ? "pointer" : "default",
                     }}
                   >
                     {showCheckboxes && (
@@ -323,6 +335,24 @@ const TransactionTable = ({
                         variant="outlined"
                       />
                     </TableCell>
+                    {showEditButton && (
+                      <TableCell align="center" padding="none">
+                        <IconButton
+                          size="small"
+                          aria-label={`Edit transaction ${transaction.id}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onTransactionClick?.(transaction);
+                          }}
+                          sx={{
+                            color: "#235347",
+                            "&:hover, &.Mui-focusVisible": { backgroundColor: "#DAF1DE" },
+                          }}
+                        >
+                          <EditRoundedIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
             </TableBody>

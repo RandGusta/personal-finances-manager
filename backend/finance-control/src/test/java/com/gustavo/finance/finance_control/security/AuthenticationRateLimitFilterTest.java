@@ -52,6 +52,33 @@ class AuthenticationRateLimitFilterTest {
         assertEquals(1, filterChainCalls.get());
     }
 
+    @Test
+    void shouldLimitInsightRequestsInASeparateWindowAndIncludeHead() throws Exception {
+        AuthenticationRateLimitFilter filter = new AuthenticationRateLimitFilter(1, 60);
+        AtomicInteger filterChainCalls = new AtomicInteger();
+        String path = "/api/v1/financial-insights/monthly";
+
+        MockHttpServletRequest firstInsight = new MockHttpServletRequest("GET", path);
+        firstInsight.setRemoteAddr("127.0.0.1");
+        filter.doFilter(firstInsight, new MockHttpServletResponse(), (request, response) ->
+            filterChainCalls.incrementAndGet()
+        );
+
+        MockHttpServletRequest secondInsight = new MockHttpServletRequest("HEAD", path);
+        secondInsight.setRemoteAddr("127.0.0.1");
+        MockHttpServletResponse blocked = new MockHttpServletResponse();
+        filter.doFilter(secondInsight, blocked, (request, response) ->
+            filterChainCalls.incrementAndGet()
+        );
+
+        filter.doFilter(loginRequest(), new MockHttpServletResponse(), (request, response) ->
+            filterChainCalls.incrementAndGet()
+        );
+
+        assertEquals(2, filterChainCalls.get());
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(), blocked.getStatus());
+    }
+
     private MockHttpServletRequest loginRequest() {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/auth/login");
         request.setRemoteAddr("127.0.0.1");

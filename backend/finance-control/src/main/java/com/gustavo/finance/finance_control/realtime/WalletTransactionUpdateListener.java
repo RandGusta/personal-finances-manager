@@ -22,11 +22,11 @@ public class WalletTransactionUpdateListener {
         this.userWalletRepository = userWalletRepository;
         this.walletEventService = walletEventService;
     }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void notifyWalletMembers(WalletTransactionChangedEvent event) {
+    // Quando o service publica o evento, o Spring chama este método após o commit.
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // executado após o commit
+    public void notifyWalletMembers(WalletTransactionChangedEvent event) { // evento de mudança da wallet
         List<UserWallet> memberships = userWalletRepository
-            .findAllByWalletIdWithUser(event.getWalletId());
+            .findAllByWalletIdWithUser(event.getWalletId()); // pego os membros associados
 
         WalletUpdateResponse response = new WalletUpdateResponse(
             event.getWalletId(),
@@ -35,8 +35,8 @@ public class WalletTransactionUpdateListener {
 
         for (UserWallet membership : memberships) {
             walletEventService.sendToUser(
-                membership.getUser().getId(),
-                response
+                membership.getUser().getId(), // enviamos apenas às conexões deste membro
+                response // resposta do update
             );
         }
     }

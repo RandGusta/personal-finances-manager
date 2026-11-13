@@ -108,6 +108,7 @@ public class FinancialInsightService {
         prompt.append("Transaction count: ").append(totals.transactionCount).append("\n");
         prompt.append("Top categories by total amount:\n");
 
+        //adicionar --> princiapis categorias no prompt 
         for (Map.Entry<String, BigDecimal> category : topCategories(totals.categoryTotals)) {
             prompt.append("- ").append(category.getKey()).append(": ")
                 .append(category.getValue().toPlainString()).append(" BRL\n");

@@ -4,6 +4,7 @@ import {
   Card,
   CardContent,
   Chip,
+  IconButton,
   Skeleton,
   Table,
   TableBody,
@@ -13,6 +14,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import EditRoundedIcon from "@mui/icons-material/EditRounded";
 import { useEffect, useState } from "react";
 import type { TransactionResponse } from "../dto/TransactionResponse";
 import type { WalletResponse } from "../dto/UserSummaryResponse";
@@ -96,8 +98,10 @@ const RecentTransaction = ({
 
   const canModifyTransaction = (transaction: TransactionResponse) => {
     const wallet = wallets?.find((currentWallet) => currentWallet.id === transaction.walletId);
-    return wallet?.role !== "VIEWER";
+    return wallet !== undefined && wallet.role !== "VIEWER";
   };
+
+  const showEditColumn = transactions.some(canModifyTransaction);
 
   return (
     <>
@@ -124,6 +128,9 @@ const RecentTransaction = ({
                 </TableCell>
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Date</TableCell>
                 <TableCell sx={{ fontWeight: 700, color: "#DAF1DE" }}>Type</TableCell>
+                {showEditColumn && (
+                  <TableCell padding="none" aria-label="Actions" sx={{ width: 56 }} />
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -134,12 +141,17 @@ const RecentTransaction = ({
                     <TableCell><Skeleton width="65%" /></TableCell>
                     <TableCell><Skeleton width="65%" /></TableCell>
                     <TableCell><Skeleton width="70%" /></TableCell>
+                    {showEditColumn && (
+                      <TableCell padding="none">
+                        <Skeleton variant="circular" width={20} height={20} sx={{ mx: "auto" }} />
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
 
               {!loading && !error && transactions.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} sx={{ py: 3, textAlign: "center" }}>
+                  <TableCell colSpan={showEditColumn ? 5 : 4} sx={{ py: 3, textAlign: "center" }}>
                     <Alert severity="info">There are no transactions to display.</Alert>
                   </TableCell>
                 </TableRow>
@@ -188,6 +200,26 @@ const RecentTransaction = ({
                         variant="outlined"
                       />
                     </TableCell>
+                    {showEditColumn && (
+                      <TableCell align="center" padding="none">
+                        {canModify && (
+                          <IconButton
+                            size="small"
+                            aria-label={`Edit transaction ${transaction.id}`}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setSelectedTransaction(transaction);
+                            }}
+                            sx={{
+                              color: "#235347",
+                              "&:hover, &.Mui-focusVisible": { backgroundColor: "#DAF1DE" },
+                            }}
+                          >
+                            <EditRoundedIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    )}
                   </TableRow>
                   );
                 })}

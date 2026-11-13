@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,41 @@ class GeminiInsightClientTest {
 
     @Test
     void shouldReportModelUnavailableWithoutExposingProviderBody() {
+        AtomicInteger requests = new AtomicInteger();
         AiIntegrationException exception = assertThrows(AiIntegrationException.class,
-            () -> generate(404, "{\"error\":{\"message\":\"private-provider-detail\"}}"));
+            () -> generate(requests, "{\"error\":{\"message\":\"private-provider-detail\"}}", 404));
         assertEquals("The configured AI model is unavailable. Check the Gemini model configuration.", exception.getMessage());
+        assertEquals(1, requests.get());
     }
 
     @Test
     void shouldReportQuotaLimit() {
+        AtomicInteger requests = new AtomicInteger();
         AiIntegrationException exception = assertThrows(AiIntegrationException.class,
-            () -> generate(429, "{\"error\":{\"message\":\"private-quota-detail\"}}"));
+            () -> generate(requests, "{\"error\":{\"message\":\"private-quota-detail\"}}", 429));
         assertEquals("The AI request limit was reached. Please try again later or check your API quota.", exception.getMessage());
+        assertEquals(1, requests.get());
+    }
+
+    @Test
+    void shouldRetryTemporaryProviderErrorsAndReturnTheSuccessfulInsight() throws Exception {
+        AtomicInteger requests = new AtomicInteger();
+        String insight = generate(requests, """
+            {"candidates":[{"content":{"parts":[{"text":"Review your spending."}]}}]}
+            """, 503, 500, 200);
+
+        assertEquals("Review your spending.", insight);
+        assertEquals(3, requests.get());
+    }
+
+    @Test
+    void shouldStopAfterThreeAttemptsWhenTheProviderRemainsUnavailable() {
+        AtomicInteger requests = new AtomicInteger();
+        AiIntegrationException exception = assertThrows(AiIntegrationException.class,
+            () -> generate(requests, "{\"error\":{\"message\":\"private-provider-detail\"}}", 503));
+
+        assertEquals("The financial insight service is temporarily unavailable.", exception.getMessage());
+        assertEquals(3, requests.get());
     }
 
     @Test
@@ -70,8 +96,14 @@ class GeminiInsightClientTest {
     }
 
     private String generate(int status, String responseJson) throws Exception {
+        return generate(new AtomicInteger(), responseJson, status);
+    }
+
+    private String generate(AtomicInteger requests, String responseJson, int... statuses) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", exchange -> {
+            int requestIndex = requests.getAndIncrement();
+            int status = statuses[Math.min(requestIndex, statuses.length - 1)];
             byte[] body = responseJson.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().set("Content-Type", "application/json");
             exchange.sendResponseHeaders(status, body.length);

@@ -26,8 +26,8 @@ public class WalletEventService {
     }
 
     public SseEmitter subscribe(User user, Instant expiresAt) {
-        String connectionId = UUID.randomUUID().toString();
-        // A expiração é verificada antes de enviar eventos e nos heartbeats.
+        String connectionId = UUID.randomUUID().toString(); 
+        
         SseEmitter emitter = new SseEmitter(0L);
         Connection connection = new Connection(user, expiresAt, emitter);
         connections.put(connectionId, connection);

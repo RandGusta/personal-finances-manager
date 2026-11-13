@@ -18,7 +18,7 @@ export function subscribeToWalletUpdates(onUpdate: () => void) {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    signal: controller.signal,
+    signal: controller.signal, // use esse objeto --> cancelar a conexão 
     openWhenHidden: true,
     async onopen(response) {
       if (response.status === 401 || response.status === 403 || getStoredToken() !== token) {
@@ -37,7 +37,7 @@ export function subscribeToWalletUpdates(onUpdate: () => void) {
 
       if (message.event === "connected") {
         // Após reconectar, busca mudanças que podem ter ocorrido enquanto estava offline.
-        if (hasConnected) {
+        if (hasConnected) { // se cair e reconectar -->  conectar de novo
           onUpdate();
         }
         hasConnected = true;
@@ -57,7 +57,7 @@ export function subscribeToWalletUpdates(onUpdate: () => void) {
       return 5000;
     },
   }).catch(() => {
-    // HTTP 401/403 encerra as tentativas; erros de rede são reconectados acima.
+    // HTTP 401/403 encerra as tentativas --> erros de rede são reconectados acima.
   });
 
   // A limpeza do useEffect fecha a conexão ao sair da página.

@@ -38,7 +38,7 @@ public class WalletEventsController {
         Authentication authentication,
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
     ) {
-        // O filtro JWT já validou o token e identificou o usuário desta requisição.
+        
         User user = (User) authentication.getPrincipal();
         String token = authorization.substring(7);
         Instant expiresAt = jwtService.extractExpiration(token).toInstant();

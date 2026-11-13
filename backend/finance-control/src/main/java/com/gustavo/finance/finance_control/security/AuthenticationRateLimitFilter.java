@@ -33,12 +33,21 @@ public class AuthenticationRateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        if (!"POST".equalsIgnoreCase(request.getMethod())) {
-            return true;
+        String path = request.getServletPath();
+        if (path.isEmpty()) {
+            path = request.getRequestURI();
         }
 
-        String path = request.getRequestURI();
-        return !"/auth/login".equals(path) && !"/auth/forgot-password".equals(path);
+        String method = request.getMethod();
+        if ("POST".equals(method)) {
+            return !"/auth/login".equals(path) && !"/auth/forgot-password".equals(path);
+        }
+
+        if ("GET".equals(method) || "HEAD".equals(method)) {
+            return !"/api/v1/financial-insights/monthly".equals(path);
+        }
+
+        return true;
     }
 
     @Override

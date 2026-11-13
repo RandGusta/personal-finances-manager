@@ -1,4 +1,8 @@
-export const API_BASE_URL = "http://localhost:8081";
+const configuredApiUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+
+export const API_BASE_URL = (
+  configuredApiUrl || (import.meta.env.DEV ? "http://localhost:8081" : "")
+).replace(/\/+$/, "");
 
 export function getStoredToken() {
   return localStorage.getItem("token") ?? sessionStorage.getItem("token");

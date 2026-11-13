@@ -47,7 +47,7 @@ const navigation = [
   },
   {
     label: "Categories",
-    path: "/categories",
+    path: "/category",
     icon: <CategoryIcon />,
   },
 ];

@@ -1,5 +1,6 @@
 package com.gustavo.finance.finance_control.controller;
 
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,9 +27,9 @@ public class FinancialInsightController {
     public ResponseEntity<FinancialInsightResponse> generateMonthlyInsight(
         Authentication authentication
     ) {
-        return ResponseEntity.ok(
-            financialInsightService.generateMonthlyInsight(authenticatedUser(authentication))
-        );
+        return ResponseEntity.ok()
+            .cacheControl(CacheControl.noStore())
+            .body(financialInsightService.generateMonthlyInsight(authenticatedUser(authentication)));
     }
 
     private User authenticatedUser(Authentication authentication) {

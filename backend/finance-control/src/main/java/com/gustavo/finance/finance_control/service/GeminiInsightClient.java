@@ -11,12 +11,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
-
 import tools.jackson.databind.JsonNode;
 import com.gustavo.finance.finance_control.exception.AiIntegrationException;
 
 @Component
 public class GeminiInsightClient {
+
+    private static final int MAX_ATTEMPTS = 3;
+    private static final long FIRST_RETRY_DELAY_MILLIS = 1000L;
 
     private final RestClient restClient;
     private final String apiKey;
@@ -54,13 +56,7 @@ public class GeminiInsightClient {
         );
 
         try {
-            JsonNode response = restClient.post()
-                .uri("/v1beta/models/{model}:generateContent", model)
-                .header("x-goog-api-key", apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .retrieve()
-                .body(JsonNode.class);
+            JsonNode response = requestWithRetry(requestBody);
 
             if (response != null && "MAX_TOKENS".equals(
                 response.path("candidates").path(0).path("finishReason").asText("")
@@ -90,6 +86,45 @@ public class GeminiInsightClient {
             throw new AiIntegrationException(
                 "The financial insight service is temporarily unavailable."
             );
+        }
+    }
+
+    private JsonNode requestWithRetry(Map<String, Object> requestBody) {
+        long delayMillis = FIRST_RETRY_DELAY_MILLIS;
+
+        for (int attempt = 1; attempt < MAX_ATTEMPTS; attempt++) {
+            try {
+                return requestInsight(requestBody);
+            } catch (RestClientResponseException exception) {
+                int status = exception.getStatusCode().value();
+                if (status != 500 && status != 503) {
+                    throw exception;
+                }
+                waitBeforeRetry(delayMillis);
+                delayMillis *= 2;
+            }
+        }
+
+        // A última tentativa não agenda outra espera.
+        return requestInsight(requestBody);
+    }
+
+    private JsonNode requestInsight(Map<String, Object> requestBody) {
+        return restClient.post()
+            .uri("/v1beta/models/{model}:generateContent", model)
+            .header("x-goog-api-key", apiKey)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(requestBody)
+            .retrieve()
+            .body(JsonNode.class);
+    }
+
+    private void waitBeforeRetry(long delayMillis) {
+        try {
+            Thread.sleep(delayMillis);
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            throw new AiIntegrationException("The financial insight request was interrupted.");
         }
     }
 
