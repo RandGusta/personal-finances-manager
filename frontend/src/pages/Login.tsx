@@ -4,9 +4,10 @@ import { BaseCheckBox } from "../components/Checkbox";
 import { Typography, Link, Box, Card, Alert } from "@mui/material";
 import { AutenticationLayout } from "../layouts/AutenticationLayout";
 import cardImage from "../assets/images/cover-cards.png";
-import { Link as RoutesLink, useNavigate } from "react-router-dom";
+import { Link as RoutesLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { login } from "../services/UserService";
+import { getPostLoginPath } from "../services/SessionService";
 import type { LoginRequest } from "../dto/LoginRequest";
 
 export function Login() {
@@ -20,6 +21,7 @@ export function Login() {
   const [passwordError, setPasswordError] = useState("");
 
   const navigate = useNavigate();
+  const location = useLocation();
 
 
   
@@ -65,14 +67,12 @@ export function Login() {
       setGeneralError("");
       setLoading(true);
       await login(data, rememberMe);
-      const redirectPath = sessionStorage.getItem("redirectAfterLogin");
-
-      if (redirectPath && redirectPath.startsWith("/")) {
-        sessionStorage.removeItem("redirectAfterLogin");
-        navigate(redirectPath, { replace: true });
-      } else {
-        navigate("/home", { replace: true });
-      }
+      const redirectPath = getPostLoginPath(
+        location.state?.returnTo,
+        sessionStorage.getItem("redirectAfterLogin"),
+      );
+      sessionStorage.removeItem("redirectAfterLogin");
+      navigate(redirectPath, { replace: true });
     } catch (error) {
       if (error instanceof Error) {
         setGeneralError(error.message);
